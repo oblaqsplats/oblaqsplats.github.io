@@ -117,6 +117,16 @@
                 settings: bootstrap.settings ?? fetch(settingsUrl).then((response) => response.json())
             };
         </script>
+        <!-- oblaQ: walk-only mode. Hides orbit, fly and animation controls. -->
+        <style>
+            .sse-orbitCamera,
+            .sse-flyCamera,
+            .sse-play,
+            .sse-pause,
+            .sse-timelineContainer {
+                display: none !important;
+            }
+        </style>
     </head>
     <body>
         <!-- Application Script -->
@@ -128,6 +138,14 @@
             // the viewer builds its own subtree (canvas, ui, icons) inside the container; the
             // standalone document's container is the page itself
             createViewer({ container: document.body, settings, ...options });
+        </script>
+
+        <!-- oblaQ: switch to walk mode as soon as collision is ready, and return to it if the visitor leaves it (e.g. Esc) -->
+        <script>
+            setInterval(() => {
+                const walk = document.querySelector('.sse-fpsCamera');
+                if (walk && !walk.classList.contains('sse-active')) walk.click();
+            }, 500);
         </script>
     </body>
 </html>
