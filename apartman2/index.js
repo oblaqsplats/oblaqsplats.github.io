@@ -1,7 +1,7 @@
 const TRACEID_GPU_TIMINGS = "GpuTimings";
 
-const version$2 = "2.23.0";
-const revision$1 = "cfef43d";
+const version$1 = "2.23.3";
+const revision = "b7655d8";
 function extend(target, ex) {
 	for (const prop in ex) {
 		const copy = ex[prop];
@@ -6641,7 +6641,7 @@ class GraphicsDevice extends EventHandler {
 		super();
 		this.canvas = canvas;
 		if ("setAttribute" in canvas) {
-			canvas.setAttribute("data-engine", `PlayCanvas ${version$2}`);
+			canvas.setAttribute("data-engine", `PlayCanvas ${version$1}`);
 		}
 		this.initOptions = { ...options };
 		(_a = this.initOptions).alpha ?? (_a.alpha = true);
@@ -6991,6 +6991,9 @@ class GraphicsDevice extends EventHandler {
 		const pixelRatio = Math.min(this._maxPixelRatio, platform.browser ? window.devicePixelRatio : 1);
 		const w = Math.floor(width * pixelRatio);
 		const h = Math.floor(height * pixelRatio);
+		if (w === 0 || h === 0) {
+			return;
+		}
 		if (w !== this.canvas.width || h !== this.canvas.height) {
 			this.setResolution(w, h);
 		}
@@ -20745,15 +20748,15 @@ const scaleCompensateRot = new Quat();
 const scaleCompensateRot2 = new Quat();
 const scaleCompensateScale = new Vec3();
 const scaleCompensateScaleForParent = new Vec3();
-const tmpMat4 = new Mat4();
+const tmpMat4$1 = new Mat4();
 const tmpQuat$1 = new Quat();
-const position = new Vec3();
+const position$2 = new Vec3();
 const invParentWtm = new Mat4();
-const rotation$4 = new Quat();
+const rotation$5 = new Quat();
 const invParentRot = new Quat();
 const matrix = new Mat4();
-const target = new Vec3();
-const up$2 = new Vec3();
+const target$1 = new Vec3();
+const up$3 = new Vec3();
 function createTest(attr, value) {
 	if (attr instanceof Function) {
 		return attr;
@@ -21162,15 +21165,15 @@ class GraphNode extends EventHandler {
 	}
 	setPosition(x, y, z) {
 		if (x instanceof Vec3) {
-			position.copy(x);
+			position$2.copy(x);
 		} else {
-			position.set(x, y, z);
+			position$2.set(x, y, z);
 		}
 		if (this._parent === null) {
-			this.localPosition.copy(position);
+			this.localPosition.copy(position$2);
 		} else {
 			invParentWtm.copy(this._parent.getWorldTransform()).invert();
-			invParentWtm.transformPoint(position, this.localPosition);
+			invParentWtm.transformPoint(position$2, this.localPosition);
 		}
 		if (!this._dirtyLocal) {
 			this._dirtifyLocal();
@@ -21178,16 +21181,16 @@ class GraphNode extends EventHandler {
 	}
 	setRotation(x, y, z, w) {
 		if (x instanceof Quat) {
-			rotation$4.copy(x);
+			rotation$5.copy(x);
 		} else {
-			rotation$4.set(x, y, z, w);
+			rotation$5.set(x, y, z, w);
 		}
 		if (this._parent === null) {
-			this.localRotation.copy(rotation$4);
+			this.localRotation.copy(rotation$5);
 		} else {
 			const parentRot = this._parent.getRotation();
 			invParentRot.copy(parentRot).invert();
-			this.localRotation.copy(invParentRot).mul(rotation$4);
+			this.localRotation.copy(invParentRot).mul(rotation$5);
 		}
 		if (!this._dirtyLocal) {
 			this._dirtifyLocal();
@@ -21227,7 +21230,7 @@ class GraphNode extends EventHandler {
 		const wPos = node.getPosition();
 		const wRot = node.getRotation();
 		this._prepareInsertChild(node);
-		node.setPosition(tmpMat4.copy(this.worldTransform).invert().transformPoint(wPos));
+		node.setPosition(tmpMat4$1.copy(this.worldTransform).invert().transformPoint(wPos));
 		node.setRotation(tmpQuat$1.copy(this.getRotation()).invert().mul(wRot));
 		this._children.push(node);
 		this._onInsertChild(node);
@@ -21343,61 +21346,61 @@ class GraphNode extends EventHandler {
 	}
 	lookAt(x, y, z, ux = 0, uy = 1, uz = 0) {
 		if (x instanceof Vec3) {
-			target.copy(x);
+			target$1.copy(x);
 			if (y instanceof Vec3) {
-				up$2.copy(y);
+				up$3.copy(y);
 			} else {
-				up$2.copy(Vec3.UP);
+				up$3.copy(Vec3.UP);
 			}
 		} else if (z === void 0) {
 			return;
 		} else {
-			target.set(x, y, z);
-			up$2.set(ux, uy, uz);
+			target$1.set(x, y, z);
+			up$3.set(ux, uy, uz);
 		}
-		matrix.setLookAt(this.getPosition(), target, up$2);
-		rotation$4.setFromMat4(matrix);
-		this.setRotation(rotation$4);
+		matrix.setLookAt(this.getPosition(), target$1, up$3);
+		rotation$5.setFromMat4(matrix);
+		this.setRotation(rotation$5);
 	}
 	translate(x, y, z) {
 		if (x instanceof Vec3) {
-			position.copy(x);
+			position$2.copy(x);
 		} else {
-			position.set(x, y, z);
+			position$2.set(x, y, z);
 		}
-		position.add(this.getPosition());
-		this.setPosition(position);
+		position$2.add(this.getPosition());
+		this.setPosition(position$2);
 	}
 	translateLocal(x, y, z) {
 		if (x instanceof Vec3) {
-			position.copy(x);
+			position$2.copy(x);
 		} else {
-			position.set(x, y, z);
+			position$2.set(x, y, z);
 		}
-		this.localRotation.transformVector(position, position);
-		this.localPosition.add(position);
+		this.localRotation.transformVector(position$2, position$2);
+		this.localPosition.add(position$2);
 		if (!this._dirtyLocal) {
 			this._dirtifyLocal();
 		}
 	}
 	rotate(x, y, z) {
-		rotation$4.setFromEulerAngles(x, y, z);
+		rotation$5.setFromEulerAngles(x, y, z);
 		if (this._parent === null) {
-			this.localRotation.mul2(rotation$4, this.localRotation);
+			this.localRotation.mul2(rotation$5, this.localRotation);
 		} else {
 			const rot = this.getRotation();
 			const parentRot = this._parent.getRotation();
 			invParentRot.copy(parentRot).invert();
-			rotation$4.mul2(invParentRot, rotation$4);
-			this.localRotation.mul2(rotation$4, rot);
+			rotation$5.mul2(invParentRot, rotation$5);
+			this.localRotation.mul2(rotation$5, rot);
 		}
 		if (!this._dirtyLocal) {
 			this._dirtifyLocal();
 		}
 	}
 	rotateLocal(x, y, z) {
-		rotation$4.setFromEulerAngles(x, y, z);
-		this.localRotation.mul(rotation$4);
+		rotation$5.setFromEulerAngles(x, y, z);
+		this.localRotation.mul(rotation$5);
 		if (!this._dirtyLocal) {
 			this._dirtifyLocal();
 		}
@@ -37792,8 +37795,7 @@ class UploadStream {
 	}
 }
 
-function SortWorker() {
-	const myself = typeof self !== "undefined" && self || require("node:worker_threads").parentPort;
+function SortWorker(myself) {
 	let order;
 	let centers;
 	let chunks;
@@ -38068,7 +38070,8 @@ class GSplatSorter extends EventHandler {
 			};
 			this.fire("updated");
 		};
-		const workerSource = `(${SortWorker.toString()})()`;
+		const workerPort = platform.environment === "node" ? 'require("node:worker_threads").parentPort' : "self";
+		const workerSource = `(${SortWorker.toString()})(${workerPort})`;
 		if (platform.environment === "node") {
 			this.worker = new Worker(workerSource, {
 				eval: true
@@ -53940,7 +53943,7 @@ class AppBase extends EventHandler {
 		if (hook?.register) {
 			this._devtoolsRegistered = true;
 			try {
-				hook.register(this, { version, revision, protocol: DEVTOOLS_PROTOCOL });
+				hook.register(this, { version: version$1, revision, protocol: DEVTOOLS_PROTOCOL });
 			} catch (e) {
 			}
 		}
@@ -58139,8 +58142,7 @@ class ScriptComponentSystem extends ComponentSystem {
 	}
 }
 
-function UnifiedSortWorker() {
-	const myself = typeof self !== "undefined" && self || require("node:worker_threads").parentPort;
+function UnifiedSortWorker(myself) {
 	const centersMap = /* @__PURE__ */ new Map();
 	let centersData;
 	let distances;
@@ -58501,9 +58503,10 @@ class GSplatUnifiedSorter extends EventHandler {
 	constructor(scene) {
 		super();
 		this.scene = scene ?? null;
+		const workerPort = platform.environment === "node" ? 'require("node:worker_threads").parentPort' : "self";
 		const workerSource = `
 						const GSplatSortBinWeights = ${GSplatSortBinWeights$1.toString()};
-						(${UnifiedSortWorker.toString()})()
+						(${UnifiedSortWorker.toString()})(${workerPort})
 				`;
 		if (platform.environment === "node") {
 			this.worker = new Worker(workerSource, {
@@ -60215,19 +60218,21 @@ class GSplatOctreeInstance {
 		}
 		return optimalLodIndex;
 	}
-	prefetchNextLod(nodeIndex, desiredLodIndex, optimalLodIndex, priority) {
+	prefetchNextLod(nodeIndex, desiredLodIndex, optimalLodIndex, distanceRank) {
 		if (desiredLodIndex === -1 || optimalLodIndex === -1) return;
 		const targetLod = desiredLodIndex === optimalLodIndex ? optimalLodIndex : this.lodTable.finerOnChain(nodeIndex, desiredLodIndex);
 		if (targetLod < 0) return;
 		const fi = this.octree.nodes[nodeIndex].lods[targetLod].fileIndex;
-		if (fi !== -1 && !this.requestFile(fi, priority)) {
+		if (fi !== -1 && !this.requestFile(fi, LOAD_TIER_PREFETCH, distanceRank)) {
 			this.prefetchPending.add(fi);
 		}
 	}
-	requestFile(fileIndex, priority) {
+	requestFile(fileIndex, tier, distanceRank) {
 		if (this.octree.pollFileResource(fileIndex)) {
 			return true;
 		}
+		const octree = this.octree;
+		const priority = tier + (octree.files[fileIndex].lodLevel + distanceRank) / octree.lodLevels;
 		const current = this._fileRequests.get(fileIndex);
 		if (current === void 0 || priority > current) {
 			this._fileRequests.set(fileIndex, priority);
@@ -60395,19 +60400,19 @@ class GSplatOctreeInstance {
 					}
 				}
 			}
-			const rank = 1 / (1 + Math.max(nodeInfo.worldDistanceSq, 1e-12));
+			const distanceRank = 1 / (1 + Math.max(nodeInfo.worldDistanceSq, 1e-12));
 			const visibleAddFi = this.pendingVisibleAdds.get(nodeIndex);
 			if (visibleAddFi !== void 0) {
-				this.requestFile(visibleAddFi, LOAD_TIER_VISIBLE + rank);
+				this.requestFile(visibleAddFi, LOAD_TIER_VISIBLE, distanceRank);
 			}
 			const pendingSwitch = this.pendingDecrements.get(nodeIndex);
 			if (pendingSwitch) {
-				this.requestFile(pendingSwitch.newFileIndex, LOAD_TIER_SWITCH + rank);
+				this.requestFile(pendingSwitch.newFileIndex, LOAD_TIER_SWITCH, distanceRank);
 			}
-			this.prefetchNextLod(nodeIndex, desiredLodIndex, optimalLodIndex, LOAD_TIER_PREFETCH + rank);
+			this.prefetchNextLod(nodeIndex, desiredLodIndex, optimalLodIndex, distanceRank);
 		}
 		for (const fileIndex of this.pending) {
-			this.requestFile(fileIndex, LOAD_TIER_PREFETCH);
+			this.requestFile(fileIndex, LOAD_TIER_PREFETCH, 0);
 		}
 		octree.submitRequests(this, this._fileRequests);
 	}
@@ -69419,8 +69424,7 @@ const createInstancing = (device, gltf, nodeInstancingMap, bufferViews) => {
 	});
 };
 
-function DracoWorker(jsUrl, wasmUrl) {
-	const myself = typeof self !== "undefined" && self || require("node:worker_threads").parentPort;
+function DracoWorker(myself) {
 	let draco;
 	const POSITION_ATTRIBUTE = 0;
 	const NORMAL_ATTRIBUTE = 1;
@@ -69846,18 +69850,19 @@ const initializeWorkers = (config) => {
 	}
 	jobQueue = new JobQueue();
 	Promise.all([downloadScript(config.jsUrl), compileModule(config.wasmUrl)]).then(([dracoSource, dracoModule]) => {
+		const isNode = platform.environment === "node";
+		const workerPort = isNode ? 'require("node:worker_threads").parentPort' : "self";
 		const code = [
 			"/* draco */",
 			dracoSource,
 			"/* worker */",
 			`(
 ${DracoWorker.toString()}
-)()
+)(${workerPort})
 
 `
 		].join("\n");
 		const numWorkers = Math.max(1, Math.min(16, config.numWorkers || defaultNumWorkers$1));
-		const isNode = platform.environment === "node";
 		const workerUrl = isNode ? null : URL.createObjectURL(new Blob([code], { type: "application/javascript" }));
 		const workers = [];
 		for (let i = 0; i < numWorkers; ++i) {
@@ -78184,7 +78189,7 @@ class Render2d {
 		this.meshInstance.shaderPassMask = 0;
 	}
 	onPreRenderLayer(camera, layer, transparent) {
-		if (!this.rendered && layer === this.layer && transparent === this.meshInstance.transparent) {
+		if (!this.rendered && this.prim.count > 0 && layer === this.layer && transparent === this.meshInstance.transparent) {
 			this.meshInstance.shaderPassMask = 4294967295;
 			this.rendered = true;
 		}
@@ -78258,6 +78263,8 @@ class MiniStats {
 		this._destroyed = false;
 		this._geometryDirty = true;
 		this._layoutDirty = true;
+		this._clientWidth = -1;
+		this._clientHeight = -1;
 		this._scroll = 0;
 		this._maxScroll = 0;
 		this._overallHeight = 0;
@@ -78663,6 +78670,12 @@ class MiniStats {
 		if (data) this.texture.unlock();
 	}
 	render() {
+		const { width, height } = this.device.clientRect;
+		if (width !== this._clientWidth || height !== this._clientHeight) {
+			this._clientWidth = width;
+			this._clientHeight = height;
+			this._layoutDirty = true;
+		}
 		if (this._layoutDirty) this.updateDiv();
 		if (this._geometryDirty) {
 			this.rebuildGeometry();
@@ -83431,7 +83444,7 @@ class CameraFrame {
 }
 
 const tmpV1$1 = new Vec3();
-const rotation$3 = new Quat();
+const rotation$4 = new Quat();
 class Pose {
 	position = new Vec3();
 	angles = new Vec3();
@@ -83493,7 +83506,7 @@ class Pose {
 		return this;
 	}
 	getFocus(out) {
-		return rotation$3.setFromEulerAngles(this.angles).transformVector(Vec3.FORWARD, out).mulScalar(this.distance).add(this.position);
+		return rotation$4.setFromEulerAngles(this.angles).transformVector(Vec3.FORWARD, out).mulScalar(this.distance).add(this.position);
 	}
 }
 
@@ -84018,9 +84031,9 @@ class GamepadSource extends InputSource {
 const damp$1 = (damping, dt) => 1 - Math.pow(damping, dt * 1e3);
 
 const dir = new Vec3();
-const offset$2 = new Vec3();
+const offset$3 = new Vec3();
 const angles = new Vec3();
-const rotation$2 = new Quat();
+const rotation$3 = new Quat();
 let OrbitController$1 = class OrbitController extends InputController$1 {
 	_targetRootPose = new Pose();
 	_rootPose = new Pose();
@@ -84064,11 +84077,11 @@ let OrbitController$1 = class OrbitController extends InputController$1 {
 	}
 	update(frame, dt) {
 		const { move, rotate } = frame.read();
-		offset$2.set(move[0], move[1], 0);
-		rotation$2.setFromEulerAngles(this._rootPose.angles).transformVector(offset$2, offset$2);
-		this._targetRootPose.move(offset$2);
+		offset$3.set(move[0], move[1], 0);
+		rotation$3.setFromEulerAngles(this._rootPose.angles).transformVector(offset$3, offset$3);
+		this._targetRootPose.move(offset$3);
 		const { z: dist } = this._targetChildPose.position;
-		this._targetChildPose.move(offset$2.set(0, 0, dist * (1 + move[2]) - dist));
+		this._targetChildPose.move(offset$3.set(0, 0, dist * (1 + move[2]) - dist));
 		this._targetRootPose.rotate(angles.set(-rotate[1], -rotate[0], 0));
 		this._rootPose.lerp(
 			this._rootPose,
@@ -84084,8 +84097,8 @@ let OrbitController$1 = class OrbitController extends InputController$1 {
 			1,
 			1
 		);
-		rotation$2.setFromEulerAngles(this._rootPose.angles).transformVector(this._childPose.position, offset$2).add(this._rootPose.position);
-		return this._pose.set(offset$2, this._rootPose.angles, this._childPose.position.z);
+		rotation$3.setFromEulerAngles(this._rootPose.angles).transformVector(this._childPose.position, offset$3).add(this._rootPose.position);
+		return this._pose.set(offset$3, this._rootPose.angles, this._childPose.position.z);
 	}
 	destroy() {
 		this.detach();
@@ -84563,12 +84576,6 @@ class MeshCollision {
     }
     queryCapsule(cx, cy, cz, halfHeight, radius, out) {
         return resolveIterative(cx, cy, cz, (rx, ry, rz, push) => this._deepestCapsulePenetration(rx, ry, rz, halfHeight, radius, push), this._constraintNormals, this._push, out);
-    }
-    isFreeAt(x, y, z) {
-        // Approximation: a point is in free space iff no triangle is within
-        // half a voxel of it. Matches the voxel-grid notion for data derived
-        // from the same carve.
-        return !this._deepestSpherePenetration(x, y, z, this.voxelResolution * 0.5, this._push);
     }
     querySurfaceNormal(x, y, z, rdx, rdy, rdz) {
         const len = Math.sqrt(rdx * rdx + rdy * rdy + rdz * rdz);
@@ -85106,24 +85113,6 @@ class VoxelCollision {
     get flipXY() {
         return false;
     }
-    isFreeAt(x, y, z) {
-        // Without voxel data, there's no carve to consult — report not-free
-        // rather than have the lattice search treat the world as wide open.
-        if (this._nodes.length === 0) {
-            return false;
-        }
-        const res = this._voxelResolution;
-        const ix = Math.floor((x - this._gridMinX) / res);
-        const iy = Math.floor((y - this._gridMinY) / res);
-        const iz = Math.floor((z - this._gridMinZ) / res);
-        // Outside the carved grid is "no data" — also not-free. Without this
-        // check the lattice search would spend candidates on out-of-bounds
-        // cells (and `isVoxelSolid` would mislead callers by returning false).
-        if (ix < 0 || iy < 0 || iz < 0 || ix >= this._numVoxelsX || iy >= this._numVoxelsY || iz >= this._numVoxelsZ) {
-            return false;
-        }
-        return !this.isVoxelSolid(ix, iy, iz);
-    }
     querySurfaceNormal(x, y, z, rdx, rdy, rdz) {
         const nudge = this._voxelResolution * 0.25;
         const ix = Math.floor((x + Math.sign(rdx) * nudge - this._gridMinX) / this._voxelResolution);
@@ -85160,7 +85149,7 @@ class VoxelCollision {
         result.nz = bestNz;
         return result;
     }
-    queryRay(ox, oy, oz, dx, dy, dz, maxDist) {
+    queryRay(ox, oy, oz, dx, dy, dz, maxDist, exitSolid = false) {
         if (this._nodes.length === 0) {
             return null;
         }
@@ -85252,12 +85241,15 @@ class VoxelCollision {
         const tDeltaZ = Math.abs(dz) > EPS ? res * Math.abs(invDz) : Infinity;
         let currentT = tNear;
         const maxSteps = this._numVoxelsX + this._numVoxelsY + this._numVoxelsZ;
+        // a ray from inside solid looks for the first free voxel instead, where it leaves
+        const inside = exitSolid && tNear === 0 && this.isVoxelSolid(ix, iy, iz);
         for (let step = 0; step < maxSteps; step++) {
-            if (this.isVoxelSolid(ix, iy, iz)) {
+            if (this.isVoxelSolid(ix, iy, iz) !== inside) {
                 return {
                     x: ox + dx * currentT,
                     y: oy + dy * currentT,
-                    z: oz + dz * currentT
+                    z: oz + dz * currentT,
+                    exit: inside
                 };
             }
             // Advance along the axis with the smallest tMax
@@ -85283,13 +85275,22 @@ class VoxelCollision {
                 iz += stepZ;
                 tMaxZ += tDeltaZ;
             }
-            if (ix < 0 ||
+            const outside = ix < 0 ||
                 iy < 0 ||
                 iz < 0 ||
                 ix >= this._numVoxelsX ||
                 iy >= this._numVoxelsY ||
-                iz >= this._numVoxelsZ ||
-                currentT > maxDist) {
+                iz >= this._numVoxelsZ;
+            // past the grid is free, so a ray inside solid that reaches its edge leaves there
+            if (outside && inside && currentT <= maxDist) {
+                return {
+                    x: ox + dx * currentT,
+                    y: oy + dy * currentT,
+                    z: oz + dz * currentT,
+                    exit: true
+                };
+            }
+            if (outside || currentT > maxDist) {
                 return null;
             }
         }
@@ -85610,6 +85611,50 @@ class VoxelCollision {
         return this.checkLeafByIndex(node, ix, iy, iz);
     }
     /**
+     * Read a whole block of voxels (leafSize on a side) with one descent of the tree, for scanning
+     * a region faster than isVoxelSolid can voxel by voxel.
+     *
+     * @param bx - Block X index (the voxel index over leafSize).
+     * @param by - Block Y index.
+     * @param bz - Block Z index.
+     * @param out - Receives the block's 64-bit solid mask as (lo, hi), bit z * 16 + y * 4 + x.
+     */
+    readBlock(bx, by, bz, out) {
+        out[0] = 0;
+        out[1] = 0;
+        const { leafSize, treeDepth, nodes, leafData } = this;
+        if (nodes.length === 0 ||
+            bx < 0 ||
+            by < 0 ||
+            bz < 0 ||
+            bx * leafSize >= this.numVoxelsX ||
+            by * leafSize >= this.numVoxelsY ||
+            bz * leafSize >= this.numVoxelsZ) {
+            return;
+        }
+        let nodeIndex = 0;
+        for (let level = treeDepth - 1; level >= -1; level--) {
+            const node = nodes[nodeIndex] >>> 0;
+            if (node === SOLID_LEAF_MARKER) {
+                out[0] = 0xffffffff;
+                out[1] = 0xffffffff;
+                return;
+            }
+            const childMask = (node >>> 24) & 0xff;
+            if (childMask === 0 || level < 0) {
+                const leafDataIndex = node & 0x00ffffff;
+                out[0] = leafData[leafDataIndex * 2];
+                out[1] = leafData[leafDataIndex * 2 + 1];
+                return;
+            }
+            const octant = (((bz >>> level) & 1) << 2) | (((by >>> level) & 1) << 1) | ((bx >>> level) & 1);
+            if ((childMask & (1 << octant)) === 0) {
+                return;
+            }
+            nodeIndex = (node & 0x00ffffff) + popcount(childMask & ((1 << octant) - 1));
+        }
+    }
+    /**
      * Check a mixed leaf node using voxel grid indices.
      * The solid leaf sentinel must be checked before calling this method.
      *
@@ -85651,8 +85696,8 @@ class FlippedVoxelCollision extends VoxelCollision {
         result.ny = -result.ny;
         return result;
     }
-    queryRay(ox, oy, oz, dx, dy, dz, maxDist) {
-        const hit = super.queryRay(-ox, -oy, oz, -dx, -dy, dz, maxDist);
+    queryRay(ox, oy, oz, dx, dy, dz, maxDist, exitSolid = false) {
+        const hit = super.queryRay(-ox, -oy, oz, -dx, -dy, dz, maxDist, exitSolid);
         if (hit) {
             hit.x = -hit.x;
             hit.y = -hit.y;
@@ -85674,9 +85719,6 @@ class FlippedVoxelCollision extends VoxelCollision {
             out.y = -out.y;
         }
         return result;
-    }
-    isFreeAt(x, y, z) {
-        return super.isFreeAt(-x, -y, z);
     }
 }
 /**
@@ -85799,11 +85841,23 @@ var deJson = {
 	"xr-modal.title": "WebGL erforderlich",
 	"xr-modal.message": "AR und VR werden vom WebGPU-Renderer nicht unterstützt. Mit OK wird der Viewer mit WebGL neu geladen.",
 	"xr-modal.cancel": "Abbrechen",
-	"xr-modal.ok": "OK"
+	"xr-modal.ok": "OK",
+	"vr-prompt.loading": "Wird geladen…",
+	"vr-prompt.enter": "Tippen, um VR zu starten",
+	"xr-menu.exit-vr": "VR beenden",
+	"xr-menu.exit-ar": "AR beenden",
+	"xr-menu.ice-cream": "Eiscreme-Modus",
+	"xr-hint.stalled": "Passiert nichts? Wechsle den Tab und wieder zurück."
 };
 
 var enJson = {
 	"settings.performance-mode": "Performance Mode",
+	"settings.quality": "Quality",
+	"settings.quality-performance": "Performance",
+	"settings.quality-default": "Default",
+	"settings.quality-high": "High",
+	"settings.quality-max": "Max",
+	"settings.stochastic": "Stochastic Rendering",
 	"settings.gaming-controls": "Gaming Controls",
 	"settings.show-annotations": "Show Annotations",
 	"settings.show-collision": "Show Collision",
@@ -85866,7 +85920,13 @@ var enJson = {
 	"xr-modal.title": "WebGL Required",
 	"xr-modal.message": "AR and VR are not supported on the WebGPU renderer. Pressing OK will reload the viewer with WebGL.",
 	"xr-modal.cancel": "Cancel",
-	"xr-modal.ok": "OK"
+	"xr-modal.ok": "OK",
+	"vr-prompt.loading": "Loading…",
+	"vr-prompt.enter": "Tap to enter VR",
+	"xr-menu.exit-vr": "Exit VR",
+	"xr-menu.exit-ar": "Exit AR",
+	"xr-menu.ice-cream": "Ice-cream mode",
+	"xr-hint.stalled": "Nothing happening? Switch tabs and back."
 };
 
 var esJson = {
@@ -85933,7 +85993,13 @@ var esJson = {
 	"xr-modal.title": "Se requiere WebGL",
 	"xr-modal.message": "AR y VR no son compatibles con el renderizador WebGPU. Al pulsar OK se recargará el visor con WebGL.",
 	"xr-modal.cancel": "Cancelar",
-	"xr-modal.ok": "OK"
+	"xr-modal.ok": "OK",
+	"vr-prompt.loading": "Cargando…",
+	"vr-prompt.enter": "Toca para entrar en RV",
+	"xr-menu.exit-vr": "Salir de VR",
+	"xr-menu.exit-ar": "Salir de AR",
+	"xr-menu.ice-cream": "Modo helado",
+	"xr-hint.stalled": "¿No pasa nada? Cambia de pestaña y vuelve."
 };
 
 var frJson = {
@@ -86000,7 +86066,13 @@ var frJson = {
 	"xr-modal.title": "WebGL requis",
 	"xr-modal.message": "L'AR et la VR ne sont pas prises en charge par le moteur de rendu WebGPU. Cliquer sur OK rechargera le visualiseur avec WebGL.",
 	"xr-modal.cancel": "Annuler",
-	"xr-modal.ok": "OK"
+	"xr-modal.ok": "OK",
+	"vr-prompt.loading": "Chargement…",
+	"vr-prompt.enter": "Touchez pour entrer en RV",
+	"xr-menu.exit-vr": "Quitter la VR",
+	"xr-menu.exit-ar": "Quitter l'AR",
+	"xr-menu.ice-cream": "Mode glace",
+	"xr-hint.stalled": "Rien ne se passe ? Changez d'onglet puis revenez."
 };
 
 var jaJson = {
@@ -86067,7 +86139,13 @@ var jaJson = {
 	"xr-modal.title": "WebGLが必要です",
 	"xr-modal.message": "ARとVRはWebGPUレンダラーでは利用できません。OKを押すとWebGLでビューアーを再読み込みします。",
 	"xr-modal.cancel": "キャンセル",
-	"xr-modal.ok": "OK"
+	"xr-modal.ok": "OK",
+	"vr-prompt.loading": "読み込み中…",
+	"vr-prompt.enter": "タップしてVRを開始",
+	"xr-menu.exit-vr": "VRを終了",
+	"xr-menu.exit-ar": "ARを終了",
+	"xr-menu.ice-cream": "アイスクリームモード",
+	"xr-hint.stalled": "反応がない場合は、タブを切り替えてから戻ってください。"
 };
 
 var koJson = {
@@ -86134,7 +86212,13 @@ var koJson = {
 	"xr-modal.title": "WebGL 필요",
 	"xr-modal.message": "AR과 VR은 WebGPU 렌더러에서 지원되지 않습니다. 확인을 누르면 WebGL로 뷰어를 다시 불러옵니다.",
 	"xr-modal.cancel": "취소",
-	"xr-modal.ok": "확인"
+	"xr-modal.ok": "확인",
+	"vr-prompt.loading": "로드 중…",
+	"vr-prompt.enter": "탭하여 VR 시작",
+	"xr-menu.exit-vr": "VR 종료",
+	"xr-menu.exit-ar": "AR 종료",
+	"xr-menu.ice-cream": "아이스크림 모드",
+	"xr-hint.stalled": "반응이 없나요? 다른 탭으로 전환했다가 돌아오세요."
 };
 
 var ptBRJson = {
@@ -86201,7 +86285,13 @@ var ptBRJson = {
 	"xr-modal.title": "WebGL necessário",
 	"xr-modal.message": "AR e VR não são compatíveis com o renderizador WebGPU. Ao pressionar OK, o visualizador será recarregado com WebGL.",
 	"xr-modal.cancel": "Cancelar",
-	"xr-modal.ok": "OK"
+	"xr-modal.ok": "OK",
+	"vr-prompt.loading": "Carregando…",
+	"vr-prompt.enter": "Toque para entrar em RV",
+	"xr-menu.exit-vr": "Sair da VR",
+	"xr-menu.exit-ar": "Sair da AR",
+	"xr-menu.ice-cream": "Modo sorvete",
+	"xr-hint.stalled": "Nada acontecendo? Troque de aba e volte."
 };
 
 var ruJson = {
@@ -86268,7 +86358,13 @@ var ruJson = {
 	"xr-modal.title": "Требуется WebGL",
 	"xr-modal.message": "AR и VR не поддерживаются рендером WebGPU. Нажмите OK, чтобы перезагрузить просмотрщик с WebGL.",
 	"xr-modal.cancel": "Отмена",
-	"xr-modal.ok": "OK"
+	"xr-modal.ok": "OK",
+	"vr-prompt.loading": "Загрузка…",
+	"vr-prompt.enter": "Нажмите, чтобы войти в VR",
+	"xr-menu.exit-vr": "Выйти из VR",
+	"xr-menu.exit-ar": "Выйти из AR",
+	"xr-menu.ice-cream": "Режим мороженого",
+	"xr-hint.stalled": "Ничего не происходит? Переключитесь на другую вкладку и вернитесь."
 };
 
 var zhCNJson = {
@@ -86335,7 +86431,13 @@ var zhCNJson = {
 	"xr-modal.title": "需要 WebGL",
 	"xr-modal.message": "WebGPU 渲染器不支持 AR 和 VR。按下确定将以 WebGL 重新加载查看器。",
 	"xr-modal.cancel": "取消",
-	"xr-modal.ok": "确定"
+	"xr-modal.ok": "确定",
+	"vr-prompt.loading": "加载中…",
+	"vr-prompt.enter": "点击进入 VR",
+	"xr-menu.exit-vr": "退出 VR",
+	"xr-menu.exit-ar": "退出 AR",
+	"xr-menu.ice-cream": "冰淇淋模式",
+	"xr-hint.stalled": "没有反应？切换到其他标签页再切回来。"
 };
 
 const en = enJson;
@@ -86388,8 +86490,16 @@ const initLocalization = (lang, root) => {
     return localize;
 };
 
+const QUALITY_VALUES = ['performance', 'default', 'high', 'max'];
 const readPreferences = (mobile) => {
-    const defaults = { performanceMode: mobile, gamingControls: false, showAnnotations: true };
+    const defaults = {
+        quality: (mobile ? 'performance' : 'default'),
+        stochastic: false,
+        performanceMode: mobile,
+        gamingControls: false,
+        showAnnotations: true,
+        iceCream: false
+    };
     try {
         // Preserve the legacy preference migration and origin-wide keys.
         const legacyRetina = localStorage.getItem('retinaDisplay');
@@ -86404,10 +86514,23 @@ const readPreferences = (mobile) => {
                 // Keep the migrated runtime value even if storage cannot be updated.
             }
         }
+        // the Quality slider replaced the Performance Mode switch (2026-10-19): a stored switch
+        // migrates to its position, and the deprecated alias follows the slider
+        const storedQuality = localStorage.getItem('quality');
+        const quality = QUALITY_VALUES.includes(storedQuality)
+            ? storedQuality
+            : performanceMode === null
+                ? defaults.quality
+                : performanceMode === 'true'
+                    ? 'performance'
+                    : 'default';
         return {
-            performanceMode: performanceMode === null ? mobile : performanceMode === 'true',
+            quality,
+            stochastic: localStorage.getItem('stochastic') === 'true',
+            performanceMode: quality === 'performance',
             gamingControls: localStorage.getItem('gamingControls') === 'true',
-            showAnnotations: localStorage.getItem('showAnnotations') !== 'false'
+            showAnnotations: localStorage.getItem('showAnnotations') !== 'false',
+            iceCream: localStorage.getItem('iceCream') === 'true'
         };
     }
     catch {
@@ -86417,7 +86540,7 @@ const readPreferences = (mobile) => {
 };
 const persistPreferences = (events) => {
     // Write changes only, so creating a viewer does not persist platform defaults.
-    const subscriptions = ['performanceMode', 'gamingControls', 'showAnnotations'].map((key) => events.on(`${key}:changed`, (value) => {
+    const subscriptions = ['quality', 'stochastic', 'performanceMode', 'gamingControls', 'showAnnotations', 'iceCream'].map((key) => events.on(`${key}:changed`, (value) => {
         try {
             localStorage.setItem(key, String(value));
         }
@@ -86427,6 +86550,6750 @@ const persistPreferences = (events) => {
     }));
     return () => subscriptions.forEach((subscription) => subscription.off());
 };
+
+/**
+ * World picking for splat scenes.
+ *
+ * Uses a custom `pickPS` / `gsplatPS` patch for a stochastic pick pass, because the stock pick
+ * pass encodes splat IDs rather than depth. Each splat fragment survives with probability equal
+ * to its opacity, and a MIN blend keeps each pixel's nearest survivor, so a pixel is nearer than
+ * a depth with probability equal to the scene's opacity in front of that depth, whatever order
+ * the splats draw in. Surfaces are then the depth where that opacity reaches one half: faint haze
+ * does not count, while enough of it layered together does.
+ */
+// Override global picking to output stochastic splat depth instead of meshInstance id.
+const pickDepthGlsl = /* glsl */ `
+vec4 encodePickOutput(uint id) {
+    const vec4 inv = vec4(1.0 / 255.0);
+    const uvec4 shifts = uvec4(16, 8, 0, 24);
+    uvec4 col = (uvec4(id) >> shifts) & uvec4(0xff);
+    return vec4(col) * inv;
+}
+
+#ifdef GSPLAT_PICK_DEPTH
+    #ifndef CAMERAPLANES
+        #define CAMERAPLANES
+        uniform vec4 camera_params; // x: 1/far, y: far, z: near, w: isOrtho
+    #endif
+
+    uint pickHash(uint v) {
+        v ^= v >> 16u;
+        v *= 0x7feb352du;
+        v ^= v >> 15u;
+        v *= 0x846ca68bu;
+        v ^= v >> 16u;
+        return v;
+    }
+
+    // Four independent trials, one per channel: each keeps the fragment with probability alpha,
+    // the splat's opacity at this fragment with its falloff included, writing its depth there,
+    // and the far plane where it does not. The splat's seed (see pickSeedVS) and depth, both
+    // the same across its quad, hashed with the pixel decorrelate the splats covering one pixel.
+    vec4 getSplatPickOutput(float alpha) {
+        float normalizedDepth;
+        if (camera_params.w > 0.5) {
+            normalizedDepth = gl_FragCoord.z;
+        } else {
+            float linearDepth = 1.0 / gl_FragCoord.w;
+            normalizedDepth = (linearDepth - camera_params.z) / (camera_params.y - camera_params.z);
+        }
+
+        uvec2 p = uvec2(gl_FragCoord.xy);
+        uint h = pickHash(p.x ^ pickHash(p.y ^ pickHash(vPickSeed ^ floatBitsToUint(normalizedDepth))));
+        uvec4 trials = uvec4(pickHash(h), pickHash(h ^ 0x9e3779b9u), pickHash(h ^ 0x7f4a7c15u), pickHash(h ^ 0x2545f491u));
+        bvec4 keep = lessThan(vec4(trials >> 8u) * (1.0 / 16777216.0), vec4(alpha));
+        if (!any(keep)) {
+            discard;
+        }
+        return mix(vec4(1.0), vec4(normalizedDepth), vec4(keep));
+    }
+#else
+    #ifndef PICK_CUSTOM_ID
+        uniform uint meshInstanceId;
+
+        vec4 getPickOutput() {
+            return encodePickOutput(meshInstanceId);
+        }
+    #endif
+#endif
+
+#ifdef DEPTH_PICK_PASS
+    #include "floatAsUintPS"
+    #ifndef CAMERAPLANES
+        #define CAMERAPLANES
+        uniform vec4 camera_params; // x: 1/far, y: far, z: near, w: isOrtho
+    #endif
+
+    vec4 getPickDepth() {
+        float linearDepth;
+        if (camera_params.w > 0.5) {
+            linearDepth = gl_FragCoord.z;
+        } else {
+            float viewDist = 1.0 / gl_FragCoord.w;
+            linearDepth = (viewDist - camera_params.z) / (camera_params.y - camera_params.z);
+        }
+        return float2uint(linearDepth);
+    }
+#endif
+`;
+const pickDepthWgsl = /* wgsl */ `
+fn encodePickOutput(id: u32) -> vec4f {
+    let inv: vec4f = vec4f(1.0 / 255.0);
+    let shifts: vec4u = vec4u(16u, 8u, 0u, 24u);
+    let col: vec4u = (vec4u(id) >> shifts) & vec4u(0xffu);
+    return vec4f(col) * inv;
+}
+
+#ifdef GSPLAT_PICK_DEPTH
+    #ifndef CAMERAPLANES
+        #define CAMERAPLANES
+        uniform camera_params: vec4f; // x: 1/far, y: far, z: near, w: isOrtho
+    #endif
+
+    fn pickHash(value: u32) -> u32 {
+        var v = value;
+        v ^= v >> 16u;
+        v *= 0x7feb352du;
+        v ^= v >> 15u;
+        v *= 0x846ca68bu;
+        v ^= v >> 16u;
+        return v;
+    }
+
+    // Four independent trials, one per channel: each keeps the fragment with probability alpha,
+    // the splat's opacity at this fragment with its falloff included, writing its depth there,
+    // and the far plane where it does not. The splat's seed (see pickSeedVS) and depth, both
+    // the same across its quad, hashed with the pixel decorrelate the splats covering one pixel.
+    fn getSplatPickOutput(alpha: f32) -> vec4f {
+        var normalizedDepth: f32;
+        if (uniform.camera_params.w > 0.5) {
+            normalizedDepth = pcPosition.z;
+        } else {
+            let linearDepth = 1.0 / pcPosition.w;
+            normalizedDepth = (linearDepth - uniform.camera_params.z) / (uniform.camera_params.y - uniform.camera_params.z);
+        }
+
+        let p = vec2u(pcPosition.xy);
+        let h = pickHash(p.x ^ pickHash(p.y ^ pickHash(vPickSeed ^ bitcast<u32>(normalizedDepth))));
+        let trials = vec4u(pickHash(h), pickHash(h ^ 0x9e3779b9u), pickHash(h ^ 0x7f4a7c15u), pickHash(h ^ 0x2545f491u));
+        let keep = vec4f(trials >> vec4u(8u)) * (1.0 / 16777216.0) < vec4f(alpha);
+        if (!any(keep)) {
+            discard;
+        }
+        return select(vec4f(1.0), vec4f(normalizedDepth), keep);
+    }
+#else
+    #ifndef PICK_CUSTOM_ID
+        uniform meshInstanceId: u32;
+
+        fn getPickOutput() -> vec4f {
+            return encodePickOutput(uniform.meshInstanceId);
+        }
+    #endif
+#endif
+
+#ifdef DEPTH_PICK_PASS
+    #include "floatAsUintPS"
+    #ifndef CAMERAPLANES
+        #define CAMERAPLANES
+        uniform camera_params: vec4f; // x: 1/far, y: far, z: near, w: isOrtho
+    #endif
+
+    fn getPickDepth() -> vec4f {
+        var linearDepth: f32;
+        if (uniform.camera_params.w > 0.5) {
+            linearDepth = pcPosition.z;
+        } else {
+            let viewDist = 1.0 / pcPosition.w;
+            linearDepth = (viewDist - uniform.camera_params.z) / (uniform.camera_params.y - uniform.camera_params.z);
+        }
+        return float2uint(linearDepth);
+    }
+#endif
+`;
+const safeChunkReplace = (s, find, repl) => {
+    const out = s.replace(find, repl);
+    if (out === s) {
+        throw new Error('picker: engine gsplat/pick chunk patch failed (engine version mismatch?)');
+    }
+    return out;
+};
+const pickPassChunkInjected = (seedVarying) => `#ifdef PICK_PASS
+    ${seedVarying}
+    #define GSPLAT_PICK_DEPTH
+    #include "pickPS"
+#endif`;
+const seedVaryingGlsl = 'flat varying uint vPickSeed;';
+const seedVaryingWgsl = 'varying @interpolate(flat) vPickSeed: u32;';
+// pickSeedVS: a per-splat seed for the survival trials, from its projected centre. The depth
+// alone would give splats at exactly the same depth the same random values at a pixel, so
+// their survivals would be correlated. The centre rather than an index: the cache index of the
+// GPU-sort path is the splat's slot in this frame's compacted list, which changes from render
+// to render, so repeated picks at one pose would disagree. Only exact duplicates (same centre
+// and depth) stay correlated
+const pickSeedGlsl = (proj) => `vPickSeed = (floatBitsToUint(${proj}.x) * 0x9e3779b9u) ^ (floatBitsToUint(${proj}.y) * 0x85ebca6bu) ^ (floatBitsToUint(${proj}.w) * 0xc2b2ae35u);`;
+const pickSeedWgsl = (proj) => `output.vPickSeed = (bitcast<u32>(${proj}.x) * 0x9e3779b9u) ^ (bitcast<u32>(${proj}.y) * 0x85ebca6bu) ^ (bitcast<u32>(${proj}.w) * 0xc2b2ae35u);`;
+const inPickPass = (line) => `\n#ifdef PICK_PASS\n    ${line}\n#endif\n`;
+const patchGsplatVSGlsl = (chunk) => safeChunkReplace(safeChunkReplace(chunk, /(varying mediump vec2 gaussianUV;)/, `$1${inPickPass(seedVaryingGlsl)}`), /(gaussianUV = corner\.uv;)/, `$1${inPickPass(pickSeedGlsl('center.proj'))}`);
+const patchGsplatVSWgsl = (chunk) => safeChunkReplace(safeChunkReplace(chunk, /(varying gaussianUV: half2;)/, `$1${inPickPass(seedVaryingWgsl)}`), /(output\.gaussianUV = corner\.uv;)/, `$1${inPickPass(pickSeedWgsl('center.proj'))}`);
+const patchGsplatHybridVSWgsl = (chunk) => safeChunkReplace(safeChunkReplace(chunk, /(varying gaussianUV: half2;)/, `$1${inPickPass(seedVaryingWgsl)}`), /(output\.gaussianUV = half2\(cornerClipped\);)/, `$1${inPickPass(pickSeedWgsl('proj'))}`);
+// Both pick-output calls (with and without unified ids) take the fragment's alpha, which
+// `main` computes locally: the varying holds only the splat's peak opacity.
+const patchGsplatPickGlsl = (chunk) => {
+    return safeChunkReplace(safeChunkReplace(chunk, /#ifdef PICK_PASS\s*#include "pickPS"\s*#endif/, pickPassChunkInjected(seedVaryingGlsl)), /pcFragColor0 = (encodePickOutput\(vPickId\)|getPickOutput\(\));/g, 'pcFragColor0 = getSplatPickOutput(alpha);');
+};
+const patchGsplatPickWgsl = (chunk) => {
+    return safeChunkReplace(safeChunkReplace(chunk, /#ifdef PICK_PASS\s*#include "pickPS"\s*#endif/, pickPassChunkInjected(seedVaryingWgsl)), /output\.color = (encodePickOutput\(vPickId\)|getPickOutput\(\));/g, 'output.color = getSplatPickOutput(f32(alpha));');
+};
+/** Per-device original chunk strings + refcount so we can restore after the last Picker releases. */
+const pickerShaderPatchState = new WeakMap();
+const vec4 = new Vec4();
+const viewProjMat = new Mat4();
+// the pick pass keeps the nearest surviving depth, so it starts at the far plane
+const farColor = new Color(1, 1, 1, 1);
+// independent survival trials per pixel, one per channel of the pick render
+const PICK_TRIALS = 4;
+// A surface's depth is taken over a disc of this radius around each pick pixel (a css pixel,
+// see prepareSample): each pixel is one random sample, so a single one says little. Small,
+// since it also blurs edges
+const SURFACE_RADIUS_PX = 2;
+// A surface is where the opacity in front first reaches this. Well under one half: captured
+// surfaces seen at a glancing angle, a deck or a floor, can be little more than half opaque,
+// and a pick must not pass through them to whatever lies beneath
+const SURFACE_OPACITY = 0.3;
+const NORMAL_EPSILON$1 = 1e-12;
+const NORMAL_DEGENERATE_EPSILON = 1e-20;
+// Sampling for the surface-normal estimator runs on a circular footprint of
+// fixed *world* radius, projected to pixels at the picked-point's depth.
+// Keeping the world area constant means adjacent cursor positions sample
+// almost the same world cluster, which stabilises the plane fit. The pixel
+// radius is clamped so distant picks still get enough samples and very-close
+// picks don't blow the block read.
+const NORMAL_SAMPLE_WORLD_RADIUS = 0.2;
+const NORMAL_SAMPLE_MIN_PX = 6;
+const NORMAL_SAMPLE_MAX_PX = 48;
+const NORMAL_RING_FRACTIONS = [0.3, 0.55, 0.8, 1.0];
+const NORMAL_OUTLIER_THRESHOLD = 2.5;
+const NORMAL_SAMPLE_DIRECTIONS = [
+    [1, 0],
+    [1, 1],
+    [0, 1],
+    [-1, 1],
+    [-1, 0],
+    [-1, -1],
+    [0, -1],
+    [1, -1]
+];
+// Shared buffer for half-to-float conversion
+const float32 = new Float32Array(1);
+const uint32 = new Uint32Array(float32.buffer);
+// Convert 16-bit half-float to 32-bit float using bit manipulation.
+const half2Float = (h) => {
+    const sign = (h & 0x8000) << 16;
+    const exponent = (h & 0x7c00) >> 10;
+    const mantissa = h & 0x03ff;
+    if (exponent === 0) {
+        if (mantissa === 0) {
+            uint32[0] = sign;
+        }
+        else {
+            let e = -1;
+            let m = mantissa;
+            do {
+                e++;
+                m <<= 1;
+            } while ((m & 0x0400) === 0);
+            uint32[0] = sign | ((127 - 15 - e) << 23) | ((m & 0x03ff) << 13);
+        }
+    }
+    else if (exponent === 31) {
+        uint32[0] = sign | 0x7f800000 | (mantissa << 13);
+    }
+    else {
+        uint32[0] = sign | ((exponent + 127 - 15) << 23) | (mantissa << 13);
+    }
+    return float32[0];
+};
+const registerPickerShaderPatches = (app) => {
+    const device = app.graphicsDevice;
+    const existing = pickerShaderPatchState.get(device);
+    if (existing) {
+        existing.refCount++;
+        return;
+    }
+    const glslChunks = ShaderChunks.get(device, 'glsl');
+    const wgslChunks = ShaderChunks.get(device, 'wgsl');
+    const glslPickPS = glslChunks.get('pickPS');
+    const glslGsplatPS = glslChunks.get('gsplatPS');
+    const wgslPickPS = wgslChunks.get('pickPS');
+    const wgslGsplatPS = wgslChunks.get('gsplatPS');
+    const glslGsplatVS = glslChunks.get('gsplatVS');
+    const wgslGsplatVS = wgslChunks.get('gsplatVS');
+    const wgslGsplatHybridVS = wgslChunks.get('gsplatHybridVS');
+    // Patch strings before mutating ShaderChunks so engine mismatches leave globals untouched.
+    const patchedGlslGsplatPS = patchGsplatPickGlsl(glslGsplatPS);
+    const patchedWgslGsplatPS = patchGsplatPickWgsl(wgslGsplatPS);
+    const patchedGlslGsplatVS = patchGsplatVSGlsl(glslGsplatVS);
+    const patchedWgslGsplatVS = patchGsplatVSWgsl(wgslGsplatVS);
+    const patchedWgslGsplatHybridVS = patchGsplatHybridVSWgsl(wgslGsplatHybridVS);
+    const state = {
+        glslPickPS,
+        glslGsplatPS,
+        wgslPickPS,
+        wgslGsplatPS,
+        glslGsplatVS,
+        wgslGsplatVS,
+        wgslGsplatHybridVS,
+        refCount: 1
+    };
+    pickerShaderPatchState.set(device, state);
+    glslChunks.set('pickPS', pickDepthGlsl);
+    wgslChunks.set('pickPS', pickDepthWgsl);
+    glslChunks.set('gsplatPS', patchedGlslGsplatPS);
+    wgslChunks.set('gsplatPS', patchedWgslGsplatPS);
+    glslChunks.set('gsplatVS', patchedGlslGsplatVS);
+    wgslChunks.set('gsplatVS', patchedWgslGsplatVS);
+    wgslChunks.set('gsplatHybridVS', patchedWgslGsplatHybridVS);
+};
+const unregisterPickerShaderPatches = (app) => {
+    const device = app.graphicsDevice;
+    const state = pickerShaderPatchState.get(device);
+    if (!state) {
+        return;
+    }
+    state.refCount--;
+    if (state.refCount > 0) {
+        return;
+    }
+    const glslChunks = ShaderChunks.get(device, 'glsl');
+    const wgslChunks = ShaderChunks.get(device, 'wgsl');
+    glslChunks.set('pickPS', state.glslPickPS);
+    glslChunks.set('gsplatPS', state.glslGsplatPS);
+    wgslChunks.set('pickPS', state.wgslPickPS);
+    wgslChunks.set('gsplatPS', state.wgslGsplatPS);
+    glslChunks.set('gsplatVS', state.glslGsplatVS);
+    wgslChunks.set('gsplatVS', state.wgslGsplatVS);
+    wgslChunks.set('gsplatHybridVS', state.wgslGsplatHybridVS);
+    pickerShaderPatchState.delete(device);
+};
+const createPickCameraSnapshot = () => ({
+    position: new Vec3(),
+    viewMatrix: new Mat4(),
+    projectionMatrix: new Mat4(),
+    nearClip: 0,
+    farClip: 0,
+    projection: 0
+});
+const captureCameraSnapshot = (camera, out) => {
+    const cam = camera.camera;
+    out.position.copy(camera.getPosition());
+    out.viewMatrix.copy(cam.viewMatrix);
+    out.projectionMatrix.copy(cam.projectionMatrix);
+    out.nearClip = cam.nearClip;
+    out.farClip = cam.farClip;
+    out.projection = cam.projection;
+};
+const getWorldPoint = (camera, x, y, width, height, normalizedDepth, out) => {
+    if (!Number.isFinite(normalizedDepth) || normalizedDepth < 0 || normalizedDepth > 1) {
+        return null;
+    }
+    const { farClip: far, nearClip: near } = camera;
+    const ndcDepth = camera.projection === PROJECTION_ORTHOGRAPHIC
+        ? normalizedDepth
+        : (far * normalizedDepth) / (normalizedDepth * (far - near) + near);
+    viewProjMat.mul2(camera.projectionMatrix, camera.viewMatrix).invert();
+    vec4.set((x / width) * 2 - 1, (1 - y / height) * 2 - 1, ndcDepth * 2 - 1, 1);
+    viewProjMat.transformVec4(vec4, vec4);
+    if (!Number.isFinite(vec4.w) || Math.abs(vec4.w) < 1e-8) {
+        return null;
+    }
+    vec4.mulScalar(1 / vec4.w);
+    if (!Number.isFinite(vec4.x) || !Number.isFinite(vec4.y) || !Number.isFinite(vec4.z)) {
+        return null;
+    }
+    return (out ?? new Vec3()).set(vec4.x, vec4.y, vec4.z);
+};
+const setCameraFacingNormal = (cameraPosition, position, normal) => {
+    normal.sub2(cameraPosition, position);
+    const len = normal.length();
+    if (len > 1e-6) {
+        normal.mulScalar(1 / len);
+    }
+    else {
+        normal.set(0, 1, 0);
+    }
+    return normal;
+};
+// Project a world-space radius around `pos` to its on-screen pixel radius for
+// the given camera. Uses the projection matrix's [1][1] entry (= 1/tan(fov/2)
+// for perspective, = 1/orthoHeight for orthographic) so we don't need fov or
+// orthoHeight on the snapshot.
+const worldRadiusToPixelRadius = (cam, pos, canvasHeight, worldRadius) => {
+    const projY = cam.projectionMatrix.data[5];
+    if (cam.projection === PROJECTION_ORTHOGRAPHIC) {
+        return (worldRadius * projY * canvasHeight) / 2;
+    }
+    const dx = pos.x - cam.position.x;
+    const dy = pos.y - cam.position.y;
+    const dz = pos.z - cam.position.z;
+    const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+    if (distance < 1e-6)
+        return Infinity;
+    return (worldRadius * projY * canvasHeight) / (2 * distance);
+};
+// Single least-squares plane fit through a cluster of 3D points. The normal
+// is the eigenvector of the smallest eigenvalue of the points' 3x3 covariance
+// matrix, computed in closed form (analytic eigendecomposition for 3x3
+// symmetric, Smith 1961). Returns null on degenerate input.
+const fitPlaneOnce = (points) => {
+    const n = points.length;
+    if (n < 3)
+        return null;
+    let cx = 0, cy = 0, cz = 0;
+    for (let i = 0; i < n; i++) {
+        cx += points[i].x;
+        cy += points[i].y;
+        cz += points[i].z;
+    }
+    cx /= n;
+    cy /= n;
+    cz /= n;
+    let cxx = 0, cxy = 0, cxz = 0, cyy = 0, cyz = 0, czz = 0;
+    for (let i = 0; i < n; i++) {
+        const dx = points[i].x - cx;
+        const dy = points[i].y - cy;
+        const dz = points[i].z - cz;
+        cxx += dx * dx;
+        cxy += dx * dy;
+        cxz += dx * dz;
+        cyy += dy * dy;
+        cyz += dy * dz;
+        czz += dz * dz;
+    }
+    const q = (cxx + cyy + czz) / 3;
+    const a = cxx - q, b = cyy - q, c = czz - q;
+    const p2 = a * a + b * b + c * c + 2 * (cxy * cxy + cxz * cxz + cyz * cyz);
+    if (p2 < NORMAL_DEGENERATE_EPSILON)
+        return null;
+    const p = Math.sqrt(p2 / 6);
+    const inv = 1 / p;
+    const Bxx = a * inv, Bxy = cxy * inv, Bxz = cxz * inv;
+    const Byy = b * inv, Byz = cyz * inv, Bzz = c * inv;
+    const detB = Bxx * (Byy * Bzz - Byz * Byz) - Bxy * (Bxy * Bzz - Byz * Bxz) + Bxz * (Bxy * Byz - Byy * Bxz);
+    const r = Math.max(-1, Math.min(1, detB / 2));
+    const phi = Math.acos(r) / 3;
+    const lambdaMin = q + 2 * p * Math.cos(phi + (2 * Math.PI) / 3);
+    const Mxx = cxx - lambdaMin, Myy = cyy - lambdaMin, Mzz = czz - lambdaMin;
+    const v1x = cxy * cyz - cxz * Myy;
+    const v1y = cxz * cxy - Mxx * cyz;
+    const v1z = Mxx * Myy - cxy * cxy;
+    const v2x = cxy * Mzz - cxz * cyz;
+    const v2y = cxz * cxz - Mxx * Mzz;
+    const v2z = Mxx * cyz - cxy * cxz;
+    const v3x = Myy * Mzz - cyz * cyz;
+    const v3y = cyz * cxz - cxy * Mzz;
+    const v3z = cxy * cyz - Myy * cxz;
+    const l1 = v1x * v1x + v1y * v1y + v1z * v1z;
+    const l2 = v2x * v2x + v2y * v2y + v2z * v2z;
+    const l3 = v3x * v3x + v3y * v3y + v3z * v3z;
+    let vx, vy, vz, lSq;
+    if (l1 >= l2 && l1 >= l3) {
+        vx = v1x;
+        vy = v1y;
+        vz = v1z;
+        lSq = l1;
+    }
+    else if (l2 >= l3) {
+        vx = v2x;
+        vy = v2y;
+        vz = v2z;
+        lSq = l2;
+    }
+    else {
+        vx = v3x;
+        vy = v3y;
+        vz = v3z;
+        lSq = l3;
+    }
+    if (lSq < NORMAL_EPSILON$1)
+        return null;
+    const invLen = 1 / Math.sqrt(lSq);
+    return { cx, cy, cz, vx: vx * invLen, vy: vy * invLen, vz: vz * invLen };
+};
+// Two-pass plane fit: first pass on all points, then drop points whose
+// distance from the fitted plane exceeds NORMAL_OUTLIER_THRESHOLD * the mean
+// residual, refit on the inliers. Sign-flips the result toward toCamera so
+// the cursor's tangent basis stays consistent. Returns false on degenerate
+// input (fewer than 3 points, collinear/coincident samples).
+const fitPlaneNormal = (points, toCamera, outNormal) => {
+    const first = fitPlaneOnce(points);
+    if (!first)
+        return false;
+    let residualSum = 0;
+    for (let i = 0; i < points.length; i++) {
+        const dx = points[i].x - first.cx;
+        const dy = points[i].y - first.cy;
+        const dz = points[i].z - first.cz;
+        residualSum += Math.abs(dx * first.vx + dy * first.vy + dz * first.vz);
+    }
+    const threshold = (residualSum / points.length) * NORMAL_OUTLIER_THRESHOLD;
+    const inliers = [];
+    for (let i = 0; i < points.length; i++) {
+        const dx = points[i].x - first.cx;
+        const dy = points[i].y - first.cy;
+        const dz = points[i].z - first.cz;
+        if (Math.abs(dx * first.vx + dy * first.vy + dz * first.vz) <= threshold) {
+            inliers.push(points[i]);
+        }
+    }
+    let result = first;
+    if (inliers.length >= 3 && inliers.length < points.length) {
+        const refined = fitPlaneOnce(inliers);
+        if (refined)
+            result = refined;
+    }
+    let { vx, vy, vz } = result;
+    if (vx * toCamera.x + vy * toCamera.y + vz * toCamera.z < 0) {
+        vx = -vx;
+        vy = -vy;
+        vz = -vz;
+    }
+    outNormal.set(vx, vy, vz);
+    return true;
+};
+// The surface at a pixel: the SURFACE_OPACITY quantile of the nearest survivors over a small
+// disc, which is the depth where the opacity in front reaches that. Null where it never does.
+const surfaceDepth = (depthAt, x, y) => {
+    const samples = [];
+    for (let dy = -SURFACE_RADIUS_PX; dy <= SURFACE_RADIUS_PX; dy++) {
+        for (let dx = -SURFACE_RADIUS_PX; dx <= SURFACE_RADIUS_PX; dx++) {
+            if (dx * dx + dy * dy > SURFACE_RADIUS_PX * SURFACE_RADIUS_PX)
+                continue;
+            for (let trial = 0; trial < PICK_TRIALS; trial++) {
+                const depth = depthAt(x + dx, y + dy, trial);
+                if (depth !== null)
+                    samples.push(depth);
+            }
+        }
+    }
+    if (samples.length === 0) {
+        return null;
+    }
+    samples.sort((a, b) => a - b);
+    const depth = samples[Math.max(0, Math.ceil(samples.length * SURFACE_OPACITY) - 1)];
+    return Number.isFinite(depth) && depth < 1 ? depth : null;
+};
+// The surface under a pixel and its normal, fitted through surface points on rings around it.
+// `depthAt` must cover NORMAL_SAMPLE_MAX_PX + SURFACE_RADIUS_PX around the pixel.
+const estimateSurface = (depthAt, pickCamera, width, height, screenX, screenY) => {
+    const surfacePoint = (px, py) => {
+        const depth = surfaceDepth(depthAt, px, py);
+        return depth === null ? null : getWorldPoint(pickCamera, px, py, width, height, depth);
+    };
+    const position = surfacePoint(screenX, screenY);
+    if (!position) {
+        return null;
+    }
+    const samplePixel = (px, py) => {
+        if (px < 0 || px >= width || py < 0 || py >= height) {
+            return null;
+        }
+        return surfacePoint(px, py);
+    };
+    // Pixel radius corresponding to a fixed world radius at the
+    // picked-point's depth. Clamped so distant picks still sample
+    // enough pixels and very-close picks stay inside the block read.
+    const pixelRadius = Math.max(NORMAL_SAMPLE_MIN_PX, Math.min(NORMAL_SAMPLE_MAX_PX, worldRadiusToPixelRadius(pickCamera, position, height, NORMAL_SAMPLE_WORLD_RADIUS)));
+    const ringPixelRadii = NORMAL_RING_FRACTIONS.map((f) => Math.max(1, Math.round(f * pixelRadius)));
+    const sampleRings = ringPixelRadii.map((radius) => {
+        return NORMAL_SAMPLE_DIRECTIONS.map(([dx, dy]) => {
+            return samplePixel(screenX + dx * radius, screenY + dy * radius);
+        });
+    });
+    const toCamera = setCameraFacingNormal(pickCamera.position, position, new Vec3());
+    // Collect every valid 3D sample: the picked position plus all ring
+    // samples that didn't fall off-screen or find no surface.
+    const fitPoints = [position];
+    for (let i = 0; i < sampleRings.length; i++) {
+        const ring = sampleRings[i];
+        for (let j = 0; j < ring.length; j++) {
+            const pt = ring[j];
+            if (pt)
+                fitPoints.push(pt);
+        }
+    }
+    const normal = new Vec3();
+    if (!fitPlaneNormal(fitPoints, toCamera, normal)) {
+        normal.copy(toCamera);
+    }
+    return {
+        position,
+        normal
+    };
+};
+// The share of samples over a disc of `r` pixels whose nearest survivor is nearer than the view
+// depth `depth`; null where the disc has no samples. `depthAt` must cover the disc.
+const opacityInFront = (depthAt, pickCamera, screenX, screenY, r, depth) => {
+    const threshold = (depth - pickCamera.nearClip) / (pickCamera.farClip - pickCamera.nearClip);
+    let total = 0;
+    let inFront = 0;
+    for (let dy = -r; dy <= r; dy++) {
+        for (let dx = -r; dx <= r; dx++) {
+            if (dx * dx + dy * dy > r * r)
+                continue;
+            for (let trial = 0; trial < PICK_TRIALS; trial++) {
+                const nearest = depthAt(screenX + dx, screenY + dy, trial);
+                if (nearest === null)
+                    continue;
+                total++;
+                if (nearest < threshold)
+                    inFront++;
+            }
+        }
+    }
+    return total > 0 ? inFront / total : null;
+};
+// One pick pixel per css pixel, never more than the backbuffer has: picking then behaves the
+// same in performance mode and at any device pixel ratio, since the pixel sizes above are css
+// pixels, and a high-density display does not multiply the pass's cost. Null before the device
+// or the canvas has been sized.
+const pickTargetSize = (graphicsDevice) => {
+    const canvas = graphicsDevice.canvas;
+    const width = Math.min(Math.floor(graphicsDevice.width), Math.round(canvas.clientWidth));
+    const height = Math.min(Math.floor(graphicsDevice.height), Math.round(canvas.clientHeight));
+    return width > 0 && height > 0 ? { width, height } : null;
+};
+const clampPixel = (v, size) => Math.min(size - 1, Math.max(0, Math.floor(v * size)));
+// Picks run one at a time, since they share one render. `fallback` is the result for a pick
+// that release overtakes: one queued behind another pick, or one whose read-back is cut short
+// as the device goes.
+class PickQueue {
+    released = false;
+    queue = Promise.resolve();
+    run(operation, fallback) {
+        const guarded = () => {
+            if (this.released) {
+                return Promise.resolve(fallback);
+            }
+            return operation().catch((error) => {
+                if (this.released) {
+                    return fallback;
+                }
+                throw error;
+            });
+        };
+        const result = this.queue.then(guarded, guarded);
+        this.queue = result.then(() => undefined, () => undefined);
+        return result;
+    }
+}
+class Picker {
+    pick;
+    pickSurface;
+    /**
+     * Estimate how opaque the scene is in front of several points, for testing many at once
+     * (the annotation occlusion test): the share of the pick render's pixels, over a disc of
+     * `radius` around each point, whose nearest survivor is nearer than the point's `depth`.
+     * Coordinates and radius are normalised like `pick`'s (the radius to the height); `depth`
+     * is the view depth to test against. Each result is 0 (nothing in front) to 1 (opaque), or
+     * null where the disc is off the render.
+     */
+    pickVisibility;
+    /**
+     * Bring the pick render up to date for the current camera and return its texture, for a view
+     * that reads it on the GPU (the debug panel's pick depth), with a count of the renders so
+     * far, which changes whenever the texture does. Each channel is one trial's nearest
+     * surviving normalised depth, 1 where nothing survived. Null before the device is sized or
+     * after release. Call it between frames, as the picks do: a pick pass rendered during a
+     * frame (in `prerender`, say) can come out empty.
+     */
+    renderView;
+    release;
+    constructor(app, camera) {
+        const { graphicsDevice } = app;
+        let pickBuffer;
+        let pickTarget;
+        let pickPass;
+        let chunksPatched = false;
+        const queue = new PickQueue();
+        let cacheValid = false;
+        let renders = 0;
+        let cacheWidth = 0;
+        let cacheHeight = 0;
+        const cacheCamera = createPickCameraSnapshot();
+        const initPickTarget = (width, height) => {
+            pickBuffer = new Texture(graphicsDevice, {
+                format: PIXELFORMAT_RGBA16F,
+                width,
+                height,
+                mipmaps: false,
+                minFilter: FILTER_NEAREST,
+                magFilter: FILTER_NEAREST,
+                addressU: ADDRESS_CLAMP_TO_EDGE,
+                addressV: ADDRESS_CLAMP_TO_EDGE,
+                name: 'picker-stochastic'
+            });
+            pickTarget = new RenderTarget({
+                colorBuffer: pickBuffer,
+                depth: false // not needed: the blend keeps the nearest depth
+            });
+            pickPass = new RenderPassPicker(graphicsDevice, app.renderer);
+            // the nearest surviving depth wins, whatever order the splats draw in
+            pickPass.blendState = new BlendState(true, BLENDEQUATION_MIN, BLENDMODE_ONE, BLENDMODE_ONE, BLENDEQUATION_MIN, BLENDMODE_ONE, BLENDMODE_ONE);
+        };
+        const updateCache = (width, height) => {
+            captureCameraSnapshot(camera, cacheCamera);
+            cacheWidth = width;
+            cacheHeight = height;
+        };
+        const cameraMatches = (width, height) => {
+            const cam = camera.camera;
+            return (cacheValid &&
+                cacheWidth === width &&
+                cacheHeight === height &&
+                cacheCamera.viewMatrix.equals(cam.viewMatrix) &&
+                cacheCamera.projectionMatrix.equals(cam.projectionMatrix) &&
+                cacheCamera.nearClip === cam.nearClip &&
+                cacheCamera.farClip === cam.farClip &&
+                cacheCamera.projection === cam.projection);
+        };
+        const getCacheCameraSnapshot = () => {
+            const snapshot = createPickCameraSnapshot();
+            snapshot.position.copy(cacheCamera.position);
+            snapshot.viewMatrix.copy(cacheCamera.viewMatrix);
+            snapshot.projectionMatrix.copy(cacheCamera.projectionMatrix);
+            snapshot.nearClip = cacheCamera.nearClip;
+            snapshot.farClip = cacheCamera.farClip;
+            snapshot.projection = cacheCamera.projection;
+            return snapshot;
+        };
+        // Read the pick render around a pixel, `margin` pixels each way, clamped to the render.
+        const readAround = async (screenX, screenY, margin, width, height) => {
+            const blockX = Math.max(0, screenX - margin);
+            const blockY = Math.max(0, screenY - margin);
+            const blockWidth = Math.min(width - 1, screenX + margin) - blockX + 1;
+            const blockHeight = Math.min(height - 1, screenY + margin) - blockY + 1;
+            const texY = graphicsDevice.isWebGL2 ? pickTarget.height - blockY - blockHeight : blockY;
+            const pixels = (await pickBuffer.read(blockX, texY, blockWidth, blockHeight, {
+                renderTarget: pickTarget,
+                immediate: true
+            }));
+            return (x, y, trial) => {
+                const localX = x - blockX;
+                const localY = y - blockY;
+                if (localX < 0 || localX >= blockWidth || localY < 0 || localY >= blockHeight) {
+                    return null;
+                }
+                const row = graphicsDevice.isWebGL2 ? blockHeight - localY - 1 : localY;
+                return half2Float(pixels[(row * blockWidth + localX) * 4 + trial]);
+            };
+        };
+        const ensureRendered = (width, height, worldLayer) => {
+            if (cameraMatches(width, height)) {
+                return;
+            }
+            // No gsplat ids: the pass outputs depth, not ids, and switching `enableIds` changes the
+            // work buffer's format, which rebuilds the whole work buffer on the next frame
+            if (!chunksPatched) {
+                registerPickerShaderPatches(app);
+                chunksPatched = true;
+            }
+            if (!pickPass) {
+                initPickTarget(width, height);
+            }
+            else if (cacheWidth !== width || cacheHeight !== height) {
+                cacheValid = false;
+                pickTarget.resize(width, height);
+            }
+            pickPass.init(pickTarget);
+            pickPass.setClearColor(farColor);
+            pickPass.update(camera.camera, app.scene, [worldLayer], new Map(), false);
+            pickPass.render();
+            updateCache(width, height);
+            cacheValid = true;
+            renders++;
+        };
+        const prepareSample = (x, y) => {
+            if (queue.released) {
+                return null;
+            }
+            const size = pickTargetSize(graphicsDevice);
+            if (!size) {
+                return null;
+            }
+            const { width, height } = size;
+            const worldLayer = app.scene.layers.getLayerByName('World');
+            if (!worldLayer) {
+                return null;
+            }
+            const screenX = clampPixel(x, width);
+            const screenY = clampPixel(y, height);
+            ensureRendered(width, height, worldLayer);
+            const pickCamera = getCacheCameraSnapshot();
+            return { width, height, screenX, screenY, pickCamera };
+        };
+        const pick = async (x, y) => {
+            const sample = prepareSample(x, y);
+            if (!sample) {
+                return null;
+            }
+            const { width, height, screenX, screenY, pickCamera } = sample;
+            const depthAt = await readAround(screenX, screenY, SURFACE_RADIUS_PX, width, height);
+            const depth = surfaceDepth(depthAt, screenX, screenY);
+            return depth === null ? null : getWorldPoint(pickCamera, screenX, screenY, width, height, depth);
+        };
+        const pickSurface = async (x, y) => {
+            const sample = prepareSample(x, y);
+            if (!sample) {
+                return null;
+            }
+            const { width, height, screenX, screenY, pickCamera } = sample;
+            // Single block read serves both the depth (center pixel) and the normal samples.
+            // Sized to the maximum possible ring pixel-radius, plus the surface disc around each
+            // sample, so the dynamic ring offsets always lie inside the buffer we read.
+            const depthAt = await readAround(screenX, screenY, NORMAL_SAMPLE_MAX_PX + SURFACE_RADIUS_PX, width, height);
+            return estimateSurface(depthAt, pickCamera, width, height, screenX, screenY);
+        };
+        const pickVisibility = async (points, radius) => {
+            if (points.length === 0) {
+                return [];
+            }
+            // every point renders from the same cached pass, since the camera cannot change
+            // between these synchronous calls; the reads then run in parallel
+            return Promise.all(points.map(async ({ x, y, depth }) => {
+                const sample = prepareSample(x, y);
+                if (!sample) {
+                    return null;
+                }
+                const { width, height, screenX, screenY, pickCamera } = sample;
+                const r = Math.max(1, Math.round(radius * height));
+                const depthAt = await readAround(screenX, screenY, r, width, height);
+                return opacityInFront(depthAt, pickCamera, screenX, screenY, r, depth);
+            }));
+        };
+        this.pick = (x, y) => queue.run(() => pick(x, y), null);
+        this.pickSurface = (x, y) => queue.run(() => pickSurface(x, y), null);
+        this.pickVisibility = (points, radius) => queue.run(() => pickVisibility(points, radius), points.map(() => null));
+        this.renderView = () => (prepareSample(0, 0) ? { texture: pickBuffer, renders } : null);
+        // The scene can change under a still camera, which the camera-based cache cannot see:
+        // finer detail streams in after the reveal and after every move. The engine reports each
+        // frame whether all the detail it wants is resident, so the cached render is stale on
+        // every frame it is not, and once more when it becomes so. Nothing re-renders until a
+        // pick needs it.
+        const gsplatSystem = app.systems.gsplat;
+        let contentReady = false;
+        const onFrameReady = (frameCamera, _layer, ready) => {
+            if (frameCamera !== camera.camera)
+                return;
+            if (!ready || !contentReady) {
+                cacheValid = false;
+            }
+            contentReady = ready;
+        };
+        gsplatSystem.on('frame:ready', onFrameReady);
+        this.release = () => {
+            queue.released = true;
+            gsplatSystem.off('frame:ready', onFrameReady);
+            if (chunksPatched) {
+                unregisterPickerShaderPatches(app);
+                chunksPatched = false;
+            }
+            pickPass?.destroy();
+            pickTarget?.destroy();
+            pickBuffer?.destroy();
+            cacheValid = false;
+        };
+    }
+}
+
+// The resident set: which splats the engine's LOD and streaming have made resident this
+// frame, and where each node's data sits. The engine keeps octree LOD, the budget, file
+// streaming and the block allocator (one slot range per node); the stochastic renderer
+// consumes its decisions and owns everything after them.
+//
+// Read through the engine's internal (@ignore) gsplat-unified classes until the engine has a
+// public api for them (a `world:update` event). Every internal shape used is
+// narrowed here to the members this file reads, so a change in the engine fails in one place.
+//
+// The engine's own splat rendering is switched off after the fact, through the same internals:
+// the provider takes the engine's renderer over once it exists (its render prep returns false
+// and its mesh instance is hidden, so it never builds its projector, sorter or cache), and the
+// direct source stops the work buffer's copies and keeps its textures at 1x1. The engine then
+// runs LOD, streaming and allocation and nothing else.
+const tmpVec = new Vec3();
+const tmpVec2$1 = new Vec3();
+/**
+ * Hooks the engine's per-frame gsplat update for one camera and layer and exposes the resident
+ * set. `frame:ready` fires inside `GSplatManager.update()` after `world.bake()` and after the
+ * engine's own render prep (both in 2.22.4 and on main), so a listener sees the baked state of
+ * the current frame and can replace that prep.
+ */
+class EngineResidentSetProvider {
+    app;
+    camera;
+    layer;
+    handles = [];
+    callbacks = new Set();
+    set = null;
+    // the engine renderers this provider has switched off, with their original prep function
+    takenOver = new Map();
+    // while false the engine keeps rendering the splats itself (XR), and the hook stays quiet
+    active = true;
+    constructor(app, camera, layer) {
+        this.app = app;
+        this.camera = camera;
+        this.layer = layer;
+        const system = app.systems.gsplat;
+        // fires when a manager is created for a camera and layer, before its first update:
+        // the earliest point to switch the engine's own renderer off, so it never allocates
+        // its projector, sort and draw resources
+        this.handles.push(system.on('material:created', (material, cam, lyr) => {
+            if (cam === this.camera && lyr === this.layer && this.active) {
+                const manager = this.manager();
+                if (manager)
+                    this.takeOver(manager);
+            }
+        }));
+        this.handles.push(system.on('frame:ready', (cam, lyr) => {
+            if (cam !== this.camera || lyr !== this.layer || !this.active)
+                return;
+            const manager = this.manager();
+            if (!manager)
+                return;
+            this.takeOver(manager);
+            const state = manager.world.currentState;
+            if (!state)
+                return;
+            // A file's entity can move without a new world state (an XR grab moves a single
+            // file's, whose state never changes): the set's matrices and bounds follow it
+            const changed = !this.set ||
+                this.set.version !== state.version ||
+                state.splats.some((info, i) => !this.set.files[i]?.modelMatrix.equals(info.node.getWorldTransform()));
+            if (changed) {
+                this.set = buildResidentSet(state);
+            }
+            for (const cb of this.callbacks) {
+                cb(this.set, changed, manager);
+            }
+        }));
+    }
+    /** The engine manager for this camera and layer, once the engine has created it. */
+    manager() {
+        const director = this.app.renderer.gsplatDirector;
+        // the director keys its cameras by the scene camera, not the component
+        const cameraData = director?.camerasMap.get(this.camera.camera);
+        return cameraData?.layersMap.get(this.layer)?.gsplatManager ?? null;
+    }
+    /** Hand the splats back to the engine's renderer (false), or take them over again (true). */
+    setActive(value) {
+        if (this.active === value)
+            return;
+        this.active = value;
+        if (value) {
+            const manager = this.manager();
+            if (manager)
+                this.takeOver(manager);
+        }
+        else {
+            this.restore();
+            // the direct source skipped the engine's copies while it drew, so the work buffer is
+            // stale for whatever streamed in since; the engine's renderer needs it rebuilt in full
+            this.manager()?.world.invalidate({ workBuffer: true });
+        }
+    }
+    onFrame(cb) {
+        this.callbacks.add(cb);
+        return () => this.callbacks.delete(cb);
+    }
+    /**
+     * Switch the engine's own splat rendering off for this manager: its render prep returns
+     * false (so the hybrid renderer never builds its projector, sorter or cache) and its mesh
+     * instance is hidden. The world (LOD, streaming, allocation, the work-buffer copy) keeps
+     * running. Reversed by {@link restore}.
+     */
+    takeOver(manager) {
+        const renderer = manager.renderer;
+        if (!this.takenOver.has(renderer)) {
+            this.takenOver.set(renderer, renderer.prepareRenderView);
+            renderer.prepareRenderView = () => false;
+        }
+        if (renderer.meshInstance)
+            renderer.meshInstance.visible = false;
+        // The manager's first update runs its render prep before frame:ready fires, and
+        // material:created fires before the layer data holds the manager, so the engine's
+        // projector, sorter and compaction get allocated once (32 bytes a splat and more).
+        // Release them; the engine recreates them lazily if it renders again (XR, restore)
+        // or picks through its sorted path.
+        for (const key of ['gpuSorter', 'projector', 'intervalCompaction']) {
+            const resource = renderer[key];
+            if (resource) {
+                resource.destroy();
+                renderer[key] = null;
+            }
+        }
+    }
+    restore() {
+        for (const [renderer, original] of this.takenOver) {
+            renderer.prepareRenderView = original;
+            if (renderer.meshInstance)
+                renderer.meshInstance.visible = true;
+        }
+        this.takenOver.clear();
+    }
+    destroy() {
+        this.restore();
+        for (const handle of this.handles)
+            handle.off();
+        this.handles.length = 0;
+        this.callbacks.clear();
+        this.set = null;
+    }
+}
+// Flatten the engine world state into files and nodes with world-space bounds.
+const buildResidentSet = (state) => {
+    const files = [];
+    const nodes = [];
+    const spheres = [];
+    const pushNode = (node, cx, cy, cz, radius) => {
+        nodes.push(node);
+        spheres.push(cx, cy, cz, radius);
+    };
+    state.splats.forEach((info, fileIndex) => {
+        const modelMatrix = info.node.getWorldTransform().clone();
+        const scale = modelMatrix.getScale(tmpVec2$1);
+        const maxScale = Math.max(Math.abs(scale.x), Math.abs(scale.y), Math.abs(scale.z));
+        const file = {
+            fileIndex,
+            lodIndex: info.lodIndex,
+            nodes: [],
+            modelMatrix,
+            resource: info.resource
+        };
+        const numIntervals = info.intervals.length / 2;
+        if (numIntervals === 0) {
+            // a single-file resource: one range covering it whole, bounded by its aabb
+            const node = {
+                fileIndex,
+                nodeIndex: nodes.length,
+                lodIndex: info.lodIndex,
+                sourceBase: 0,
+                count: info.activeSplats,
+                slotBase: info.intervalOffsets[0] ?? 0,
+                allocId: info.allocId
+            };
+            modelMatrix.transformPoint(info.aabb.center, tmpVec);
+            const he = info.aabb.halfExtents;
+            pushNode(node, tmpVec.x, tmpVec.y, tmpVec.z, he.length() * maxScale);
+            file.nodes.push(node);
+        }
+        else {
+            for (let j = 0; j < numIntervals; j++) {
+                const start = info.intervals[j * 2];
+                const end = info.intervals[j * 2 + 1];
+                const nodeIndex = info.intervalNodeIndices[j];
+                const node = {
+                    fileIndex,
+                    nodeIndex: nodes.length,
+                    lodIndex: info.lodIndex,
+                    sourceBase: start,
+                    count: end - start,
+                    slotBase: info.intervalOffsets[j] ?? 0,
+                    allocId: info.intervalAllocIds[j]
+                };
+                const sphere = info.octreeNodes?.[nodeIndex]?.boundingSphere;
+                if (sphere) {
+                    tmpVec.set(sphere.x, sphere.y, sphere.z);
+                    modelMatrix.transformPoint(tmpVec, tmpVec);
+                    pushNode(node, tmpVec.x, tmpVec.y, tmpVec.z, sphere.w * maxScale);
+                }
+                else {
+                    // no bounds: never culled
+                    pushNode(node, 0, 0, 0, Infinity);
+                }
+                file.nodes.push(node);
+            }
+        }
+        files.push(file);
+    });
+    return {
+        version: state.version,
+        activeSplats: state.totalActiveSplats,
+        slotCapacity: state.textureSize * state.textureSize,
+        fullRebuild: state.fullRebuild,
+        changedAllocIds: state.needsUploadIds,
+        files,
+        nodes,
+        nodeSpheres: new Float32Array(spheres)
+    };
+};
+
+// The foveated target (variant warp): the splats render into a target whose pixels are spread
+// over the screen unevenly, densest where the screen is, and every pass that maps between the
+// screen and the target goes through one table. In a WebGPU XR session on Apple Vision Pro the
+// table is the eye's own rasterization rate map, measured when the session starts (xr-rate-map.ts):
+// visionOS draws a 4493 x 3604 logical eye into a 1856 x 1792 texture, one texel per logical pixel
+// over a plateau toward the nose and as few as one per 14 at the edges, so a target with that
+// layout puts its pixels where the display has them and the compose reads one texel per
+// fragment. Variant warp:<m> builds the table from the SuperSplat editor's foveation experiment
+// instead, q = m p / sqrt(1 + (m^2 - 1) p^2) per axis, for trying the warp on a flat screen.
+//
+// The warp is separable: per axis, the target's ndc is a monotonic function of the screen's
+// (logical) ndc. The table holds, after the target's width and height, the forward map per axis
+// at WARP_STEPS logical ndc evenly over [-1, 1], then the logical ndc at the centre of every
+// target column, left to right, and of every row, top to bottom.
+/** Forward samples per axis. Linear between them, which is exact where the map is piecewise
+ * linear (a rate map's 32-texel zones) within a fifth of a texel. */
+const WARP_STEPS = 1024;
+// the editor's warp, inverted: the logical ndc a target ndc came from
+const analyticWarpMap = (m, width, height) => {
+    const unwarp = (q) => q / Math.sqrt(Math.max(m * m - (m * m - 1) * q * q, 1e-6));
+    const columns = new Float32Array(width);
+    const rows = new Float32Array(height);
+    for (let i = 0; i < width; i++)
+        columns[i] = unwarp((2 * (i + 0.5)) / width - 1);
+    for (let j = 0; j < height; j++)
+        rows[j] = unwarp(1 - (2 * (j + 0.5)) / height);
+    return { width, height, columns, rows };
+};
+// The continuous coordinate (texel centres at i + 0.5) at which an increasing sequence reaches a
+// value: linear between centres, and beyond the ends along the end segments
+const coordinateOf = (values, value, sign) => {
+    let lo = 0;
+    let hi = values.length - 1;
+    while (hi - lo > 1) {
+        const mid = (lo + hi) >> 1;
+        if (sign * values[mid] <= value)
+            lo = mid;
+        else
+            hi = mid;
+    }
+    const a = sign * values[lo];
+    const b = sign * values[hi];
+    return lo + 0.5 + (b > a ? (value - a) / (b - a) : 0);
+};
+/** The table the shaders read (see above). */
+const buildWarpTable = (map) => {
+    const { width, height, columns, rows } = map;
+    const table = new Float32Array(2 + 2 * WARP_STEPS + width + height);
+    table[0] = width;
+    table[1] = height;
+    for (let k = 0; k < WARP_STEPS; k++) {
+        const logical = -1 + (2 * k) / (WARP_STEPS - 1);
+        table[2 + k] = (2 * coordinateOf(columns, logical, 1)) / width - 1;
+        // rows run top down, where the ndc falls
+        table[2 + WARP_STEPS + k] = 1 - (2 * coordinateOf(rows, -logical, -1)) / height;
+    }
+    table.set(columns, 2 + 2 * WARP_STEPS);
+    table.set(rows, 2 + 2 * WARP_STEPS + width);
+    return table;
+};
+// The lookups. Each shader declares the table itself, as `warpTable: array<f32>`
+const warpWGSL = /* wgsl */ `
+fn warpStep(p: f32) -> vec2f {
+    let t = (p * 0.5 + 0.5) * ${WARP_STEPS - 1}.0;
+    let i = clamp(floor(t), 0.0, ${WARP_STEPS - 2}.0);
+    return vec2f(i, t - i);
+}
+
+// one axis of the forward map at a logical ndc; linear beyond the edges
+fn warpAxis(p: f32, base: u32) -> f32 {
+    let s = warpStep(p);
+    let i = base + u32(s.x);
+    let a = warpTable[i];
+    return a + (warpTable[i + 1u] - a) * s.y;
+}
+
+// the target's ndc of a logical ndc
+fn warpNdc(p: vec2f) -> vec2f {
+    return vec2f(warpAxis(p.x, 2u), warpAxis(p.y, ${2 + WARP_STEPS}u));
+}
+
+// the forward map's slope at a logical ndc: the target's pixels per screen pixel
+fn warpSlope(p: vec2f) -> vec2f {
+    let sx = 2u + u32(warpStep(p.x).x);
+    let sy = ${2 + WARP_STEPS}u + u32(warpStep(p.y).x);
+    let scale = ${(WARP_STEPS - 1) / 2};
+    return vec2f(warpTable[sx + 1u] - warpTable[sx], warpTable[sy + 1u] - warpTable[sy]) * scale;
+}
+
+// the logical ndc at the centre of a target texel, its row counted from the top
+fn unwarpTexel(texel: vec2i) -> vec2f {
+    let base = ${2 + 2 * WARP_STEPS}u;
+    return vec2f(warpTable[base + u32(texel.x)], warpTable[base + u32(warpTable[0]) + u32(texel.y)]);
+}
+`;
+
+// The projector: one 256-thread workgroup per chunk of the resident set. Each thread reads one
+// splat through the source's read code, projects it, applies the culls, and survivors append
+// themselves to a dense cache with one global atomic per workgroup. The chunk table and node
+// visibility come from the cpu (resident-set rebuild on version change, frustum cull per frame).
+/** Words per cache entry: ndc, depth, axis1, len2 | alpha | bucket, rgb, id (or the coverage draw). */
+const CACHE_WORDS = 6;
+const PROJECTOR_WORKGROUP_SIZE = 256;
+/** Buckets of the counting order (shaders/order.ts); the workgroup size, so each thread owns one. */
+const ORDER_BUCKETS = PROJECTOR_WORKGROUP_SIZE;
+/** Splats per chunk-table entry; a chunk is one workgroup. */
+const CHUNK_SIZE = PROJECTOR_WORKGROUP_SIZE;
+/**
+ * Sides of the polygon a splat's kept region draws as, with coverage other than pixel. The
+ * tiler's cost is per triangle: on the Pixel 7 Pro the interleaved sets' octagons cost 4.1 ms at
+ * the house start view and squares 1.2 ms, the image the same; triangles are cheaper still but
+ * blur the converged image measurably.
+ */
+const POLYGON_SIDES = 4;
+// the square's circumradius over the ellipse's: so the two cover the same area, or so the
+// square contains the ellipse (variant jitter, whose fragments discard outside it)
+const polygonScale = (circumscribed = false) => (circumscribed
+    ? 1 / Math.cos(Math.PI / POLYGON_SIDES)
+    : Math.sqrt((2 * Math.PI) / (POLYGON_SIDES * Math.sin((2 * Math.PI) / POLYGON_SIDES)))).toFixed(6);
+/**
+ * Draw groups with coverage:interleaved: the four pixel sets (0-3) and the full target (4),
+ * which takes the splats below the variant's interleaveArea; each is one contiguous range of the
+ * ordered list. (A third tier, the largest splats into quarter-resolution targets per set, one
+ * fragment per 4x4 block, was tried and lost on the Pixel 7 Pro: drawn in their own passes the
+ * large splats lose the occlusion the sets' nearer splats give them, and the fullscreen draw
+ * that carried them into a set's target with frag_depth disabled early depth rejection for the
+ * polygons drawn after it in that pass, 3-5 ms with nothing in the targets.)
+ */
+const SET_GROUPS = 5;
+/** Depth buckets per draw group with coverage:interleaved; the groups share the ORDER_BUCKETS. */
+const SET_BUCKETS = Math.floor(ORDER_BUCKETS / SET_GROUPS);
+/** Cache word 5 with coverage other than pixel: bit 15 marks a full-target entry of the interleaved mode. */
+const FULL_ENTRY_BIT = 0x8000;
+/** The bits of word 5 below it: the splat's threshold draw. */
+const DRAW_BITS = 15;
+// the 24 orders of the four strata, 2 bits a set, for the jittered pixel sets
+const permutations = (() => {
+    const out = [];
+    const walk = (rest, packed, shift) => {
+        if (!rest.length) {
+            out.push(packed);
+            return;
+        }
+        for (let i = 0; i < rest.length; i++) {
+            walk([...rest.slice(0, i), ...rest.slice(i + 1)], packed | (rest[i] << shift), shift + 2);
+        }
+    };
+    walk([0, 1, 2, 3], 0, 0);
+    return out;
+})();
+// the warp's lookups again for the second eye (stereo), whose table follows the first eye's in
+// the same buffer
+const warpEye1WGSL = warpWGSL
+    .replace(/warpTable\[/g, 'warpTable[uniforms.warpBaseEye1 + ')
+    .replace(/\b(warpStep|warpAxis|warpNdc|warpSlope|unwarpTexel)\(/g, '$1Eye1(');
+// The occlusion test against one eye's previous frame (see the cull in project below): '' for
+// the view's own grid, 'Eye1' for the second eye's in stereo. The previous frame's farthest depth
+// over the (2g+1)^2 blocks around a block, on either grid level, bounds what could still have
+// shown behind a splat there
+const occlusionWGSL = (eye, warp) => /* wgsl */ `
+fn farthestL1${eye}(block: vec2i, gather: i32, blocks: vec2i) -> u32 {
+    var farthest = 0u;
+    for (var dy = -gather; dy <= gather; dy++) {
+        for (var dx = -gather; dx <= gather; dx++) {
+            farthest = max(farthest, occ${eye}[u32((block.y + dy) * blocks.x + block.x + dx)]);
+        }
+    }
+    return farthest;
+}
+
+fn farthestL2${eye}(block: vec2i, gather: i32, blocks: vec2i) -> u32 {
+    var farthest = 0u;
+    for (var dy = -gather; dy <= gather; dy++) {
+        for (var dx = -gather; dx <= gather; dx++) {
+            farthest = max(farthest, occ${eye}[uniforms.occL2Base + u32((block.y + dy) * blocks.x + block.x + dx)]);
+        }
+    }
+    return farthest;
+}
+
+// whether a splat at a centre and view depth, whose largest polygon reaches halfExtent pixels at
+// a focal length, lay wholly behind the eye's previous frame
+fn occludedIn${eye}(center: vec3f, depth: f32, focalX: f32, halfExtent: f32, c22: f32) -> bool {
+    let prevClip = uniforms.prevViewProj${eye} * vec4f(center, 1.0);
+    let prevDepth = -(uniforms.prevView${eye} * vec4f(center, 1.0)).z;
+    let prevOrtho = uniforms.prevClipZ.z != 0.0;
+    if (prevClip.w <= 0.0 || (!prevOrtho && prevDepth <= 0.0)) {
+        return false;
+    }
+    let prevNdc = ${warp ? `warpNdc${eye}(prevClip.xy / prevClip.w)` : 'prevClip.xy / prevClip.w'};
+    let prevHalfExtent = halfExtent * (uniforms.prevFocal${eye}.x / focalX)
+        * select(depth / max(prevDepth, 0.001), 1.0, prevOrtho);
+    let footprint = max(halfExtent, prevHalfExtent);
+    var level = 1u;
+    var blockSize = 8.0;
+    var blocks = vec2i(i32(uniforms.occBlocksX1), i32(uniforms.occBlocksY1));
+    if (footprint > 16.0) {
+        level = 2u;
+        blockSize = 32.0;
+        blocks = vec2i(i32(uniforms.occBlocksX2), i32(uniforms.occBlocksY2));
+    }
+    if (footprint > 64.0 || level > uniforms.occlusionMode) {
+        return false;
+    }
+    let gather = max(i32(ceil(footprint / blockSize)), 1);
+    let prevPixel = vec2f(prevNdc.x * 0.5 + 0.5, 0.5 - prevNdc.y * uniforms.prevFlip * 0.5) * uniforms.prevViewport;
+    let block = vec2i(floor(prevPixel / blockSize));
+    if (block.x < gather || block.y < gather || block.x >= blocks.x - gather || block.y >= blocks.y - gather) {
+        return false;
+    }
+    let front = prevDepth - 2.8284 * sqrt(c22);
+    let w = select(front, 1.0, prevOrtho);
+    if (w <= 0.0) {
+        return false;
+    }
+    let frontZ = clamp(uniforms.prevClipZ.x * front + uniforms.prevClipZ.y, 0.0, w) / w;
+    // the block under the centre first: the neighbourhood's maximum is at least its maximum, so
+    // a splat that block alone cannot cull is visible, and most splats leave here after one load
+    let centreIndex = u32(block.y * blocks.x + block.x);
+    var farthest = select(occ${eye}[centreIndex], occ${eye}[uniforms.occL2Base + centreIndex], level == 2u);
+    if (frontZ <= bitcast<f32>(farthest)) {
+        return false;
+    }
+    if (level == 1u) {
+        farthest = farthestL1${eye}(block, gather, blocks);
+    } else {
+        farthest = farthestL2${eye}(block, gather, blocks);
+    }
+    return frontZ > bitcast<f32>(farthest);
+}
+`;
+// Stereo: the second eye's own footprint of a splat, the same 3D Gaussian through that eye's view,
+// focal length and warp, as project() below does for the view (only the shape: the depth, colour
+// and order stay the view's). The quad's axes are the full quad's, clamped, as cache words 2 and
+// 3 hold them
+const footprintEye1WGSL = (warp) => /* wgsl */ `
+struct FootprintEye1 {
+    visible: bool,
+    depth: f32,
+    ndc: vec2f,
+    axis1: vec2f,
+    len2: f32,
+    lambda1: f32,
+    determinant: f32
+}
+
+fn footprintEye1(center: vec3f, rot: vec4f, scale: vec3f, viewport: vec2f) -> FootprintEye1 {
+    var f: FootprintEye1;
+    f.visible = false;
+    f.ndc = vec2f(1e4);
+    f.axis1 = vec2f(1.0, 0.0);
+    f.len2 = 1.0;
+    let viewCenter = uniforms.viewEye1 * vec4f(center, 1.0);
+    let ortho = uniforms.isOrtho != 0u;
+    f.depth = -viewCenter.z;
+    let clip = uniforms.viewProjEye1 * vec4f(center, 1.0);
+    if ((!ortho && f.depth <= 0.0) || clip.w <= 0.0) {
+        return f;
+    }
+    let focal = uniforms.focalEye1;
+    let linear = mat3x3f(uniforms.viewEye1[0].xyz, uniforms.viewEye1[1].xyz, uniforms.viewEye1[2].xyz);
+    let gaussian = linear * rotationMatrix(vec4f(rot.yzw, rot.x)) * mat3x3f(
+        vec3f(scale.x, 0.0, 0.0),
+        vec3f(0.0, scale.y, 0.0),
+        vec3f(0.0, 0.0, scale.z)
+    );
+    let row0 = vec3f(gaussian[0].x, gaussian[1].x, gaussian[2].x);
+    let row1 = vec3f(gaussian[0].y, gaussian[1].y, gaussian[2].y);
+    let row2 = vec3f(gaussian[0].z, gaussian[1].z, gaussian[2].z);
+    let c00 = dot(row0, row0);
+    let c01 = dot(row0, row1);
+    let c02 = dot(row0, row2);
+    let c11 = dot(row1, row1);
+    let c12 = dot(row1, row2);
+    let c22 = dot(row2, row2);
+    var cov00: f32;
+    var cov01: f32;
+    var cov11: f32;
+    if (ortho) {
+        cov00 = focal.x * focal.x * c00;
+        cov01 = focal.x * focal.y * c01;
+        cov11 = focal.y * focal.y * c11;
+    } else {
+        let invDepth = 1.0 / max(f.depth, 0.001);
+        let jx0 = focal.x * invDepth;
+        let jx2 = focal.x * viewCenter.x * invDepth * invDepth;
+        let jy1 = focal.y * invDepth;
+        let jy2 = focal.y * viewCenter.y * invDepth * invDepth;
+        let u00 = jx0 * c00 + jx2 * c02;
+        let u01 = jx0 * c01 + jx2 * c12;
+        let u02 = jx0 * c02 + jx2 * c22;
+        let u11 = jy1 * c11 + jy2 * c12;
+        let u12 = jy1 * c12 + jy2 * c22;
+        cov00 = u00 * jx0 + u02 * jx2;
+        cov01 = u01 * jy1 + u02 * jy2;
+        cov11 = u11 * jy1 + u12 * jy2;
+    }
+${warp
+    ? `
+    let linearNdc = clip.xy / clip.w;
+    let reach = 2.8284 * sqrt(vec2f(cov00, cov11)) * 2.0 / viewport;
+    let lo = clamp(linearNdc - reach, vec2f(-1.0), vec2f(1.0));
+    let hi = clamp(linearNdc + reach, vec2f(-1.0), vec2f(1.0));
+    let span = hi - lo;
+    let warpedLo = warpNdcEye1(lo);
+    let pixelScale = select(
+        warpSlopeEye1(lo),
+        (warpNdcEye1(hi) - warpedLo) / max(span, vec2f(1e-9)),
+        span > vec2f(1e-6)
+    );
+    f.ndc = warpedLo + pixelScale * (linearNdc - lo);
+    cov00 *= pixelScale.x * pixelScale.x;
+    cov01 *= pixelScale.x * pixelScale.y;
+    cov11 *= pixelScale.y * pixelScale.y;
+`
+    : `
+    f.ndc = clip.xy / clip.w;
+`}
+    let us2 = uniforms.unitScale * uniforms.unitScale;
+    cov00 += 0.3 / us2;
+    cov11 += 0.3 / us2;
+    f.determinant = cov00 * cov11 - cov01 * cov01;
+    if (f.determinant <= 0.0) {
+        f.ndc = vec2f(1e4);
+        return f;
+    }
+    let mid = 0.5 * (cov00 + cov11);
+    let radius = length(vec2f(0.5 * (cov00 - cov11), cov01));
+    f.lambda1 = mid + radius;
+    let lambda2 = max(mid - radius, 0.1 / us2);
+    let eigenVec = vec2f(cov01, f.lambda1 - cov00);
+    let eigenLen = length(eigenVec);
+    let direction = select(vec2f(1.0, 0.0), eigenVec / eigenLen, eigenLen > 1e-9);
+    let len1 = 2.0 * sqrt(2.0 * f.lambda1);
+    let clampScale = min(1.0, min(1024.0, min(viewport.x, viewport.y)) / len1);
+    f.axis1 = len1 * clampScale * direction;
+    f.len2 = 2.0 * sqrt(2.0 * lambda2) * clampScale;
+    f.visible = true;
+    return f;
+}
+`;
+const projectorWGSL = (readChunk, occlusion, coverage, warp, stereo) => /* wgsl */ `
+struct ProjectorUniforms {
+    view: mat4x4f,
+    viewProj: mat4x4f,
+    // the previous frame, for the occlusion cull: its view and view-projection, its clip-z
+    // mapping (a, b, isOrtho, 0), viewport and focal length
+    prevViewProj: mat4x4f,
+    prevView: mat4x4f,
+    prevClipZ: vec4f,
+    viewport: vec2f,
+    focal: vec2f,
+    prevViewport: vec2f,
+    prevFocal: vec2f,
+    numChunks: u32,
+    splatTextureSize: u32,
+    isOrtho: u32,
+    minPixelSize: f32,
+    alphaClip: f32,
+    minContribution: f32,
+    // the occlusion grid: level 1 (8 px) and level 2 (32 px) block counts
+    occBlocksX1: u32,
+    occBlocksY1: u32,
+    occBlocksX2: u32,
+    occBlocksY2: u32,
+    // 0 off, 1 level 1 only, 2 both levels
+    occlusionMode: u32,
+    // -1 when the previous depth texture's rows run bottom-up (an offscreen target), else 1
+    prevFlip: f32,
+    // the order key: bucket = (log(depth) - keyLogNear) * keyInvLogRange, over [0, 1)
+    keyLogNear: f32,
+    keyInvLogRange: f32,
+    // first chunk-table entry of this dispatch (per-file sources dispatch one run each)
+    chunkBase: u32,
+    // the file's model transform, for sources that read splats in the file's own space
+    model: mat4x4f,
+    modelRotation: vec4f,
+    modelScale: vec4f,
+    cameraPosition: vec4f,
+    // 1: covariance in true pixels. 2: the engine's convention (its focal is viewport * proj[0][0],
+    // twice the pixel focal), which makes its 0.3 dilation 0.075 px^2 and scales its culls
+    unitScale: f32,
+    // the coverage seed (variant coverage:splat; see the raster's frameSeed)
+    frameSeed: u32,
+    // variant jitter: sub-strata a stratum splits into (0: no jitter), and the strata a per-splat
+    // threshold draws from (coverage:splat, and the full target's splats of the interleaved mode)
+    jitterSubs: u32,
+    strata: u32,
+    // coverage:interleaved: splats whose footprint at the alpha clip is below this many pixels
+    // draw per splat into the full target instead of into the pixel sets (0: none)
+    interleaveArea: f32,
+    // stereo: the second eye this projection also serves, which shapes and places the splats by
+    // its own view, focal length and warp and culls against its own previous frame
+    viewEye1: mat4x4f,
+    viewProjEye1: mat4x4f,
+    prevViewProjEye1: mat4x4f,
+    prevViewEye1: mat4x4f,
+    focalEye1: vec2f,
+    prevFocalEye1: vec2f,
+    // where level 2 starts in a view's grid; where the second eye's words start in the cache
+    // and its warp table in warpTable
+    occL2Base: u32,
+    stereoBase: u32,
+    warpBaseEye1: u32
+}
+
+// chunk table entry: slotBase, count, node, lod | file << 16
+@group(0) @binding(0) var<storage, read> chunks: array<vec4u>;
+// one bit per node: 1 = inside the frustum this frame
+@group(0) @binding(1) var<storage, read> nodeVisible: array<u32>;
+@group(0) @binding(2) var<storage, read_write> cache: array<u32>;
+// [0] survivors this frame, [1] splats the occlusion cull removed
+@group(0) @binding(3) var<storage, read_write> counter: array<atomic<u32>>;
+@group(0) @binding(4) var<uniform> uniforms: ProjectorUniforms;
+// the previous frame's farthest depth per block, as f32 bits, level 1 then level 2 (see
+// shaders/reduce.ts)
+@group(0) @binding(5) var<storage, read> occ: array<u32>;
+// survivors per depth bucket (see shaders/order.ts)
+@group(0) @binding(6) var<storage, read_write> buckets: array<atomic<u32>>;
+
+struct Splat {
+    index: u32,
+    uv: vec2i
+}
+var<private> splat: Splat;
+fn setSplat(idx: u32) {
+    splat.index = idx;
+    splat.uv = vec2i(i32(idx % uniforms.splatTextureSize), i32(idx / uniforms.splatTextureSize));
+}
+
+${warp
+    ? `
+// variant warp: the view's table (shaders/warp.ts), and in stereo the second eye's after it
+@group(0) @binding(7) var<storage, read> warpTable: array<f32>;
+${warpWGSL}`
+    : ''}
+${stereo
+    ? `
+// stereo: the second eye's occlusion grid, and its warp's lookups
+@group(0) @binding(8) var<storage, read> occEye1: array<u32>;
+${warp ? warpEye1WGSL : ''}
+`
+    : ''}
+${readChunk}
+${coverage !== 'pixel'
+    ? `
+// integer hash (Wellons' prospector mix), as the raster's
+fn hashU32(x: u32) -> u32 {
+    var v = x;
+    v ^= v >> 16u;
+    v *= 0x7feb352du;
+    v ^= v >> 15u;
+    v *= 0x846ca68bu;
+    v ^= v >> 16u;
+    return v;
+}
+
+// the radius, in units of the quad's half extent, where alpha = opacity * falloff(r^2) falls to
+// a threshold, with falloff(x) = (exp(-4 x) - exp(-4)) / (1 - exp(-4))
+fn radiusAt(threshold: f32, opacity: f32) -> f32 {
+    let e4 = exp(-4.0);
+    return sqrt(max(-log(threshold / opacity * (1.0 - e4) + e4) * 0.25, 0.0));
+}
+
+// the 24 orders of four strata, 2 bits a set
+const PERMUTATIONS = array<u32, 24>(${permutations.map((p) => `${p}u`).join(', ')});
+`
+    : ''}
+// quaternion (x, y, z, w) to a rotation matrix (columns)
+fn rotationMatrix(qIn: vec4f) -> mat3x3f {
+    let q = normalize(qIn);
+    let x = q.x;
+    let y = q.y;
+    let z = q.z;
+    let w = q.w;
+    return mat3x3f(
+        vec3f(1.0 - 2.0 * (y * y + z * z), 2.0 * (x * y + w * z), 2.0 * (x * z - w * y)),
+        vec3f(2.0 * (x * y - w * z), 1.0 - 2.0 * (x * x + z * z), 2.0 * (y * z + w * x)),
+        vec3f(2.0 * (x * z + w * y), 2.0 * (y * z - w * x), 1.0 - 2.0 * (x * x + y * y))
+    );
+}
+
+struct Projected {
+    valid: bool,
+    occluded: bool,
+    words: array<u32, ${CACHE_WORDS}>
+}
+${occlusion ? occlusionWGSL('', warp) : ''}${occlusion && stereo ? occlusionWGSL('Eye1', warp) : ''}${stereo ? footprintEye1WGSL(warp) : ''}
+fn project(slot: u32, file: u32${stereo ? ', local: u32' : ''}) -> Projected {
+    var result: Projected;
+    result.valid = false;
+    result.occluded = false;
+
+    setSplat(slot);
+    let center = srcCenter();
+    let opacity = srcOpacity();
+    if (opacity < uniforms.alphaClip) {
+        return result;
+    }
+${coverage !== 'pixel'
+    ? `
+    // Variant coverage:splat: one coverage threshold per splat and frame instead of one per
+    // pixel. The pixels where alpha exceeds it form a solid ellipse, which the raster draws as a
+    // polygon of the same area with no discard, so a gpu updates depth early and rejects what
+    // lies behind it before rasterising it. Each pixel is still kept with probability alpha,
+    // independently per splat; the noise is a splat at a random size rather than a dither. The
+    // threshold is hashed afresh every frame: one sequence shared by every splat, rotated per
+    // splat, would keep two splats' thresholds a fixed distance apart, so their coverage would
+    // stay correlated over frames and the accumulation would converge to the wrong image. A
+    // splat whose opacity does not exceed its threshold keeps nothing this frame and stops here.
+    // The draw goes into cache word 5 as ${DRAW_BITS} bits, and the raster rebuilds the same
+    // thresholds from them (shaders/raster.ts).
+    let id = slot ^ (file * 2654435761u);
+    let hashed = hashU32(((id + 1u) * 26699u) ^ uniforms.frameSeed);
+    let drawnBits = hashed >> ${32 - DRAW_BITS}u;
+    let drawn = f32(drawnBits) * (1.0 / ${(1 << DRAW_BITS) - 1}.0);
+    // Variant jitter: the threshold is the base of a random stratum instead of the draw itself,
+    // and every pixel adds its own jitter within the stratum in the raster, so the kept region
+    // is the stratum's ellipse with a dithered rim rather than a solid one. Each pixel's
+    // threshold is still uniform over [0, 1) and independent per splat, so the expectation is
+    // unchanged, but neighbouring pixels no longer all agree. Sub-strata (jitterSubs above 1)
+    // narrow the jitter: smaller polygons, more agreement.
+    let subs = uniforms.jitterSubs;
+    let jittered = subs > 0u;
+    let subMask = max(subs, 1u) - 1u;
+    // the per-splat threshold (coverage:splat, and the small splats of the interleaved mode): a
+    // stratum of \`strata\`, its sub-stratum, and the nibble the raster reads them back from
+    // (kept | stratum << 1 | sub << 3)
+    let strata = max(uniforms.strata, 1u);
+    let splatStratum = min(u32(drawn * f32(strata)), strata - 1u);
+    let splatSub = (hashed >> 15u) & subMask;
+    let splatBase = select(drawn, f32(splatStratum * max(subs, 1u) + splatSub) / f32(strata * max(subs, 1u)), jittered);
+    let splatNibble = 1u | (splatStratum << 1u) | (splatSub << 3u);
+    let splatThreshold = max(splatBase, uniforms.alphaClip);
+    let splatKept = splatThreshold < opacity;
+${coverage === 'interleaved'
+        ? `
+    // Variant coverage:interleaved: the pixels split into four interleaved sets, the four of a
+    // 2x2 quad, and each set takes its own threshold, the four quarters of [0, 1) from the one
+    // draw: a quad holds the splat at four stratified sizes, so its mean is nearly the splat's
+    // alpha, as the per-pixel thresholds' is, and neighbouring pixels are no longer all one
+    // splat. Jittered, the sets take the four strata in a random order, each within a random
+    // sub-stratum, and their pixels jitter inside it
+    var setBases = fract(vec4f(drawn) + vec4f(0.0, 0.25, 0.5, 0.75));
+    var setNibbles = vec4u(0u);
+    if (jittered) {
+        let bits = hashU32(hashed ^ 0x9e3779b9u);
+        let packed = PERMUTATIONS[bits % 24u];
+        let perm = (vec4u(packed) >> vec4u(0u, 2u, 4u, 6u)) & vec4u(3u);
+        let subsOf = (vec4u(bits) >> vec4u(8u, 10u, 12u, 14u)) & vec4u(subMask);
+        setBases = vec4f(perm * subs + subsOf) / f32(4u * subs);
+        setNibbles = (perm << vec4u(1u)) | (subsOf << vec4u(3u));
+    }
+    let setThresholds = max(setBases, vec4f(uniforms.alphaClip));
+    let keptSets = setThresholds < vec4f(opacity);
+    setNibbles = select(vec4u(0u), setNibbles | vec4u(1u), keptSets);
+    // whether the splat draws into the sets or the full target waits for its footprint; a splat
+    // keeping nothing either way stops here
+    if (!any(keptSets) && !splatKept) {
+        return result;
+    }
+    let lowest = select(vec4f(2.0), setThresholds, keptSets);
+    let setThreshold = min(min(lowest.x, lowest.y), min(lowest.z, lowest.w));
+`
+        : `
+    if (!splatKept) {
+        return result;
+    }
+`}
+`
+    : ''}
+    let viewCenter = uniforms.view * vec4f(center, 1.0);
+    let depth = -viewCenter.z;
+    if (uniforms.isOrtho == 0u && depth <= 0.0) {
+        return result;
+    }
+    let clip = uniforms.viewProj * vec4f(center, 1.0);
+    if (clip.w == 0.0) {
+        return result;
+    }
+
+    let viewport = uniforms.viewport;
+    let focal = uniforms.focal;
+
+    // the work buffer holds world-space splats, so the view matrix is the model-view
+    let rot = srcRotation();
+    let scale = srcScale();
+    let linear = mat3x3f(uniforms.view[0].xyz, uniforms.view[1].xyz, uniforms.view[2].xyz);
+    let gaussian = linear * rotationMatrix(vec4f(rot.yzw, rot.x)) * mat3x3f(
+        vec3f(scale.x, 0.0, 0.0),
+        vec3f(0.0, scale.y, 0.0),
+        vec3f(0.0, 0.0, scale.z)
+    );
+    let row0 = vec3f(gaussian[0].x, gaussian[1].x, gaussian[2].x);
+    let row1 = vec3f(gaussian[0].y, gaussian[1].y, gaussian[2].y);
+    let row2 = vec3f(gaussian[0].z, gaussian[1].z, gaussian[2].z);
+    let c00 = dot(row0, row0);
+    let c01 = dot(row0, row1);
+    let c02 = dot(row0, row2);
+    let c11 = dot(row1, row1);
+    let c12 = dot(row1, row2);
+    let c22 = dot(row2, row2);
+
+    var cov00: f32;
+    var cov01: f32;
+    var cov11: f32;
+    if (uniforms.isOrtho != 0u) {
+        cov00 = focal.x * focal.x * c00;
+        cov01 = focal.x * focal.y * c01;
+        cov11 = focal.y * focal.y * c11;
+    } else {
+        let safeDepth = max(depth, 0.001);
+        let invDepth = 1.0 / safeDepth;
+        let jx0 = focal.x * invDepth;
+        let jx2 = focal.x * viewCenter.x * invDepth * invDepth;
+        let jy1 = focal.y * invDepth;
+        let jy2 = focal.y * viewCenter.y * invDepth * invDepth;
+        let u00 = jx0 * c00 + jx2 * c02;
+        let u01 = jx0 * c01 + jx2 * c12;
+        let u02 = jx0 * c02 + jx2 * c22;
+        let u11 = jy1 * c11 + jy2 * c12;
+        let u12 = jy1 * c12 + jy2 * c22;
+        cov00 = u00 * jx0 + u02 * jx2;
+        cov01 = u01 * jy1 + u02 * jy2;
+        cov11 = u11 * jy1 + u12 * jy2;
+    }
+
+${warp
+    ? `
+    // Variant warp: the splat in the foveated target, through the affine map per axis that is
+    // exact at the two ends of its quad's extent on screen. For a small splat that is the warp's
+    // slope at its centre; for a large one the secant over what is visible, since a near splat
+    // centred off screen, where the slope is all but zero, would shrink to nothing at the edge.
+    // Everything after, the dilation and the culls included, works in the target's pixels
+    let linearNdc = clip.xy / clip.w;
+    let reach = 2.8284 * sqrt(vec2f(cov00, cov11)) * 2.0 / viewport;
+    let lo = clamp(linearNdc - reach, vec2f(-1.0), vec2f(1.0));
+    let hi = clamp(linearNdc + reach, vec2f(-1.0), vec2f(1.0));
+    let span = hi - lo;
+    let warpedLo = warpNdc(lo);
+    let pixelScale = select(
+        warpSlope(lo),
+        (warpNdc(hi) - warpedLo) / max(span, vec2f(1e-9)),
+        span > vec2f(1e-6)
+    );
+    let ndc = warpedLo + pixelScale * (linearNdc - lo);
+    cov00 *= pixelScale.x * pixelScale.x;
+    cov01 *= pixelScale.x * pixelScale.y;
+    cov11 *= pixelScale.y * pixelScale.y;
+`
+    : `
+    let ndc = clip.xy / clip.w;
+    // the target's pixels per screen pixel (variant warp)
+    let pixelScale = vec2f(1.0);
+`}
+    // the low-pass dilation every splat renderer applies, 0.3 in the chosen units
+    let us2 = uniforms.unitScale * uniforms.unitScale;
+    cov00 += 0.3 / us2;
+    cov11 += 0.3 / us2;
+    let determinant = cov00 * cov11 - cov01 * cov01;
+    if (determinant <= 0.0) {
+        return result;
+    }
+
+    let mid = 0.5 * (cov00 + cov11);
+    let radius = length(vec2f(0.5 * (cov00 - cov11), cov01));
+    let lambda1 = mid + radius;
+    let lambda2 = max(mid - radius, 0.1 / us2);
+${stereo
+    ? `
+    // Stereo: one projection serves both eyes, as the engine's own stereo projector does: the
+    // second eye takes this view's depth, colour, coverage and order and its own footprint, and
+    // every cull keeps what either eye would
+    let eye1 = footprintEye1(center, rot, scale, viewport);
+`
+    : ''}
+    // size cull on the footprint's radius in pixels. minPixelSize is a diameter: the engine's
+    // projector is dispatched with half of it, and its quad path tests the full extent
+    // (2 sqrt(2 lambda)) against the whole value, so both cut at the same place
+    if (uniforms.unitScale * sqrt(2.0 * lambda1) < 0.5 * uniforms.minPixelSize${stereo
+    ? ' && (!eye1.visible || uniforms.unitScale * sqrt(2.0 * eye1.lambda1) < 0.5 * uniforms.minPixelSize)'
+    : ''}) {
+        return result;
+    }
+
+    // contribution cull: the splat's alpha mass in pixels (the engine's minContribution rule)
+    if (opacity * 6.283185 * sqrt(determinant) * us2 < uniforms.minContribution${stereo
+    ? ' && (!eye1.visible || opacity * 6.283185 * sqrt(eye1.determinant) * us2 < uniforms.minContribution)'
+    : ''}) {
+        return result;
+    }
+
+    // principal axis; a circular footprint has no defined eigenvector, any axis is right
+    let eigenVec = vec2f(cov01, lambda1 - cov00);
+    let eigenLen = length(eigenVec);
+    let direction = select(vec2f(1.0, 0.0), eigenVec / eigenLen, eigenLen > 1e-9);
+    let maxRadius = min(1024.0, min(viewport.x, viewport.y));
+    let len1 = 2.0 * sqrt(2.0 * lambda1);
+    let len2Full = 2.0 * sqrt(2.0 * lambda2);
+    let clampScale = min(1.0, maxRadius / len1);
+${coverage !== 'pixel'
+    ? `
+    // The kept ellipse's polygon, in units of the quad's half extent: area matched to the
+    // ellipse, or containing it when the raster discards outside it (jitter). The cache keeps
+    // the full quad's axes and the raster sizes each polygon itself; here the largest bounds the
+    // culls below
+    let polygonScale = select(${polygonScale()}, ${polygonScale(true)}, jittered);
+${coverage === 'interleaved'
+        ? `
+    // the small splats of the interleaved mode draw per splat into the full target: the
+    // footprint at the alpha clip, in pixels, decides
+    let footprint = 3.14159265 * len1 * len2Full * pow(radiusAt(max(uniforms.alphaClip, 1e-6), opacity), 2.0);
+    let fullEntry = uniforms.interleaveArea > 0.0 && footprint < uniforms.interleaveArea;
+    if (select(!any(keptSets), !splatKept, fullEntry)) {
+        return result;
+    }
+    let threshold = select(setThreshold, splatThreshold, fullEntry);
+    let radiusScale = clampScale * radiusAt(threshold, opacity) * polygonScale;
+`
+        : `
+    let radiusScale = clampScale * radiusAt(splatThreshold, opacity) * polygonScale;
+`}
+`
+    : `
+    let radiusScale = clampScale;
+`}
+    // the extent the culls test: the largest polygon the raster will draw
+    let axis1 = len1 * radiusScale * direction;
+    let len2 = len2Full * radiusScale;
+    let axis2 = len2 * vec2f(direction.y, -direction.x);
+
+    let extent = abs(axis1) + abs(axis2);
+    let centerPixels = (ndc * 0.5 + 0.5) * viewport;
+    var outside = centerPixels.x + extent.x < 0.0 || centerPixels.x - extent.x > viewport.x
+        || centerPixels.y + extent.y < 0.0 || centerPixels.y - extent.y > viewport.y;
+${stereo
+    ? `
+    // a splat either eye sees survives: the second eye's largest polygon is to its full quad as
+    // this view's is (both eyes' targets are the same size)
+    let polygonRatio = radiusScale / clampScale;
+    let axis1Eye1 = eye1.axis1 * polygonRatio;
+    let axis2Eye1 = eye1.len2 * polygonRatio * normalize(vec2f(eye1.axis1.y, -eye1.axis1.x));
+    let extentEye1 = abs(axis1Eye1) + abs(axis2Eye1);
+    let centerEye1 = (eye1.ndc * 0.5 + 0.5) * viewport;
+    outside = outside && (!eye1.visible || centerEye1.x + extentEye1.x < 0.0 || centerEye1.x - extentEye1.x > viewport.x
+        || centerEye1.y + extentEye1.y < 0.0 || centerEye1.y - extentEye1.y > viewport.y);
+`
+    : ''}
+    if (outside) {
+        return result;
+    }
+
+${occlusion
+    ? `
+    // Occlusion cull against the previous frame. Each stored depth is the nearest sample that
+    // survived there, so the farthest depth over the blocks a splat covered bounds what could
+    // still have shown behind it; a splat whose front (its centre less 2 sqrt(2) sigma along the
+    // view, the same cut-off as the quad's edge) lies beyond that bound was invisible last
+    // frame, up to sampling. Static splats reproject exactly through the previous view, so only
+    // true disocclusions arrive a frame late. The footprint the splat had last frame bounds the
+    // gather; footprints up to 16 px use the 8 px grid, up to 64 px the 32 px grid, larger ones
+    // skip the test. In stereo a splat goes only when both eyes' previous frames hid it.
+    if (uniforms.occlusionMode != 0u) {
+        let halfExtent = len1 * radiusScale;
+        if (occludedIn(center, depth, focal.x, halfExtent, c22)${stereo
+        ? ' && (!eye1.visible || occludedInEye1(center, eye1.depth, uniforms.focalEye1.x, length(axis1Eye1), c22))'
+        : ''}) {
+            result.occluded = true;
+            return result;
+        }
+    }
+
+`
+    : ''}
+    let color = clamp(srcColor(), vec3f(0.0), vec3f(8.0));
+
+    // rgb: 10/10/10 unorm with a 2-bit shared exponent (scale 1/2/4/8, range [0, 8])
+    let maxChannel = max(color.r, max(color.g, color.b));
+    var exponent = 0u;
+    if (maxChannel > 4.0) {
+        exponent = 3u;
+    } else if (maxChannel > 2.0) {
+        exponent = 2u;
+    } else if (maxChannel > 1.0) {
+        exponent = 1u;
+    }
+    let rgb = vec3u(clamp(color / f32(1u << exponent), vec3f(0.0), vec3f(1.0)) * 1023.0 + 0.5);
+
+    // centre as snorm16 over the range the offscreen cull bounds visible centres to; the
+    // raster shader derives the same range from its viewport
+    let ndcRange = vec2f(1.0) + vec2f(4.0 * maxRadius) / viewport;
+
+    result.valid = true;
+    result.words[0] = pack2x16snorm(ndc / ndcRange);
+    result.words[1] = bitcast<u32>(depth);
+${coverage !== 'pixel'
+    ? `
+    // the full quad's axes (clamped to the radius limit); the raster scales them to each polygon
+    result.words[2] = pack2x16float(len1 * clampScale * direction);
+    result.words[3] = pack2x16float(vec2f(len2Full * clampScale, 0.0)) | (u32(clamp(opacity, 0.0, 1.0) * 255.0 + 0.5) << 16u);
+`
+    : `
+    result.words[2] = pack2x16float(axis1);
+    result.words[3] = pack2x16float(vec2f(len2, 0.0)) | (u32(clamp(opacity, 0.0, 1.0) * 255.0 + 0.5) << 16u);
+`}
+    // the depth bucket, log-spaced from the near plane, in the flags byte
+    let key = clamp((log(max(depth, 1e-6)) - uniforms.keyLogNear) * uniforms.keyInvLogRange, 0.0, 0.999) * ${ORDER_BUCKETS}.0;
+    result.words[3] |= u32(key) << 24u;
+    result.words[4] = rgb.r | (rgb.g << 10u) | (rgb.b << 20u) | (exponent << 30u);
+${coverage === 'pixel'
+    ? `
+    // the stable id the coverage hash seeds from: the slot, salted by the file for sources
+    // whose indices restart per file
+    result.words[5] = slot ^ (file * 2654435761u);
+`
+    : coverage === 'interleaved'
+        ? `
+    // the draw's bits, bit 15 for a full-target entry, and a nibble per pixel set (0: the set
+    // keeps nothing): the raster rebuilds every threshold from them
+    let nibbles = select(setNibbles, vec4u(splatNibble, 0u, 0u, 0u), fullEntry);
+    result.words[5] = drawnBits | select(0u, ${FULL_ENTRY_BIT}u, fullEntry)
+        | (nibbles.x << 16u) | (nibbles.y << 20u) | (nibbles.z << 24u) | (nibbles.w << 28u);
+`
+        : `
+    // the draw's bits and the per-splat nibble (shaders/raster.ts)
+    result.words[5] = drawnBits | (splatNibble << 16u);
+`}${stereo
+    ? `
+    // the second eye's centre, in the same range, and its full quad's axes (shaders/raster.ts),
+    // stashed in workgroup memory rather than returned: three more words in the per-thread state
+    // that main() holds across its barriers put the Adreno 740's compiler on a slow path, 6-9x
+    // the mono projector (Quest 3, 2026-10-16, docs/device-benchmarks-2026-10-14.md)
+    wgEye1[local] = vec3u(
+        pack2x16snorm(eye1.ndc / ndcRange),
+        pack2x16float(eye1.axis1),
+        pack2x16float(vec2f(eye1.len2, 0.0))
+    );`
+    : ''}
+    return result;
+}
+
+var<workgroup> wgCount: atomic<u32>;
+var<workgroup> wgOccluded: atomic<u32>;
+var<workgroup> wgBase: u32;
+var<workgroup> wgBuckets: array<atomic<u32>, ${ORDER_BUCKETS}>;${stereo
+    ? `
+// stereo: each thread's second-eye words, from project() to the cache write
+var<workgroup> wgEye1: array<vec3u, ${PROJECTOR_WORKGROUP_SIZE}>;`
+    : ''}
+
+@compute @workgroup_size(${PROJECTOR_WORKGROUP_SIZE})
+fn main(
+    @builtin(workgroup_id) wg: vec3u,
+    @builtin(num_workgroups) numWorkgroups: vec3u,
+    @builtin(local_invocation_index) local: u32
+) {
+    // no early returns: the barriers below need every thread of the workgroup
+    let chunkIndex = wg.x + wg.y * numWorkgroups.x;
+    atomicStore(&wgBuckets[local], 0u);
+    var projected: Projected;
+    projected.valid = false;
+    projected.occluded = false;
+    if (chunkIndex < uniforms.numChunks) {
+        let chunk = chunks[uniforms.chunkBase + chunkIndex];
+        let visible = (nodeVisible[chunk.z >> 5u] >> (chunk.z & 31u)) & 1u;
+        if (visible != 0u && local < chunk.y) {
+            projected = project(chunk.x + local, chunk.w >> 16u${stereo ? ', local' : ''});
+        }
+    }
+
+    // survivors claim consecutive slots: one workgroup-local count, one global atomic
+    var localSlot = 0u;
+    if (projected.valid) {
+        localSlot = atomicAdd(&wgCount, 1u);
+    }
+    if (projected.occluded) {
+        atomicAdd(&wgOccluded, 1u);
+    }
+    workgroupBarrier();
+    if (local == 0u) {
+        let n = atomicLoad(&wgCount);
+        wgBase = select(0u, atomicAdd(&counter[0], n), n > 0u);
+        let o = atomicLoad(&wgOccluded);
+        if (o > 0u) {
+            atomicAdd(&counter[1], o);
+        }
+    }
+    workgroupBarrier();
+    if (projected.valid) {
+        let base = (wgBase + localSlot) * ${CACHE_WORDS}u;
+        for (var i = 0u; i < ${CACHE_WORDS}u; i++) {
+            cache[base + i] = projected.words[i];
+        }${stereo
+    ? `
+        // the second eye's three words, after every entry
+        let stereoBase = uniforms.stereoBase + (wgBase + localSlot) * 3u;
+        let eye1Words = wgEye1[local];
+        cache[stereoBase] = eye1Words.x;
+        cache[stereoBase + 1u] = eye1Words.y;
+        cache[stereoBase + 2u] = eye1Words.z;`
+    : ''}
+${coverage === 'interleaved'
+    ? `
+        // one entry per kept pixel set, or one in the full target's group: the group's
+        // ${SET_BUCKETS} buckets, front to back, from the depth bucket
+        let depthKey = ((projected.words[3] >> 24u) * ${SET_BUCKETS}u) >> 8u;
+        if ((projected.words[5] & ${FULL_ENTRY_BIT}u) != 0u) {
+            atomicAdd(&wgBuckets[4u * ${SET_BUCKETS}u + depthKey], 1u);
+        } else {
+            for (var s = 0u; s < 4u; s++) {
+                if (((projected.words[5] >> (16u + 4u * s)) & 1u) != 0u) {
+                    atomicAdd(&wgBuckets[s * ${SET_BUCKETS}u + depthKey], 1u);
+                }
+            }
+        }`
+    : `        atomicAdd(&wgBuckets[projected.words[3] >> 24u], 1u);`}
+    }
+    // a chunk's splats are spatially coherent, so few of its buckets are non-empty: one
+    // workgroup count each, then one global atomic per non-empty bucket
+    workgroupBarrier();
+    let bucketCount = atomicLoad(&wgBuckets[local]);
+    if (bucketCount > 0u) {
+        atomicAdd(&buckets[local], bucketCount);
+    }
+}
+`;
+
+// Single-thread pass turning the projector's survivor count into the indexed indirect draw
+// arguments for the raster pass and the indirect dispatch size of the order scatter. Nothing
+// comes back to the cpu, so a frame never stalls on the count. Entry layouts match the engine's
+// indirect draw buffer (5 u32 per slot) and indirect dispatch buffer (3 u32 per slot).
+const argsWGSL = /* wgsl */ `
+struct DrawIndexedIndirectArgs {
+    indexCount: u32,
+    instanceCount: u32,
+    firstIndex: u32,
+    baseVertex: i32,
+    firstInstance: u32
+}
+
+struct ArgsUniforms {
+    drawSlot: u32,
+    indexCount: u32,
+    quadsPerInstance: u32,
+    dispatchSlot: u32,
+    scatterWorkgroupSize: u32
+}
+
+@group(0) @binding(0) var<storage, read> counter: array<u32>;
+@group(0) @binding(1) var<storage, read_write> indirectDrawArgs: array<DrawIndexedIndirectArgs>;
+@group(0) @binding(2) var<storage, read_write> indirectDispatchArgs: array<u32>;
+@group(0) @binding(3) var<uniform> uniforms: ArgsUniforms;
+
+@compute @workgroup_size(1)
+fn main() {
+    let count = counter[0];
+    indirectDrawArgs[uniforms.drawSlot] = DrawIndexedIndirectArgs(
+        uniforms.indexCount,
+        (count + uniforms.quadsPerInstance - 1u) / uniforms.quadsPerInstance,
+        0u,
+        0,
+        0u
+    );
+    // the scatter: one workgroup per scatterWorkgroupSize survivors, 2D past the 65535 limit
+    let groups = (count + uniforms.scatterWorkgroupSize - 1u) / uniforms.scatterWorkgroupSize;
+    let x = max(min(groups, 65535u), 1u);
+    let base = uniforms.dispatchSlot * 3u;
+    indirectDispatchArgs[base] = x;
+    indirectDispatchArgs[base + 1u] = (groups + x - 1u) / x;
+    indirectDispatchArgs[base + 2u] = 1u;
+}
+`;
+// Variant coverage:interleaved: after the bucket scan, before the scatter moves the offsets,
+// each draw group's range of the ordered list (the four pixel sets, then the full target's
+// splats) and the indirect draw arguments of its draw
+const setArgsWGSL = /* wgsl */ `
+struct DrawIndexedIndirectArgs {
+    indexCount: u32,
+    instanceCount: u32,
+    firstIndex: u32,
+    baseVertex: i32,
+    firstInstance: u32
+}
+
+struct SetArgsUniforms {
+    drawSlot: u32,
+    indexCount: u32,
+    quadsPerInstance: u32
+}
+
+// [0, ${ORDER_BUCKETS}) counts, [${ORDER_BUCKETS}, ${2 * ORDER_BUCKETS}) offsets
+@group(0) @binding(0) var<storage, read> buckets: array<u32>;
+@group(0) @binding(1) var<storage, read_write> indirectDrawArgs: array<DrawIndexedIndirectArgs>;
+@group(0) @binding(2) var<storage, read_write> setRanges: array<vec2u>;
+@group(0) @binding(3) var<uniform> uniforms: SetArgsUniforms;
+
+@compute @workgroup_size(${SET_GROUPS})
+fn main(@builtin(local_invocation_index) index: u32) {
+    let first = buckets[${ORDER_BUCKETS}u + index * ${SET_BUCKETS}u];
+    var count = 0u;
+    for (var b = 0u; b < ${SET_BUCKETS}u; b++) {
+        count += buckets[index * ${SET_BUCKETS}u + b];
+    }
+    setRanges[index] = vec2u(first, first + count);
+    indirectDrawArgs[uniforms.drawSlot + index] = DrawIndexedIndirectArgs(
+        uniforms.indexCount,
+        (count + uniforms.quadsPerInstance - 1u) / uniforms.quadsPerInstance,
+        0u,
+        0,
+        0u
+    );
+}
+`;
+
+// Temporal accumulation for the stochastic frame. Each frame the raster leaves one sample per
+// pixel (a colour where a splat's fragment survived its coverage test, nothing otherwise) and
+// the nearest surviving depth; this pass folds it into a per-pixel history of premultiplied
+// colour and coverage, so a still camera converges to the expected image over a few hundred
+// frames and a moving one keeps most of that history by reprojecting it.
+//
+// Reprojection uses the sample's own depth: the pixel's world point is carried into the
+// previous view and the history is fetched there, clamped to the colours this frame's
+// neighbourhood holds so a stale colour cannot survive a disocclusion. A pixel with no sample
+// this frame reprojects through the mean depth its own history remembers, so coverage fades out
+// where a surface has moved away rather than smearing into the background.
+//
+// The history is 12 bytes a pixel (24 with the ping-pong). The colour is the running mean as
+// 16-bit fixed point: a half float cannot hold it, since its steps in [0.5, 1) are 1 / 2048 and
+// the 1 / N step of a 256-sample mean rounds away once a sample lies within 1 / 16 of the mean
+// (an error floor of about 5 rms in 8-bit units), while fixed point steps by 1 / 65535
+// everywhere, so the same step only rounds away within half an 8-bit level of the mean. The
+// depth record is the mean view depth of the pixel's samples and their count in one 32-bit word.
+// the most samples the history's count field holds
+const TAA_MAX_COUNT = 511;
+const taaVertexWGSL = /* wgsl */ `
+attribute vertex_position: vec2f;
+
+@vertex
+fn vertexMain(input: VertexInput) -> VertexOutput {
+    var output: VertexOutput;
+    output.position = vec4f(vertex_position, 0.0, 1.0);
+    return output;
+}
+`;
+// The history's encoding, shared with the compose that reads it
+const taaHistoryWGSL = /* wgsl */ `
+const TAA_COLOR_SCALE = 65535.0;
+
+#ifdef SSE_TAA_HALF
+    // Variant taaHistory:half, an XR eye's by default: the colour in half floats, which filter,
+    // so the moving fetch takes five bilinear taps instead of sixteen loads (historyCubicAt), 4.3
+    // of the pass's 7.4 ms in a Vision Pro session. Half floats stall a long mean (above), but in a
+    // session the head never rests, so the history holds at most taaMoveMax samples
+    fn decodeColor(v: vec4f) -> vec4f {
+        return v;
+    }
+
+    fn encodeColor(c: vec4f) -> vec4f {
+        let a = clamp(c.a, 0.0, 1.0);
+        return vec4f(clamp(c.rgb, vec3f(0.0), vec3f(a)), a);
+    }
+#else
+    fn decodeColor(v: vec4u) -> vec4f {
+        return vec4f(v) / TAA_COLOR_SCALE;
+    }
+
+    // premultiplied colour and coverage: coverage in [0, 1] and colour within it (the Catmull-Rom
+    // fetch over- and undershoots both), rounded to the nearest step
+    fn encodeColor(c: vec4f) -> vec4u {
+        let a = clamp(c.a, 0.0, 1.0);
+        return vec4u(round(vec4f(clamp(c.rgb, vec3f(0.0), vec3f(a)), a) * TAA_COLOR_SCALE));
+    }
+#endif
+
+struct HistoryInfo {
+    depth: f32,
+    count: f32
+}
+
+// The mean view depth keeps the float's exponent and top 15 mantissa bits, rounded: a relative
+// step of 2^-15, which stalls a 256-sample mean only within 0.4 % of the depth (the depth steers
+// the reprojection, where that is far below a pixel). The count takes the low 9 bits
+fn decodeInfo(v: u32) -> HistoryInfo {
+    var info: HistoryInfo;
+    info.depth = bitcast<f32>((v >> 9u) << 8u);
+    info.count = f32(v & ${TAA_MAX_COUNT}u);
+    return info;
+}
+
+fn encodeInfo(depth: f32, count: f32) -> u32 {
+    let bits = bitcast<u32>(max(depth, 0.0));
+    return (((bits + 0x80u) >> 8u) << 9u) | min(u32(count), ${TAA_MAX_COUNT}u);
+}
+`;
+const taaFragmentWGSL = /* wgsl */ `
+#ifdef SSE_SETS
+    // variant coverage:interleaved: this frame's samples straight from the four pixel sets'
+    // targets, the full target's pixel (2i + x, 2j + y) being set (x, y)'s (i, j), and their
+    // depth written into the full depth target for the compose, the occlusion grid and the picker
+    // (in place of a pass that copies the sets back)
+    var setColor0: texture_2d<f32>;
+    var setColor0Sampler: sampler;
+    var setColor1: texture_2d<f32>;
+    var setColor1Sampler: sampler;
+    var setColor2: texture_2d<f32>;
+    var setColor2Sampler: sampler;
+    var setColor3: texture_2d<f32>;
+    var setColor3Sampler: sampler;
+    var setDepth0: texture_depth_2d;
+    var setDepth1: texture_depth_2d;
+    var setDepth2: texture_depth_2d;
+    var setDepth3: texture_depth_2d;
+#else
+    var curColor: texture_2d<f32>;
+    var curColorSampler: sampler;
+    var curDepth: texture_depth_2d;
+#endif
+// premultiplied colour and coverage, unorm16 or half floats (decodeColor)
+#ifdef SSE_TAA_HALF
+    var histColor: texture_2d<f32>;
+    var histColorSampler: sampler;
+#else
+    var histColor: texture_2d<u32>;
+#endif
+// the mean view depth of the pixel's samples and their count, in the previous frame's view
+// depths (decodeInfo)
+var histInfo: texture_2d<u32>;
+
+// the camera's world transform (the inverse view), and its projection's x and y terms: x, y the
+// scales, z, w the offsets (the column that multiplies view z for a perspective camera, the
+// translation for an orthographic one)
+uniform cameraWorld: mat4x4f;
+uniform unproject: vec4f;
+uniform prevViewProj: mat4x4f;
+uniform prevView: mat4x4f;
+// clip z = a * viewDepth + b over w = viewDepth (x, y); z: 1 for an orthographic camera
+uniform clipZParams: vec4f;
+// x: sample cap, y: 1 when the history holds the previous frame, z: 1 when the camera moved
+// since that frame, w: the frames the camera has rested, this one included (0 on a frame whose
+// resident set changed)
+uniform taaParams: vec4f;
+// width, height, 1 / width, 1 / height
+uniform taaViewport: vec4f;
+// x: -1 when the target's rows run bottom-up (an offscreen target), else 1; y: the colour
+// clamp width in neighbourhood standard deviations while moving (0: no clamp); z: 1 to
+// reproject through the pixel's accumulated mean depth rather than this frame's sample depth;
+// w: image motion in pixels a frame that halves the moving sample cap (0: fixed cap)
+uniform taaControl: vec4f;
+// x: 1 to shorten the moving cap by no more than the parallax motion, and a history an occluder
+// left behind by its misplacement (variant taaParallax);
+// y: the history length at which the moving sample is half the pixel's own, half the quad mean
+// (variant taaSharp, 0: the quad mean)
+uniform taaMoving: vec2f;
+// 1: write the accumulation state instead of colour (r: count / cap, g: history accepted,
+// b: the camera moved since the previous frame)
+uniform taaDebug: f32;
+#ifdef SSE_WARP
+    // variant warp: the view's table (shaders/warp.ts)
+    var<storage, read> warpTable: array<f32>;
+    ${warpWGSL}
+#endif
+
+${taaHistoryWGSL}
+
+// variant taaParallax: the misplacement in pixels a frame that halves the cap of a history an
+// occluder left behind (measured against 1 px, which kept a visible trail)
+const TAA_GHOST_PX = 0.25;
+
+fn viewDepthOf(z: f32) -> f32 {
+    let p = uniform.clipZParams;
+    let dz = z - p.x;
+    let safeDz = select(dz, sign(dz) * 1e-9 + 1e-12, abs(dz) < 1e-9);
+    return select(p.y / safeDz, (z - p.y) / p.x, p.z != 0.0);
+}
+
+struct Reprojected {
+    valid: bool,
+    uv: vec2f,
+    prevDepth: f32,
+    // where the camera's rotation alone carries the pixel (its ray's direction, a point at
+    // infinity), so uv - farUv is the parallax its translation adds; for an orthographic camera
+    // the pixel itself, the whole motion
+    farUv: vec2f
+}
+
+// The previous frame's view depth and texture coordinate of this pixel's point at a view
+// depth. The point is built in view space from the depth and the projection's x and y terms,
+// then moved by the camera's rigid transform: through the inverse view-projection instead, a
+// near plane at 1e-4 of the depth (the viewer's floor once the camera is inside the scene
+// bound) leaves a 32-bit float about three digits of the point, a pixel of error that changes
+// with every frame's sample depths and shakes the history.
+fn reproject(pix: vec2i, viewDepth: f32) -> Reprojected {
+    var r: Reprojected;
+    let flip = uniform.taaControl.x;
+    let uv = (vec2f(pix) + vec2f(0.5)) * uniform.taaViewport.zw;
+    // variant warp: the texel's place on screen, and the previous frame's points back into the
+    // target; the history's coordinates are the target's
+    #ifdef SSE_WARP
+        let rowFromTop = select(i32(uniform.taaViewport.y) - 1 - pix.y, pix.y, flip > 0.0);
+        let ndc = unwarpTexel(vec2i(pix.x, rowFromTop));
+    #else
+        let ndc = vec2f(uv.x * 2.0 - 1.0, flip * (1.0 - 2.0 * uv.y));
+    #endif
+    let u = uniform.unproject;
+    let viewXY = select((ndc + u.zw) * viewDepth, ndc - u.zw, uniform.clipZParams.z != 0.0) / u.xy;
+    let world = (uniform.cameraWorld * vec4f(viewXY, -viewDepth, 1.0)).xyz;
+    let prevClip = uniform.prevViewProj * vec4f(world, 1.0);
+    r.prevDepth = -(uniform.prevView * vec4f(world, 1.0)).z;
+    r.valid = prevClip.w > 0.0;
+    var prevNdc = prevClip.xy / max(prevClip.w, 1e-9);
+    let dir = (uniform.cameraWorld * vec4f(viewXY, -viewDepth, 0.0)).xyz;
+    let farClip = uniform.prevViewProj * vec4f(dir, 0.0);
+    var farNdc = farClip.xy / max(farClip.w, 1e-9);
+    #ifdef SSE_WARP
+        prevNdc = warpNdc(prevNdc);
+        farNdc = warpNdc(farNdc);
+    #endif
+    r.uv = vec2f(prevNdc.x * 0.5 + 0.5, 0.5 - prevNdc.y * flip * 0.5);
+    r.valid = r.valid && all(r.uv >= vec2f(0.0)) && all(r.uv <= vec2f(1.0));
+    r.farUv = select(vec2f(farNdc.x * 0.5 + 0.5, 0.5 - farNdc.y * flip * 0.5), uv, uniform.clipZParams.z != 0.0);
+    return r;
+}
+
+struct Current {
+    color: vec4f,
+    depth: f32
+}
+
+// this frame's colour and depth at a texel
+fn current(p: vec2i) -> Current {
+    var c: Current;
+    #ifdef SSE_SETS
+        let t = p >> vec2u(1u);
+        let index = (p.x & 1) + (p.y & 1) * 2;
+        if (index == 0) {
+            c.color = textureLoad(setColor0, t, 0);
+            c.depth = textureLoad(setDepth0, t, 0);
+        } else if (index == 1) {
+            c.color = textureLoad(setColor1, t, 0);
+            c.depth = textureLoad(setDepth1, t, 0);
+        } else if (index == 2) {
+            c.color = textureLoad(setColor2, t, 0);
+            c.depth = textureLoad(setDepth2, t, 0);
+        } else {
+            c.color = textureLoad(setColor3, t, 0);
+            c.depth = textureLoad(setDepth3, t, 0);
+        }
+    #else
+        c.color = textureLoad(curColor, p, 0);
+        c.depth = textureLoad(curDepth, p, 0);
+    #endif
+    return c;
+}
+
+// the premultiplied sample at a texel: its colour where a fragment landed, nothing otherwise
+fn sampleAt(pix: vec2i, dims: vec2i) -> vec4f {
+    let s = current(clamp(pix, vec2i(0), dims - vec2i(1)));
+    return select(vec4f(0.0), vec4f(s.color.rgb, 1.0), s.color.a > 0.0 && s.depth < 1.0);
+}
+
+// The mean of the 2x2 quad's samples, bilinear between quad centres (the compose's resolve of
+// the raster's quad-stratified thresholds): four samples a pixel, at a little sharpness, for
+// the frames where the history is too short to carry the noise on its own
+fn quadSample(pix: vec2i, dims: vec2i) -> vec4f {
+    let u = (vec2f(pix) - vec2f(0.5)) * 0.5;
+    #ifdef SSE_SETS
+        // a quad is one texel of each set, so the bilinear mean between quad centres is the
+        // mean of the sets' bilinear fetches there
+        let uvS = (u + vec2f(0.5)) / vec2f(textureDimensions(setColor0));
+        let m = 0.25 * (textureSampleLevel(setColor0, setColor0Sampler, uvS, 0.0) +
+            textureSampleLevel(setColor1, setColor1Sampler, uvS, 0.0) +
+            textureSampleLevel(setColor2, setColor2Sampler, uvS, 0.0) +
+            textureSampleLevel(setColor3, setColor3Sampler, uvS, 0.0));
+    #else
+        let size = vec2f(dims);
+        let q0 = floor(u);
+        let f = u - q0;
+        let uv = (q0 * 2.0 + vec2f(1.0)) / size;
+        let step = vec2f(2.0) / size;
+        let a = textureSampleLevel(curColor, curColorSampler, uv, 0.0);
+        let b = textureSampleLevel(curColor, curColorSampler, uv + vec2f(step.x, 0.0), 0.0);
+        let c = textureSampleLevel(curColor, curColorSampler, uv + vec2f(0.0, step.y), 0.0);
+        let d = textureSampleLevel(curColor, curColorSampler, uv + step, 0.0);
+        let m = mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
+    #endif
+    // the raster leaves empty texels transparent black, so the mean is premultiplied coverage
+    return vec4f(m.rgb, m.a);
+}
+
+fn historyTexel(p: vec2i, dims: vec2i) -> vec4f {
+    return decodeColor(textureLoad(histColor, clamp(p, vec2i(0), dims - vec2i(1)), 0));
+}
+
+// Catmull-Rom fetch of the history: sharper than bilinear, whose blur compounds over the
+// frames a moving history lives. Its lobes over- and undershoot; the encoding clamps both
+fn historyCubicAt(uv: vec2f, dims: vec2i) -> vec4f {
+    let p = uv * vec2f(dims) - vec2f(0.5);
+    let i0 = floor(p);
+    let f = p - i0;
+    let f2 = f * f;
+    let f3 = f2 * f;
+    // Catmull-Rom weights for taps at -1, 0, 1, 2
+    let w0 = -0.5 * f3 + f2 - 0.5 * f;
+    let w1 = 1.5 * f3 - 2.5 * f2 + vec2f(1.0);
+    let w2 = -1.5 * f3 + 2.0 * f2 + 0.5 * f;
+    let w3 = 0.5 * f3 - 0.5 * f2;
+    #ifdef SSE_TAA_HALF
+        // five bilinear taps (Jimenez, Filmic SMAA, 2016): along each axis the two middle texels
+        // in one tap placed between them by their weights, and the four corner taps, each the
+        // product of two small outer weights, left out and the rest renormalised
+        let size = vec2f(dims);
+        let w12 = w1 + w2;
+        let t0 = (i0 - vec2f(0.5)) / size;
+        let t3 = (i0 + vec2f(2.5)) / size;
+        let t12 = (i0 + vec2f(0.5) + w2 / w12) / size;
+        let sum = textureSampleLevel(histColor, histColorSampler, vec2f(t12.x, t0.y), 0.0) * (w12.x * w0.y) +
+            textureSampleLevel(histColor, histColorSampler, vec2f(t0.x, t12.y), 0.0) * (w0.x * w12.y) +
+            textureSampleLevel(histColor, histColorSampler, t12, 0.0) * (w12.x * w12.y) +
+            textureSampleLevel(histColor, histColorSampler, vec2f(t3.x, t12.y), 0.0) * (w3.x * w12.y) +
+            textureSampleLevel(histColor, histColorSampler, vec2f(t12.x, t3.y), 0.0) * (w12.x * w3.y);
+        return sum / (w12.x * (w0.y + w12.y + w3.y) + (w0.x + w3.x) * w12.y);
+    #else
+        let wx = array<f32, 4>(w0.x, w1.x, w2.x, w3.x);
+        let wy = array<f32, 4>(w0.y, w1.y, w2.y, w3.y);
+        var sum = vec4f(0.0);
+        for (var y = 0; y < 4; y++) {
+            for (var x = 0; x < 4; x++) {
+                sum += historyTexel(vec2i(i0) + vec2i(x - 1, y - 1), dims) * (wx[x] * wy[y]);
+            }
+        }
+        return sum;
+    #endif
+}
+
+@fragment
+fn fragmentMain(input: FragmentInput) -> FragmentOutput {
+    var output: FragmentOutput;
+    let pix = vec2i(pcPosition.xy);
+    let dims = vec2i(uniform.taaViewport.xy);
+    let here = current(pix);
+    let cur = here.color;
+    let z = here.depth;
+    #ifdef SSE_SETS
+        output.fragDepth = z;
+    #endif
+    let hit = cur.a > 0.0 && z < 1.0;
+    let d = viewDepthOf(z);
+
+    let own = decodeInfo(textureLoad(histInfo, pix, 0).x);
+    let maxCount = uniform.taaParams.x;
+    let historyValid = uniform.taaParams.y > 0.5;
+    let moving = uniform.taaParams.z > 0.5;
+    // still: this pixel's own sample, so the history converges to full resolution; moving:
+    // the quad's four, which a long history takes back toward the pixel's own (below)
+    let single = select(vec4f(0.0), vec4f(cur.rgb, 1.0), hit);
+    var sample = single;
+    if (moving) {
+        sample = quadSample(pix, dims);
+    }
+
+    // Where to look in the history: through this frame's sample, or, with no sample, through
+    // the depth this pixel's own history remembers, so an emptied pixel fades rather than
+    // holding a stale colour
+    var r: Reprojected;
+    r.valid = false;
+    var carryDepth = 0.0;
+    if (!moving) {
+        // a resting camera maps every pixel onto itself: the exact texel, not the round trip
+        // through the matrices, whose rounding would blur the history a little every frame
+        r.valid = true;
+        r.uv = (vec2f(pix) + vec2f(0.5)) * uniform.taaViewport.zw;
+        r.prevDepth = select(own.depth, d, hit);
+        carryDepth = r.prevDepth;
+    } else if (uniform.taaControl.z > 0.5 && own.count > 0.5) {
+        // through the depth the pixel's history has settled on: one stochastic sample's depth
+        // is one layer of the mixture the history holds, and reprojecting the mixture through
+        // a different layer every frame smears it by their parallax
+        r = reproject(pix, own.depth);
+        carryDepth = own.depth;
+    } else if (hit) {
+        r = reproject(pix, d);
+        carryDepth = d;
+    } else if (own.count > 0.5) {
+        r = reproject(pix, own.depth);
+        carryDepth = own.depth;
+    }
+    r.valid = r.valid && historyValid;
+
+    var hist = vec4f(0.0);
+    var info: HistoryInfo;
+    var accepted = false;
+    if (r.valid) {
+        // at rest the exact texel; moving, a filtered fetch of the reprojected position
+        if (!moving) {
+            hist = decodeColor(textureLoad(histColor, pix, 0));
+            info = own;
+        } else {
+            hist = historyCubicAt(r.uv, dims);
+            info = decodeInfo(textureLoad(histInfo, clamp(vec2i(r.uv * vec2f(dims)), vec2i(0), dims - vec2i(1)), 0).x);
+        }
+        // a resting camera cannot disocclude anything, so every sample is accepted and the
+        // pixel converges; moving, the colour clamp below keeps a disoccluded history out
+        accepted = info.count > 0.5;
+    }
+
+    var color: vec4f;
+    var mean: f32;
+    var count: f32;
+    if (!accepted) {
+        color = sample;
+        mean = d;
+        count = select(0.0, 1.0, hit);
+        // at rest a pixel with no hit yet has still been sampled on every rest frame, so its
+        // first hit is one of that many samples: at full weight a rare hit would flash to full
+        // coverage, and freeze there once the viewer stops rendering. Its depth is the hit's
+        if (hit && !moving && historyValid) {
+            count = clamp(uniform.taaParams.w, 1.0, maxCount);
+            color = sample / count;
+        }
+    } else {
+        // moving, the history is clamped to the colours this frame's neighbourhood holds, so a
+        // stale colour cannot survive where nothing like it is drawn any more
+        if (moving && uniform.taaControl.y > 0.0) {
+            var m1 = vec4f(0.0);
+            var m2 = vec4f(0.0);
+            for (var dy = -1; dy <= 1; dy++) {
+                for (var dx = -1; dx <= 1; dx++) {
+                    let n = sampleAt(pix + vec2i(dx, dy), dims);
+                    m1 += n;
+                    m2 += n * n;
+                }
+            }
+            let mu = m1 / 9.0;
+            let sd = sqrt(max(m2 / 9.0 - mu * mu, vec4f(0.0)));
+            let halfWidth = sd * uniform.taaControl.y;
+            hist = clamp(hist, mu - halfWidth, mu + halfWidth);
+        }
+        // the faster the image moves, the shorter the history: a stochastic pixel's layers
+        // reproject through one layer's depth, so their parallax smears the history by an
+        // amount that grows with the motion, and a raw frame is the better estimate past it.
+        // A rotation moves every layer alike, whatever its depth, so with variant taaParallax
+        // the motion counts for no more than the parallax the camera's translation adds
+        var cap = maxCount;
+        if (moving && uniform.taaControl.w > 0.0) {
+            var speed = length(r.uv * vec2f(dims) - vec2f(pix) - vec2f(0.5));
+            let parallax = length((r.uv - r.farUv) * vec2f(dims));
+            if (uniform.taaMoving.x > 0.5) {
+                speed = min(speed, parallax);
+            }
+            cap = max(2.0, maxCount / (1.0 + speed / uniform.taaControl.w));
+            // A history nearer than this frame's sample is what an occluder left behind as it
+            // moved off the pixel: its surface's parallax is the sample's scaled by their depth
+            // ratio, so it lands that much further each frame from where it is fetched, and a
+            // history the length of the background's own motion would streak. Its cap shrinks
+            // by that misplacement; a rotation has no parallax, so it keeps its history
+            if (uniform.taaMoving.x > 0.5 && hit) {
+                let ghost = parallax * max(r.prevDepth - info.depth, 0.0) / max(info.depth, 1e-6);
+                cap = min(cap, max(2.0, maxCount / (1.0 + ghost / TAA_GHOST_PX)));
+            }
+        }
+        count = min(info.count + 1.0, cap);
+        // variant taaSharp: the longer the history, the more of the noise it carries and the
+        // less the quad mean's blur buys, so the pixel's own sample takes count / (count + k)
+        if (moving && uniform.taaMoving.y > 0.0) {
+            sample = mix(sample, single, count / (count + uniform.taaMoving.y));
+        }
+        let w = 1.0 / count;
+        color = mix(hist, sample, w);
+        // an empty sample takes at least a step off the coverage: rounded to the nearest, a
+        // decay of less than half a step holds (below cap / 2 steps, about 0.002 at the default
+        // cap), so a faint pixel would keep its coverage, and the depth the compose writes for
+        // it, forever. The colour follows, since the encoding keeps it within the coverage
+        if (sample.a == 0.0) {
+            color.a = min(color.a, max(hist.a - 1.0 / TAA_COLOR_SCALE, 0.0));
+        }
+        // carry the mean depth into this view: the point moved along the ray by the change in
+        // its depth, then the sample joins it
+        let shifted = info.depth + (carryDepth - r.prevDepth);
+        mean = select(shifted, shifted + w * (d - shifted), hit);
+    }
+
+    if (uniform.taaDebug > 1.5) {
+        // the reprojection offset in pixels, 8 px full scale, centred on 0.5
+        let mv = select(vec2f(0.0), r.uv * vec2f(dims) - vec2f(pix) - vec2f(0.5), r.valid);
+        color = vec4f(mv / 16.0 + vec2f(0.5), select(0.0, 1.0, r.valid), 1.0);
+    } else if (uniform.taaDebug > 0.5) {
+        color = vec4f(count / maxCount, select(0.0, 1.0, accepted), select(0.0, 1.0, moving), 1.0);
+    }
+    output.color = encodeColor(color);
+    output.color1 = encodeInfo(mean, count);
+    return output;
+}
+`;
+
+// The compose: a fullscreen quad in the World layer's transparent sublayer that blends the
+// stochastic target over the camera's target (after the skybox and opaque meshes) and writes
+// its depth, so everything drawn later depth-tests against the splats. The colour transform
+// the engine's own splat shader applies (gsplatOutputVS: tonemap and gamma, or the viewer's
+// pass-through patch under CameraFrame) runs here, once per pixel instead of once per splat.
+// The quad's position across the screen, 0 to 1 from the bottom left. The splat targets are read
+// through it rather than through the fragment's position: an XR eye may be rasterised at a
+// variable rate (visionOS draws a 4493x3604 viewport into a 1888x1792 texture), where a
+// fragment's pixel is not a fixed fraction of the screen
+const composeVaryingsWGSL = /* wgsl */ `
+varying screenPos: vec2f;
+`;
+const composeVertexWGSL = /* wgsl */ `
+attribute vertex_position: vec2f;
+${composeVaryingsWGSL}
+
+@vertex
+fn vertexMain(input: VertexInput) -> VertexOutput {
+    var output: VertexOutput;
+    output.position = vec4f(vertex_position, 0.0, 1.0);
+    output.screenPos = vertex_position * 0.5 + vec2f(0.5);
+    return output;
+}
+`;
+const composeFragmentWGSL = /* wgsl */ `
+#include "gsplatOutputVS"
+${composeVaryingsWGSL}
+
+var splatColor: texture_2d<f32>;
+var splatColorSampler: sampler;
+var splatDepth: texture_depth_2d;
+// the temporally accumulated frame (premultiplied colour, coverage), when taa ran this frame:
+// unorm16, or half floats (variant taaHistory, shaders/taa.ts)
+#ifdef SSE_TAA_HALF
+    var taaColor: texture_2d<f32>;
+#else
+    var taaColor: texture_2d<u32>;
+#endif
+// its depth record: the mean view depth of the pixel's samples and their count
+var taaInfo: texture_2d<u32>;
+// x: 1 when the splat target's rows run the other way to the camera target's; y: 1 for an
+// orthographic camera; z: 1 to read the taa history instead of the raw frame (w unused)
+uniform composeParams: vec4f;
+// the splat target's depth: clip z = a * viewDepth + b over w = viewDepth (x, y), and the
+// camera's near and far (z, w) for the depth view
+uniform depthViewParams: vec4f;
+// the camera's own depth, the one written for the rest of the scene: clip z = a * viewDepth + b
+// (x, y). The splat target's far plane is at infinity where the camera's is fitted to the scene
+uniform cameraClipZ: vec4f;
+// variant taaSharpen: x the strength of an unsharp mask on the history at display, y the sample
+// count at which it has faded out (a still camera's converged history needs none)
+uniform sharpenParams: vec4f;
+#ifdef SSE_WARP
+    // variant warp: the view's table (shaders/warp.ts)
+    var<storage, read> warpTable: array<f32>;
+    ${warpWGSL}
+#endif
+
+${taaHistoryWGSL}
+
+const FAR_DEPTH = 0.999999;
+
+// the splat target's depth texel of a view depth, just inside its far plane at most: the
+// raster clamps there too, since a depth of 1 reads as no sample
+fn clipZOf(viewDepth: f32) -> f32 {
+    let p = uniform.depthViewParams;
+    let w = select(viewDepth, 1.0, uniform.composeParams.y > 0.5);
+    return min(clamp(p.x * viewDepth + p.y, 0.0, w) / w, FAR_DEPTH);
+}
+
+// the view depth of a splat target depth texel
+fn viewDepthOf(z: f32) -> f32 {
+    let p = uniform.depthViewParams;
+    let dz = z - p.x;
+    let safeDz = select(dz, sign(dz) * 1e-9 + 1e-12, abs(dz) < 1e-9);
+    return select(p.y / safeDz, (z - p.y) / p.x, uniform.composeParams.y > 0.5);
+}
+
+// a splat target texel's depth: the nearest sample's, or 1 (the clear) where none landed
+fn sampleDepth(p: vec2i) -> f32 {
+    return textureLoad(splatDepth, p, 0);
+}
+
+// A splat target depth in the camera's depth, clamped just inside the camera's far plane as the
+// engine clamps its splats: splats beyond it stay behind everything the scene draws
+fn cameraDepthOf(z: f32) -> f32 {
+    let viewDepth = viewDepthOf(z);
+    let c = uniform.cameraClipZ;
+    let w = select(viewDepth, 1.0, uniform.composeParams.y > 0.5);
+    return min(clamp(c.x * viewDepth + c.y, 0.0, w) / w, FAR_DEPTH);
+}
+
+@fragment
+fn fragmentMain(input: FragmentInput) -> FragmentOutput {
+    var output: FragmentOutput;
+    let dims = vec2i(textureDimensions(splatColor));
+    // variant warp: the foveated target holds this pixel where the warp put it
+    #ifdef SSE_WARP
+        let screen = warpNdc(input.screenPos * 2.0 - vec2f(1.0)) * 0.5 + vec2f(0.5);
+    #else
+        let screen = input.screenPos;
+    #endif
+    // the splat target's texel under this fragment, rows from the top as the fragment's are
+    var pix = vec2i(floor(vec2f(screen.x, 1.0 - screen.y) * vec2f(dims)));
+    if (uniform.composeParams.x > 0.5) {
+        pix.y = dims.y - 1 - pix.y;
+    }
+    pix = clamp(pix, vec2i(0), dims - vec2i(1));
+
+    var depth = sampleDepth(pix);
+    var color: vec4f;
+    if (uniform.composeParams.z > 0.5) {
+        // the accumulated history: coverage in alpha, colour premultiplied by it
+        color = decodeColor(textureLoad(taaColor, pix, 0));
+        if (color.a > 0.001) {
+            let info = decodeInfo(textureLoad(taaInfo, pix, 0).x);
+            // Variant taaSharpen: an unsharp mask applied here at display, where nothing feeds back
+            // (a sharper kernel inside the accumulation diverges), to take back some of the blur
+            // the moving path's resampling compounds. The blur is a few pixels wide, so the mask
+            // takes its mean over a 5x5 tent; it fades out as the history lengthens toward a still
+            // camera's, which is sharp already
+            if (uniform.sharpenParams.x > 0.0 && info.count > 0.5) {
+                var mean = vec4f(0.0);
+                var weight = 0.0;
+                for (var dy = -2; dy <= 2; dy++) {
+                    for (var dx = -2; dx <= 2; dx++) {
+                        let w = f32((3 - abs(dx)) * (3 - abs(dy)));
+                        mean += decodeColor(textureLoad(taaColor, clamp(pix + vec2i(dx, dy), vec2i(0), dims - vec2i(1)), 0)) * w;
+                        weight += w;
+                    }
+                }
+                let k = uniform.sharpenParams.x * clamp(1.0 - info.count / max(uniform.sharpenParams.y, 1.0), 0.0, 1.0);
+                color += (color - mean / weight) * k;
+                let a = clamp(color.a, 0.0, 1.0);
+                color = vec4f(clamp(color.rgb, vec3f(0.0), vec3f(a)), a);
+            }
+            // The mean depth of the pixel's own samples wherever it has a history, rather than
+            // this frame's nearest sample: a faint splat in front takes a sample on a few frames
+            // only, so the depth would flicker between it and what lies behind, which a compositor
+            // reprojecting a late XR frame by depth shows as judder there, and which hides what
+            // is drawn after the splats on some frames only. For a history this frame started
+            // (moving, from the quad's samples), this frame's sample, or where none landed the
+            // nearest sampled neighbour's, so the pixel still occludes what is behind the splats
+            if (info.count > 0.5) {
+                depth = clipZOf(info.depth);
+            } else if (depth >= 1.0) {
+                for (var dy = -1; dy <= 1; dy++) {
+                    for (var dx = -1; dx <= 1; dx++) {
+                        depth = min(depth, sampleDepth(clamp(pix + vec2i(dx, dy), vec2i(0), dims - vec2i(1))));
+                    }
+                }
+            }
+        }
+    } else {
+        // the raw frame: the mean of each 2x2 quad, bilinearly interpolated between quad centres.
+        // A quad's four pixels take thresholds spread over [0, 1) (interleaved gradient noise, or
+        // the pixel sets' four quarters), so the mean is close to the splat's coverage. Empty
+        // texels are transparent black, so the result is premultiplied coverage
+        let size = vec2f(dims);
+        let u = (vec2f(pix) - vec2f(0.5)) * 0.5;
+        let q0 = floor(u);
+        let f = u - q0;
+        let uv = (q0 * 2.0 + vec2f(1.0)) / size;
+        let step = vec2f(2.0) / size;
+        let a = textureSampleLevel(splatColor, splatColorSampler, uv, 0.0);
+        let b = textureSampleLevel(splatColor, splatColorSampler, uv + vec2f(step.x, 0.0), 0.0);
+        let c = textureSampleLevel(splatColor, splatColorSampler, uv + vec2f(0.0, step.y), 0.0);
+        let d = textureSampleLevel(splatColor, splatColorSampler, uv + step, 0.0);
+        color = mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
+        if (depth >= 1.0) {
+            // no sample at this pixel but coverage from its quad: the quad's nearest depth
+            let quad = (pix >> vec2u(1u)) << vec2u(1u);
+            depth = min(
+                min(sampleDepth(quad), sampleDepth(min(quad + vec2i(1, 0), dims - 1))),
+                min(sampleDepth(min(quad + vec2i(0, 1), dims - 1)), sampleDepth(min(quad + vec2i(1, 1), dims - 1)))
+            );
+        }
+    }
+    if (color.a <= 0.001) {
+        discard;
+    }
+    // coverage with no depth anywhere near: shown, behind everything the scene drew
+    depth = min(depth, FAR_DEPTH);
+
+    #ifdef SSE_SHOW_DEPTH
+        // the nearest sample's view depth, log-spaced between near and far, as grey
+        let p = uniform.depthViewParams;
+        let viewDepth = viewDepthOf(depth);
+        let t = clamp(log(max(viewDepth, p.z) / p.z) / log(p.w / p.z), 0.0, 1.0);
+        // 24-bit fixed point across rgb (high byte in red), so a capture can read it precisely
+        let fixed = floor(t * 16777215.0);
+        let hi = floor(fixed / 65536.0);
+        let mid = floor((fixed - hi * 65536.0) / 256.0);
+        let lo = fixed - hi * 65536.0 - mid * 256.0;
+        output.color = vec4f(vec3f(hi, mid, lo) / 255.0, 1.0);
+        output.fragDepth = cameraDepthOf(depth);
+        return output;
+    #endif
+
+    // un-premultiply for the output transform, then premultiply for the blend
+    let gamma = color.rgb / color.a;
+    let rgb = prepareOutputFromGamma(gamma, 0.0);
+    output.color = vec4f(rgb * color.a, color.a);
+    output.fragDepth = cameraDepthOf(depth);
+    return output;
+}
+`;
+
+// Variant coverage:interleaved: the four pixel sets' targets, each the full target's pixels of
+// one position in the 2x2 quad, copied back into the full target texel for texel, colour and
+// depth, so the compose and the occlusion grid read one ordinary frame. Only without taa, or
+// with the small splats drawn per splat into the full target (variant interleaveArea): the
+// accumulation otherwise reads the sets itself and writes their depth (shaders/taa.ts). The copy
+// depth-tests, so it runs after the small splats: a frag_depth draw first in a pass disables
+// early depth rejection for the draws after it on Mali (3-5 ms on the Pixel 7 Pro).
+const interleaveFragmentWGSL = /* wgsl */ `
+var setColor0: texture_2d<f32>;
+var setColor1: texture_2d<f32>;
+var setColor2: texture_2d<f32>;
+var setColor3: texture_2d<f32>;
+var setDepth0: texture_depth_2d;
+var setDepth1: texture_depth_2d;
+var setDepth2: texture_depth_2d;
+var setDepth3: texture_depth_2d;
+
+@fragment
+fn fragmentMain(input: FragmentInput) -> FragmentOutput {
+    var output: FragmentOutput;
+    let pix = vec2i(pcPosition.xy);
+    let texel = pix >> vec2u(1u);
+    let index = (pix.x & 1) + (pix.y & 1) * 2;
+    var color: vec4f;
+    var depth: f32;
+    if (index == 0) {
+        color = textureLoad(setColor0, texel, 0);
+        depth = textureLoad(setDepth0, texel, 0);
+    } else if (index == 1) {
+        color = textureLoad(setColor1, texel, 0);
+        depth = textureLoad(setDepth1, texel, 0);
+    } else if (index == 2) {
+        color = textureLoad(setColor2, texel, 0);
+        depth = textureLoad(setDepth2, texel, 0);
+    } else {
+        color = textureLoad(setColor3, texel, 0);
+        depth = textureLoad(setDepth3, texel, 0);
+    }
+    output.color = color;
+    output.fragDepth = depth;
+    return output;
+}
+`;
+
+// The ordering passes: the projector counts its survivors into 256 depth buckets, front to
+// back; a one-workgroup scan turns the counts into bucket offsets, and the scatter writes each
+// survivor's cache slot into the ordered list the raster then follows. Splats inside a bucket
+// land in append order, so a bucket keeps its chunks' locality.
+// exclusive prefix sum of the bucket counts into the bucket offsets, in one workgroup
+const orderScanWGSL = /* wgsl */ `
+// [0, ${ORDER_BUCKETS}) counts, [${ORDER_BUCKETS}, ${2 * ORDER_BUCKETS}) offsets
+@group(0) @binding(0) var<storage, read_write> buckets: array<u32>;
+
+var<workgroup> partial: array<u32, ${ORDER_BUCKETS}>;
+
+@compute @workgroup_size(${ORDER_BUCKETS})
+fn main(@builtin(local_invocation_index) local: u32) {
+    partial[local] = buckets[local];
+    for (var stride = 1u; stride < ${ORDER_BUCKETS}u; stride <<= 1u) {
+        workgroupBarrier();
+        let value = select(0u, partial[local - stride], local >= stride);
+        workgroupBarrier();
+        partial[local] += value;
+    }
+    // inclusive to exclusive
+    buckets[${ORDER_BUCKETS}u + local] = partial[local] - buckets[local];
+}
+`;
+// One thread per cache slot, one workgroup per 256 consecutive slots. Consecutive slots come
+// from one chunk, so a workgroup touches few buckets: it counts them locally, claims each
+// bucket's range with one global atomic, and places its splats in append order inside it.
+const orderScatterWGSL = /* wgsl */ `
+@group(0) @binding(0) var<storage, read> counter: array<u32>;
+@group(0) @binding(1) var<storage, read> cache: array<u32>;
+@group(0) @binding(2) var<storage, read_write> buckets: array<atomic<u32>>;
+@group(0) @binding(3) var<storage, read_write> ordered: array<u32>;
+
+var<workgroup> wgCounts: array<atomic<u32>, ${ORDER_BUCKETS}>;
+var<workgroup> wgBase: array<u32, ${ORDER_BUCKETS}>;
+
+@compute @workgroup_size(${ORDER_BUCKETS})
+fn main(
+    @builtin(workgroup_id) wg: vec3u,
+    @builtin(num_workgroups) numWorkgroups: vec3u,
+    @builtin(local_invocation_index) local: u32
+) {
+    // no early returns: the barriers need every thread
+    atomicStore(&wgCounts[local], 0u);
+    let slot = (wg.x + wg.y * numWorkgroups.x) * ${ORDER_BUCKETS}u + local;
+    let live = slot < counter[0];
+    var key = 0u;
+    var rank = 0u;
+    workgroupBarrier();
+    if (live) {
+        key = cache[slot * ${CACHE_WORDS}u + 3u] >> 24u;
+        rank = atomicAdd(&wgCounts[key], 1u);
+    }
+    workgroupBarrier();
+    let count = atomicLoad(&wgCounts[local]);
+    if (count > 0u) {
+        wgBase[local] = atomicAdd(&buckets[${ORDER_BUCKETS}u + local], count);
+    }
+    workgroupBarrier();
+    if (live) {
+        ordered[wgBase[key] + rank] = slot;
+    }
+}
+`;
+// Variant coverage:interleaved: the same, with an entry for each pixel set a survivor keeps
+// pixels in (the nibbles of its cache word 5), in that set's buckets, or one entry in the full
+// target's group for a splat drawn per splat (bit 15), so each group's entries are one
+// contiguous range of the ordered list, front to back
+const orderScatterSetsWGSL = /* wgsl */ `
+@group(0) @binding(0) var<storage, read> counter: array<u32>;
+@group(0) @binding(1) var<storage, read> cache: array<u32>;
+@group(0) @binding(2) var<storage, read_write> buckets: array<atomic<u32>>;
+@group(0) @binding(3) var<storage, read_write> ordered: array<u32>;
+
+var<workgroup> wgCounts: array<atomic<u32>, ${ORDER_BUCKETS}>;
+var<workgroup> wgBase: array<u32, ${ORDER_BUCKETS}>;
+
+@compute @workgroup_size(${ORDER_BUCKETS})
+fn main(
+    @builtin(workgroup_id) wg: vec3u,
+    @builtin(num_workgroups) numWorkgroups: vec3u,
+    @builtin(local_invocation_index) local: u32
+) {
+    // no early returns: the barriers need every thread
+    atomicStore(&wgCounts[local], 0u);
+    let slot = (wg.x + wg.y * numWorkgroups.x) * ${ORDER_BUCKETS}u + local;
+    let live = slot < counter[0];
+    // bit g: an entry in group g
+    var groups = 0u;
+    var keys = array<u32, ${SET_GROUPS}>();
+    var ranks = array<u32, ${SET_GROUPS}>();
+    workgroupBarrier();
+    if (live) {
+        let depthKey = ((cache[slot * ${CACHE_WORDS}u + 3u] >> 24u) * ${SET_BUCKETS}u) >> 8u;
+        let word5 = cache[slot * ${CACHE_WORDS}u + 5u];
+        if ((word5 & ${FULL_ENTRY_BIT}u) != 0u) {
+            groups = 1u << 4u;
+        } else {
+            for (var s = 0u; s < 4u; s++) {
+                groups |= ((word5 >> (16u + 4u * s)) & 1u) << s;
+            }
+        }
+        for (var g = 0u; g < ${SET_GROUPS}u; g++) {
+            if (((groups >> g) & 1u) != 0u) {
+                keys[g] = g * ${SET_BUCKETS}u + depthKey;
+                ranks[g] = atomicAdd(&wgCounts[keys[g]], 1u);
+            }
+        }
+    }
+    workgroupBarrier();
+    let count = atomicLoad(&wgCounts[local]);
+    if (count > 0u) {
+        wgBase[local] = atomicAdd(&buckets[${ORDER_BUCKETS}u + local], count);
+    }
+    workgroupBarrier();
+    if (live) {
+        for (var g = 0u; g < ${SET_GROUPS}u; g++) {
+            if (((groups >> g) & 1u) != 0u) {
+                ordered[wgBase[keys[g]] + ranks[g]] = slot;
+            }
+        }
+    }
+}
+`;
+
+// The raster pass: an indirect instanced draw of 128-quad meshes over the projector's
+// survivors, into the renderer's own colour + depth target. Fragments keep themselves with
+// probability alpha (StochasticSplats, Listing 1) and write opaque colour with hardware depth,
+// so no sort is needed and the depth buffer holds the nearest surviving sample per pixel.
+/** Quads per draw instance; the mesh holds this many quads. */
+const QUADS_PER_INSTANCE = 128;
+/** The raster's far clamp in normalised depth: just inside 1, which the compose reads as empty. */
+const FAR_CLIP_Z = 0.999999;
+// the raster's varyings, shared by both stages: the opacity sits in packedAlpha's low 8 bits
+// and the splat's seed, hashed once per vertex, in the high 24, so no splat id needs to reach
+// the fragment
+const varyingsWGSL = /* wgsl */ `
+varying @interpolate(linear) gaussianUV: vec2f;
+varying @interpolate(flat, either) packedColor: u32;
+varying @interpolate(flat, either) packedAlpha: u32;
+#ifdef SSE_JITTER
+    // variant jitter, as floats so the fragment converts nothing: x the stratum's base
+    // threshold, y the entry's key for the jitter pattern, z the opacity
+    varying @interpolate(flat, either) jitterVary: vec4f;
+#endif
+`;
+// integer hash (Wellons' prospector mix)
+const hashWGSL = /* wgsl */ `
+fn hashU32(x: u32) -> u32 {
+    var v = x;
+    v ^= v >> 16u;
+    v *= 0x7feb352du;
+    v ^= v >> 15u;
+    v *= 0x846ca68bu;
+    v ^= v >> 16u;
+    return v;
+}
+`;
+const rasterVertexWGSL = /* wgsl */ `
+attribute vertex_position: vec3f;
+
+// width, height, 2 / width, 2 / height
+uniform viewportSize: vec4f;
+// clip z = a * viewDepth + b (x, y); z = 1 for an orthographic camera
+uniform clipZParams: vec4f;
+// set by the engine's forward renderer for the target being rendered
+uniform projectionFlipY: f32;
+// the fragment shader's alpha clip, which also bounds the quad
+uniform sseAlphaClip: f32;
+
+var<storage, read> splatCache: array<u32>;
+var<storage, read> splatCount: array<u32>;
+// cache slots in draw order (shaders/order.ts)
+var<storage, read> orderedSlots: array<u32>;
+#ifdef SSE_INTERLEAVED
+    // variant coverage:interleaved: the draw group this draw renders (0-3 the pixel sets, 4 the
+    // full target's small splats), its range of the ordered list, and the map from the full
+    // target's clip x and y (over w) into the group's target
+    uniform setIndex: u32;
+    uniform setMap: vec4f;
+    var<storage, read> setRanges: array<vec2u>;
+#endif
+#ifdef SSE_STEREO
+    // variant stereo: one projection serves both eyes; the second draws each splat at its own
+    // centre with its own quad (shaders/projector.ts), from the three words per cache slot that
+    // follow the entries
+    uniform stereoEye: u32;
+    uniform stereoBase: u32;
+#endif
+#ifdef SSE_COVERAGE_SPLAT
+    // x: the sub-strata a stratum splits into (variant jitter; 0: no jitter), y: the strata this
+    // draw's thresholds come from, z: 1 / (strata * sub-strata), the width of a pixel's jitter,
+    // w: the square's circumradius over the ellipse's (area matched, or containing it with jitter)
+    uniform jitterParams: vec4f;
+#endif
+
+// screen-linear: the corners share one screen footprint whatever depth they carry
+${varyingsWGSL}
+// the splat's share of the coverage hash, once per vertex rather than per fragment
+uniform frameSeed: u32;
+${hashWGSL}
+
+const discardPosition = vec4f(0.0, 0.0, 2.0, 1.0);
+
+#ifdef SSE_COVERAGE_SPLAT
+    // the radius, in units of the quad's half extent, where alpha = opacity * falloff(r^2) falls
+    // to a threshold (the projector's radiusAt)
+    fn radiusAt(threshold: f32, opacity: f32) -> f32 {
+        let e4 = exp(-4.0);
+        return sqrt(max(-log(threshold / opacity * (1.0 - e4) + e4) * 0.25, 0.0));
+    }
+#endif
+
+@vertex
+fn vertexMain(input: VertexInput) -> VertexOutput {
+    var output: VertexOutput;
+    #ifdef SSE_INTERLEAVED
+        let range = setRanges[uniform.setIndex];
+        let order = range.x + pcInstanceIndex * ${QUADS_PER_INSTANCE}u + u32(vertex_position.z);
+        if (order >= range.y) {
+            output.position = discardPosition;
+            return output;
+        }
+    #else
+        let order = pcInstanceIndex * ${QUADS_PER_INSTANCE}u + u32(vertex_position.z);
+        // the indirect instance count rounds up to whole instances; the tail is discarded here
+        if (order >= splatCount[0]) {
+            output.position = discardPosition;
+            return output;
+        }
+    #endif
+    let base = orderedSlots[order] * ${CACHE_WORDS}u;
+    let maxRadius = min(1024.0, min(uniform.viewportSize.x, uniform.viewportSize.y));
+    let ndcRange = vec2f(1.0) + vec2f(4.0 * maxRadius) / uniform.viewportSize.xy;
+    var ndc = unpack2x16snorm(splatCache[base]) * ndcRange;
+    let depth = bitcast<f32>(splatCache[base + 1u]);
+    let ortho = uniform.clipZParams.z != 0.0;
+
+    var axis1 = unpack2x16float(splatCache[base + 2u]);
+    let word3 = splatCache[base + 3u];
+    var len2 = unpack2x16float(word3).x;
+    #ifdef SSE_STEREO
+        if (uniform.stereoEye != 0u) {
+            let stereoWord = uniform.stereoBase + orderedSlots[order] * 3u;
+            ndc = unpack2x16snorm(splatCache[stereoWord]) * ndcRange;
+            axis1 = unpack2x16float(splatCache[stereoWord + 1u]);
+            len2 = unpack2x16float(splatCache[stereoWord + 2u]).x;
+        }
+    #endif
+    let axis2 = len2 * normalize(vec2f(axis1.y, -axis1.x));
+
+    #ifdef SSE_COVERAGE_SPLAT
+        // Coverage other than pixel: the projector kept only the splats with pixels to keep this
+        // frame and stored the full quad's axes; the square of the pixels this draw keeps is
+        // sized here from its threshold, rebuilt from cache word 5 as the projector built it
+        // (shaders/projector.ts): the splat's 15-bit draw, and a nibble per draw group holding
+        // the stratum and sub-stratum of the jittered modes
+        let word5 = splatCache[base + 5u];
+        let opacityS = f32((word3 >> 16u) & 0xffu) / 255.0;
+        let drawn = f32(word5 & ${(1 << DRAW_BITS) - 1}u) * (1.0 / ${(1 << DRAW_BITS) - 1}.0);
+        #ifdef SSE_INTERLEAVED
+            let group = uniform.setIndex;
+            let fullGroup = group == 4u;
+            let nibble = (word5 >> (16u + 4u * select(group, 0u, fullGroup))) & 0xfu;
+            // the sets' thresholds are the four quarters from the draw; the full target's is the draw
+            let plain = select(fract(drawn + f32(group) * 0.25), drawn, fullGroup);
+        #else
+            let nibble = (word5 >> 16u) & 0xfu;
+            let plain = drawn;
+        #endif
+        let subs = uniform.jitterParams.x;
+        // jittered: the base of the stratum (and sub-stratum) the nibble names; its index goes to
+        // the fragment, which adds the pixel's own jitter within it
+        let strataIndex = f32((nibble >> 1u) & 3u) * subs + f32(nibble >> 3u);
+        let threshold = max(select(plain, strataIndex * uniform.jitterParams.z, subs > 0.0), uniform.sseAlphaClip);
+        let polygonRadius = radiusAt(threshold, opacityS) * uniform.jitterParams.w;
+        #ifdef SSE_POLYGON_ROTATE
+            // without jitter the square is turned by a fresh angle every frame, so over frames
+            // the kept region averages to the ellipse rather than to the square's corners
+            let turn = f32(hashU32(order ^ uniform.frameSeed)) * (6.2831853 / 4294967296.0);
+            let cs = vec2f(cos(turn), sin(turn));
+            let unit = vec2f(
+                vertex_position.x * cs.x - vertex_position.y * cs.y,
+                vertex_position.x * cs.y + vertex_position.y * cs.x
+            );
+        #else
+            let unit = vertex_position.xy;
+        #endif
+        let corner = unit * polygonRadius;
+    #else
+        // shrink the quad to where alpha falls below the clip, as the engine's clipCorner does:
+        // the fragment shader discards everything outside it anyway, but still pays to shade it
+        let opacity = f32((word3 >> 16u) & 0xffu) / 255.0;
+        let corner = vertex_position.xy * min(1.0, sqrt(max(0.0, log(opacity / uniform.sseAlphaClip))) * 0.5);
+    #endif
+    let pixelOffset = corner.x * axis1 + corner.y * axis2;
+    let w = select(depth, 1.0, ortho);
+    let ndcCorner = ndc + pixelOffset * uniform.viewportSize.zw;
+    // clip z clamped into range like the engine's splat shader, so splats beyond the far plane
+    // still draw; just inside it, since the compose and the accumulation read depth 1 as empty
+    let pos = vec4f(ndcCorner * w, clamp(uniform.clipZParams.x * depth + uniform.clipZParams.y, 0.0, w * ${FAR_CLIP_Z}), w);
+    output.position = vec4f(pos.x, pos.y * uniform.projectionFlipY, pos.z, pos.w);
+    #ifdef SSE_INTERLEAVED
+        // into the set's own target, in framebuffer space: the full target's pixel (2i + x, 2j + y)
+        // for set (x, y) is the set's pixel (i, j), so the interleave can copy texel for texel
+        output.position = vec4f(
+            uniform.setMap.x * output.position.x + uniform.setMap.y * w,
+            uniform.setMap.z * output.position.y + uniform.setMap.w * w,
+            output.position.z,
+            w
+        );
+    #endif
+    output.gaussianUV = corner;
+    output.packedColor = splatCache[base + 4u];
+    #ifdef SSE_JITTER
+        // the stratum's base threshold for the fragment's test, and a per-entry key that rotates
+        // its jitter pattern, so overlapping splats' jitters are independent
+        let entryKey = hashU32(order ^ uniform.frameSeed);
+        output.jitterVary = vec4f(strataIndex * uniform.jitterParams.z, f32(entryKey >> 8u) * (1.0 / 16777216.0), opacityS, 0.0);
+        output.packedAlpha = word3 >> 16u;
+    #else
+        let seed = hashU32(((splatCache[base + 5u] + 1u) * 26699u) ^ uniform.frameSeed);
+        output.packedAlpha = ((word3 >> 16u) & 0xffu) | (seed & 0xffffff00u);
+    #endif
+    return output;
+}
+`;
+const rasterFragmentWGSL = /* wgsl */ `
+${varyingsWGSL}
+
+uniform sseAlphaClip: f32;
+#ifdef SSE_JITTER
+    // z: the width of a pixel's jitter, 1 / (strata * sub-strata) (see the vertex stage)
+    uniform jitterParams: vec4f;
+#endif
+
+const EXP4 = exp(-4.0);
+const INV_EXP4 = 1.0 / (1.0 - EXP4);
+
+// the engine's falloff: zero at the quad edge, which sits at 2 sqrt(2) sigma
+fn falloff(x: f32) -> f32 {
+    return (exp(x * -4.0) - EXP4) * INV_EXP4;
+}
+
+@fragment
+fn fragmentMain(input: FragmentInput) -> FragmentOutput {
+    var output: FragmentOutput;
+    #ifdef SSE_COVERAGE_SPLAT
+        #ifdef SSE_JITTER
+            // Variant jitter: the square contains the stratum's ellipse, and the fragment keeps
+            // itself where alpha exceeds the stratum's base plus its own jitter within the
+            // stratum: interleaved gradient noise rotated by the entry's key, as the per-pixel
+            // raster's. The test discards the square's corners too (alpha is negative past the
+            // quad's edge), so the kept region is the exact ellipse with a dithered rim
+            let alphaJ = falloff(dot(gaussianUV, gaussianUV)) * jitterVary.z;
+            let ignJ = fract(52.9829189 * fract(dot(pcPosition.xy, vec2f(0.06711056, 0.00583715))));
+            let thresholdJ = jitterVary.x + fract(ignJ + jitterVary.y) * uniform.jitterParams.z;
+            if (alphaJ <= max(thresholdJ, uniform.sseAlphaClip)) {
+                discard;
+            }
+        #endif
+        // the square is the kept coverage, so every fragment is kept
+        let bits = packedColor;
+    #else
+        let radius = dot(gaussianUV, gaussianUV);
+        if (radius > 1.0) {
+            discard;
+        }
+        let opacity = f32(packedAlpha & 0xffu) / 255.0;
+        let alpha = falloff(radius) * opacity;
+        if (alpha < uniform.sseAlphaClip) {
+            discard;
+        }
+
+        // the coverage threshold: interleaved gradient noise (Jimenez 2014) rotated by the
+        // splat's seed, float only, with no integer multiplies, which mobile gpus run at a
+        // fraction of the float rate; the rotation changes every frame with the seed
+        let ign = fract(52.9829189 * fract(dot(pcPosition.xy, vec2f(0.06711056, 0.00583715))));
+        let rnd = fract(ign + f32(packedAlpha >> 8u) * (1.0 / 16777216.0));
+        if (rnd >= alpha) {
+            discard;
+        }
+        let bits = packedColor;
+    #endif
+
+    let color = vec3f(vec3u(bits, bits >> 10u, bits >> 20u) & vec3u(1023u)) * (f32(1u << (bits >> 30u)) / 1023.0);
+    // opaque coverage: the compose reads alpha 1 as "a sample landed here"
+    output.color = vec4f(color, 1.0);
+    return output;
+}
+`;
+
+// The occlusion grid: the previous frame's depth texture reduced to the farthest depth per 8x8
+// pixel block (level 1), and the farthest of each 4x4 group of those (level 2, 32 px). Each
+// pixel's depth is the nearest surviving sample there, so a block's maximum bounds what could
+// still have shown behind it; a splat whose front lies beyond that bound over every block it
+// covers was invisible last frame. Depths are hardware z in [0, 1], stored as their f32 bits
+// (non-negative floats order the same as their bits, so atomicMax works on them). Both levels
+// share one buffer, level 2 after level 1, so a projector binds a view's grid once.
+const reduceL1WGSL = /* wgsl */ `
+struct ReduceUniforms {
+    width: u32,
+    height: u32,
+    blocksX: u32,
+    blocksY: u32
+}
+
+@group(0) @binding(0) var prevDepth: texture_depth_2d;
+@group(0) @binding(1) var<storage, read_write> blockMax: array<u32>;
+@group(0) @binding(2) var<uniform> uniforms: ReduceUniforms;
+
+var<workgroup> wgMax: atomic<u32>;
+
+@compute @workgroup_size(8, 8)
+fn main(
+    @builtin(workgroup_id) wg: vec3u,
+    @builtin(local_invocation_id) lid: vec3u,
+    @builtin(local_invocation_index) li: u32
+) {
+    let pixel = wg.xy * 8u + lid.xy;
+    // pixels off the texture count as far, so an edge block never culls
+    var depth = 1.0;
+    if (pixel.x < uniforms.width && pixel.y < uniforms.height) {
+        depth = textureLoad(prevDepth, vec2i(pixel), 0);
+    }
+    atomicMax(&wgMax, bitcast<u32>(depth));
+    workgroupBarrier();
+    if (li == 0u) {
+        blockMax[wg.y * uniforms.blocksX + wg.x] = atomicLoad(&wgMax);
+    }
+}
+`;
+const reduceL2WGSL = /* wgsl */ `
+struct ReduceUniforms {
+    blocksX1: u32,
+    blocksY1: u32,
+    blocksX2: u32,
+    blocksY2: u32
+}
+
+// level 1, then level 2 from blocksX1 * blocksY1
+@group(0) @binding(0) var<storage, read_write> grid: array<u32>;
+@group(0) @binding(1) var<uniform> uniforms: ReduceUniforms;
+
+@compute @workgroup_size(64)
+fn main(@builtin(global_invocation_id) gid: vec3u) {
+    let index = gid.x;
+    if (index >= uniforms.blocksX2 * uniforms.blocksY2) {
+        return;
+    }
+    let bx = index % uniforms.blocksX2;
+    let by = index / uniforms.blocksX2;
+    var farthest = 0u;
+    for (var dy = 0u; dy < 4u; dy++) {
+        for (var dx = 0u; dx < 4u; dx++) {
+            let x = bx * 4u + dx;
+            let y = by * 4u + dy;
+            if (x < uniforms.blocksX1 && y < uniforms.blocksY1) {
+                farthest = max(farthest, grid[y * uniforms.blocksX1 + x]);
+            } else {
+                farthest = max(farthest, bitcast<u32>(1.0));
+            }
+        }
+    }
+    grid[uniforms.blocksX1 * uniforms.blocksY1 + index] = farthest;
+}
+`;
+
+// The direct source's layout for sog v2 files: a resident file's six RGBA8 textures repacked
+// once into one RGBA32U texel of geometry per splat and one R32U texel of sh0 indices, so the
+// projector reads one texel for every active splat and the second only for survivors.
+// The payload is the file's own bytes, so the decode below is the engine's sog read code
+// (shader-lib/wgsl/chunks/gsplat/vert/formats/sog.js) over different words.
+//
+// Geometry word layout: x = mean x | mean y << 16 (16-bit, as the file stores them);
+// y = mean z | quaternion bytes x, y << 16; z = quaternion bytes z, w | scale indices x, y << 16;
+// w = scale index z | opacity << 8 | sh palette label << 16.
+const repackWGSL = /* wgsl */ `
+@group(0) @binding(0) var means_l: texture_2d<f32>;
+@group(0) @binding(1) var means_u: texture_2d<f32>;
+@group(0) @binding(2) var quats: texture_2d<f32>;
+@group(0) @binding(3) var scales: texture_2d<f32>;
+@group(0) @binding(4) var sh0: texture_2d<f32>;
+@group(0) @binding(5) var sh_labels: texture_2d<f32>;
+@group(0) @binding(6) var outGeom: texture_storage_2d<rgba32uint, write>;
+@group(0) @binding(7) var outColor: texture_storage_2d<r32uint, write>;
+
+fn bytesOf(v: vec4f) -> vec4u {
+    return vec4u(v * 255.0 + 0.5);
+}
+
+@compute @workgroup_size(16, 16)
+fn main(@builtin(global_invocation_id) id: vec3u) {
+    let dims = textureDimensions(means_l);
+    if (id.x >= dims.x || id.y >= dims.y) {
+        return;
+    }
+    let p = vec2i(id.xy);
+    let l = bytesOf(textureLoad(means_l, p, 0));
+    let u = bytesOf(textureLoad(means_u, p, 0));
+    let q = bytesOf(textureLoad(quats, p, 0));
+    let s = bytesOf(textureLoad(scales, p, 0));
+    let c = bytesOf(textureLoad(sh0, p, 0));
+    let lab = bytesOf(textureLoad(sh_labels, p, 0));
+    let geom = vec4u(
+        (l.x | (u.x << 8u)) | ((l.y | (u.y << 8u)) << 16u),
+        (l.z | (u.z << 8u)) | (q.x << 16u) | (q.y << 24u),
+        q.z | (q.w << 8u) | (s.x << 16u) | (s.y << 24u),
+        s.z | (c.w << 8u) | ((lab.x | (lab.y << 8u)) << 16u)
+    );
+    textureStore(outGeom, p, geom);
+    textureStore(outColor, p, vec4u(c.x | (c.y << 8u) | (c.z << 16u), 0u, 0u, 0u));
+}
+`;
+// The sh palette decoded once through the codebook, packed 11/11/10 bits a texel over the
+// file's codebook range (the engine's own per-splat packing): the original palette's 4 bytes a
+// texel, and a survivor's coefficient reads need no codebook lookups. The range is a uniform,
+// so each file's decode needs its own compute.
+const decodeSHWGSL = /* wgsl */ `
+struct DecodeUniforms {
+    shRange: vec4f
+}
+@group(0) @binding(0) var<uniform> uniforms: DecodeUniforms;
+@group(0) @binding(1) var sh_centroids: texture_2d<f32>;
+@group(0) @binding(2) var sogCodebook: texture_2d<f32>;
+@group(0) @binding(3) var outSH: texture_storage_2d<r32uint, write>;
+
+@compute @workgroup_size(16, 16)
+fn main(@builtin(global_invocation_id) id: vec3u) {
+    let dims = textureDimensions(sh_centroids);
+    if (id.x >= dims.x || id.y >= dims.y) {
+        return;
+    }
+    let p = vec2i(id.xy);
+    let idx = vec3i(textureLoad(sh_centroids, p, 0).xyz * 255.0 + 0.5);
+    let value = vec3f(
+        textureLoad(sogCodebook, vec2i(idx.x, 0), 0).b,
+        textureLoad(sogCodebook, vec2i(idx.y, 0), 0).b,
+        textureLoad(sogCodebook, vec2i(idx.z, 0), 0).b
+    );
+    // x and z take 11 bits, y 10, as the engine's own packing
+    let n = clamp((value - uniforms.shRange.x) / uniforms.shRange.y, vec3f(0.0), vec3f(1.0));
+    let q = vec3u(n * vec3f(2047.0, 1023.0, 2047.0) + 0.5);
+    textureStore(outSH, p, vec4u((q.x << 21u) | (q.y << 11u) | q.z, 0u, 0u, 0u));
+}
+`;
+// The inverse of the repack, for handing a file back to the engine's renderer: the engine's
+// textures again, byte for byte where its read code reads them (the means' and scales' fourth
+// bytes and the labels' last two are not kept, and come back 0). Each texture's bytes from the
+// geometry word g and the colour word c
+const UNPACK_BYTES = {
+    means_l: 'byteOf(g.x, 0u), byteOf(g.x, 2u), byteOf(g.y, 0u), 0u',
+    means_u: 'byteOf(g.x, 1u), byteOf(g.x, 3u), byteOf(g.y, 1u), 0u',
+    quats: 'byteOf(g.y, 2u), byteOf(g.y, 3u), byteOf(g.z, 0u), byteOf(g.z, 1u)',
+    scales: 'byteOf(g.z, 2u), byteOf(g.z, 3u), byteOf(g.w, 0u), 0u',
+    sh0: 'byteOf(c, 0u), byteOf(c, 1u), byteOf(c, 2u), byteOf(g.w, 1u)',
+    sh_labels: 'byteOf(g.w, 2u), byteOf(g.w, 3u), 0u, 0u'
+};
+// the unpack writing `outputs`, names of UNPACK_BYTES
+const unpackWGSL = (outputs) => /* wgsl */ `
+@group(0) @binding(0) var packedGeom: texture_2d<u32>;
+@group(0) @binding(1) var packedColor: texture_2d<u32>;
+${outputs.map((name, i) => `@group(0) @binding(${i + 2}) var ${name}: texture_storage_2d<rgba8unorm, write>;`).join('\n')}
+
+// byte i of a word
+fn byteOf(v: u32, i: u32) -> u32 {
+    return (v >> (i * 8u)) & 255u;
+}
+
+fn toUnorm(b: vec4u) -> vec4f {
+    return vec4f(b) / 255.0;
+}
+
+@compute @workgroup_size(16, 16)
+fn main(@builtin(global_invocation_id) id: vec3u) {
+    let dims = textureDimensions(packedGeom);
+    if (id.x >= dims.x || id.y >= dims.y) {
+        return;
+    }
+    let p = vec2i(id.xy);
+    let g = textureLoad(packedGeom, p, 0);
+    let c = textureLoad(packedColor, p, 0).r;
+${outputs.map((name) => `    textureStore(${name}, p, toUnorm(vec4u(${UNPACK_BYTES[name]})));`).join('\n')}
+}
+`;
+// The inverse of the palette decode: each 11/11/10-bit coefficient back to a codebook index,
+// through a table of the entry nearest each level (row 0 the 11-bit levels, row 1 the 10-bit).
+// Exact unless two entries round to one level, where the entry found is within a level of the
+// file's
+const encodeSHWGSL = /* wgsl */ `
+@group(0) @binding(0) var decodedSH: texture_2d<u32>;
+@group(0) @binding(1) var levelIndices: texture_2d<u32>;
+@group(0) @binding(2) var sh_centroids: texture_storage_2d<rgba8unorm, write>;
+
+@compute @workgroup_size(16, 16)
+fn main(@builtin(global_invocation_id) id: vec3u) {
+    let dims = textureDimensions(decodedSH);
+    if (id.x >= dims.x || id.y >= dims.y) {
+        return;
+    }
+    let p = vec2i(id.xy);
+    let v = textureLoad(decodedSH, p, 0).r;
+    let x = textureLoad(levelIndices, vec2i(i32(v >> 21u), 0), 0).r;
+    let y = textureLoad(levelIndices, vec2i(i32((v >> 11u) & 1023u), 1), 0).r;
+    let z = textureLoad(levelIndices, vec2i(i32(v & 2047u), 0), 0).r;
+    textureStore(sh_centroids, p, vec4f(vec3f(f32(x), f32(y), f32(z)) / 255.0, 0.0));
+}
+`;
+// the projector's read chunk over the packed textures and the decoded palette; `bands` is the
+// file's sh band count, the palette stride
+const packedReadWGSL = (bindingBase, bands) => /* wgsl */ `
+#include "halfTypesCS"
+#include "gsplatEvalSHVS"
+@group(0) @binding(${bindingBase}) var packedGeom: texture_2d<u32>;
+@group(0) @binding(${bindingBase + 1}) var packedColor: texture_2d<u32>;
+${bands > 0 ? `@group(0) @binding(${bindingBase + 2}) var sh_centroids: texture_2d<u32>;` : ''}
+@group(0) @binding(${bindingBase + (bands > 0 ? 3 : 2)}) var sogCodebook: texture_2d<f32>;
+uniform means_mins: vec3f;
+uniform means_maxs: vec3f;
+${bands > 0 ? 'uniform shRange: vec4f;' : ''}
+
+const SH_C0: f32 = 0.28209479177387814;
+const PACK_NORM: f32 = sqrt(2.0);
+// the file's coefficients per palette entry: the stride of the centroid texture
+const SH_STRIDE: i32 = ${[0, 3, 8, 15][bands]};
+
+fn lutScales(b: i32) -> f32 { return textureLoad(sogCodebook, vec2i(b, 0), 0).r; }
+fn lutSh0(b: i32) -> f32 { return textureLoad(sogCodebook, vec2i(b, 0), 0).g; }
+
+var<private> packedG: vec4u;
+var<private> srcWorldCenter: vec3f;
+
+fn quatMulF(a: vec4f, b: vec4f) -> vec4f {
+    return vec4f(a.w * b.xyz + b.w * a.xyz + cross(a.xyz, b.xyz), a.w * b.w - dot(a.xyz, b.xyz));
+}
+
+// v rotated by the inverse of q (x, y, z, w)
+fn quatRotateInvF(q: vec4f, v: vec3f) -> vec3f {
+    let u = -q.xyz;
+    return v + 2.0 * cross(u, cross(u, v) + q.w * v);
+}
+
+// the one read every active splat makes
+fn srcCenter() -> vec3f {
+    packedG = textureLoad(packedGeom, splat.uv, 0);
+    let n = vec3f(f32(packedG.x & 0xffffu), f32(packedG.x >> 16u), f32(packedG.y & 0xffffu)) / 65535.0;
+    let v = mix(uniform.means_mins, uniform.means_maxs, n);
+    srcWorldCenter = (uniforms.model * vec4f(sign(v) * (exp(abs(v)) - 1.0), 1.0)).xyz;
+    return srcWorldCenter;
+}
+
+fn srcOpacity() -> f32 {
+    return f32((packedG.w >> 8u) & 0xffu) / 255.0;
+}
+
+// the file stores three components and the omitted axis; the engine's getRotation
+fn srcRotation() -> vec4f {
+    let qb = vec4u((packedG.y >> 16u) & 0xffu, packedG.y >> 24u, packedG.z & 0xffu, (packedG.z >> 8u) & 0xffu);
+    let abc = (vec3f(qb.xyz) / 255.0 - 0.5) * PACK_NORM;
+    let d = sqrt(max(0.0, 1.0 - dot(abc, abc)));
+    let qmode = qb.w - 252u;
+    var quat: vec4f;
+    if (qmode == 0u) {
+        quat = vec4f(d, abc);
+    } else if (qmode == 1u) {
+        quat = vec4f(abc.x, d, abc.y, abc.z);
+    } else if (qmode == 2u) {
+        quat = vec4f(abc.x, abc.y, d, abc.z);
+    } else {
+        quat = vec4f(abc.x, abc.y, abc.z, d);
+    }
+    // the format's order is (w, x, y, z); world = model * source
+    let q = quatMulF(uniforms.modelRotation, quat.yzwx);
+    return q.wxyz;
+}
+
+fn srcScale() -> vec3f {
+    let i = vec3i(i32((packedG.z >> 16u) & 0xffu), i32(packedG.z >> 24u), i32(packedG.w & 0xffu));
+    return uniforms.modelScale.xyz * exp(vec3f(lutScales(i.x), lutScales(i.y), lutScales(i.z)));
+}
+
+#if SH_BANDS > 0
+// a coefficient triple of the decoded palette: 11/11/10 bits over the file's codebook range
+fn readSHTexel(u: i32, v: i32) -> half3 {
+    let bits = textureLoad(sh_centroids, vec2i(u, v), 0).x;
+    let q = vec3f(vec3u(bits >> 21u, (bits >> 11u) & 0x3ffu, bits & 0x7ffu)) / vec3f(2047.0, 1023.0, 2047.0);
+    return half3(uniform.shRange.x + q * uniform.shRange.y);
+}
+#endif
+
+// survivors only: the sh0 texel, and the sh evaluation for this camera
+fn srcColor() -> vec3f {
+    let c = textureLoad(packedColor, splat.uv, 0).x;
+    let i = vec3i(i32(c & 0xffu), i32((c >> 8u) & 0xffu), i32((c >> 16u) & 0xffu));
+    var color = vec3f(0.5) + vec3f(lutSh0(i.x), lutSh0(i.y), lutSh0(i.z)) * SH_C0;
+    #if SH_BANDS > 0
+        let view = uniforms.view;
+        let orthoDir = vec3f(0.0, 0.0, -1.0) * mat3x3f(view[0].xyz, view[1].xyz, view[2].xyz);
+        let viewDir = select(srcWorldCenter - uniforms.cameraPosition.xyz, orthoDir, uniforms.isOrtho != 0u);
+        let dir = normalize(quatRotateInvF(uniforms.modelRotation, viewDir));
+        let n = i32(packedG.w >> 16u);
+        let u = (n % 64) * SH_STRIDE;
+        let v = n / 64;
+        var sh: array<half3, SH_COEFFS>;
+        sh[0] = readSHTexel(u, v);
+        sh[1] = readSHTexel(u + 1, v);
+        sh[2] = readSHTexel(u + 2, v);
+        #if SH_BANDS > 1
+            sh[3] = readSHTexel(u + 3, v);
+            sh[4] = readSHTexel(u + 4, v);
+            sh[5] = readSHTexel(u + 5, v);
+            sh[6] = readSHTexel(u + 6, v);
+            sh[7] = readSHTexel(u + 7, v);
+        #endif
+        #if SH_BANDS > 2
+            sh[8] = readSHTexel(u + 8, v);
+            sh[9] = readSHTexel(u + 9, v);
+            sh[10] = readSHTexel(u + 10, v);
+            sh[11] = readSHTexel(u + 11, v);
+            sh[12] = readSHTexel(u + 12, v);
+            sh[13] = readSHTexel(u + 13, v);
+            sh[14] = readSHTexel(u + 14, v);
+        #endif
+        color += vec3f(evalSH(&sh, dir));
+    #endif
+    return color;
+}
+`;
+
+// Data path (ii): the projector reads each resident file's own textures, so nothing is copied
+// into a work buffer: no decoded 24-byte copy per splat, no re-copy when a node's lod changes,
+// no colour refresh when the camera turns. The price is one dispatch per resident file, the
+// model transform and the sh evaluation per splat per frame.
+//
+// A sog v2 file is repacked once at load into two textures and its sh palette decoded to
+// 11/11/10 bits (shaders/packed-source.ts), so the projector reads one texel per active splat,
+// a second per survivor and no codebook per coefficient; measured on the Pixel 7 Pro against
+// reading the six textures as they are: house 11.3 to 9.3 ms, large 11.2 to 9.4. Other formats
+// (sog v1, ply, compressed ply) are read through the engine's format read chunks as they are.
+//
+// The engine's work buffer is not read by this path, so its copy passes are switched off on
+// the buffer this source sees and its textures are kept at 1x1 (shrunk if the engine sized them
+// before the patch). Once a file's repack and palette decode have been submitted, the engine's
+// six textures and its palette are destroyed too, leaving the packed copy as the only one on
+// the gpu; the 4 KB codebook stays, the packed read uses it, and the engine's own unload of the
+// file finds the textures destroyed and does nothing more. Handing the files back to the engine's
+// renderer (the Stochastic setting switched off) rebuilds its textures from the packed copies.
+const tmpScale = new Vec3();
+const tmpRotation = new Quat();
+// The engine's textures of a file the unpack writes, the sh labels besides where the file has sh,
+// four a dispatch: WebGPU guarantees no more storage textures a shader stage
+const UNPACK_GROUPS = [['means_l', 'means_u', 'quats', 'scales'], ['sh0']];
+// the file's sh codebook
+const shCodebook = (resource) => resource.gsplatData?.meta?.shN?.codebook ?? [0, 1];
+// The codebook entry nearest each level of the decoded palette, over the file's codebook range as
+// the decode measures it: row 0 for its 11-bit channels, row 1 for its 10-bit one
+const levelIndices = (codebook, range) => {
+    const data = new Uint8Array(2048 * 2);
+    [2047, 1023].forEach((levels, row) => {
+        const entries = codebook
+            .map((value, index) => ({ level: ((value - range[0]) / range[1]) * levels, index }))
+            .sort((a, b) => a.level - b.level);
+        // the nearest entry only moves up the sorted entries as the level rises
+        let k = 0;
+        for (let q = 0; q <= levels; q++) {
+            while (k + 1 < entries.length && Math.abs(entries[k + 1].level - q) <= Math.abs(entries[k].level - q)) {
+                k++;
+            }
+            data[row * 2048 + q] = entries[k].index;
+        }
+    });
+    return data;
+};
+class DirectSplatSource {
+    kind = 'direct';
+    device;
+    resource = null;
+    set = null;
+    constants = new Map();
+    // the repacked textures per resident sog v2 file, and the compute that fills them
+    packed = new Map();
+    // files repacked (and decoded) this frame: their engine textures go once the frame's
+    // commands are submitted
+    pendingRelease = [];
+    repack = null;
+    // the decoded palette per file, with its decode compute: a compute owns the uniform buffer
+    // its dispatch reads, and the codebook range is the file's
+    decodedSH = new Map();
+    decodeSHShader = null;
+    // the files' codebook ranges (min, extent), the palette's dequantisation constants
+    ranges = new Map();
+    // the inverses that hand the files back to the engine's renderer: the unpacks, by the
+    // textures they write, and the palette's re-encode
+    unpackComputes = new Map();
+    encodeSH = null;
+    patched = null;
+    constructor(device) {
+        this.device = device;
+    }
+    update(set, manager) {
+        // one format per scene: a sog lod set shares its format across files. The first file's
+        // format compiles the projector; a file of another format is skipped by dispatchPlan
+        this.resource = set.files[0]?.resource ?? this.resource;
+        this.set = set;
+        this.constants.clear();
+        for (const file of set.files) {
+            const m = file.modelMatrix;
+            m.getScale(tmpScale);
+            tmpRotation.setFromMat4(m);
+            if (tmpRotation.w < 0)
+                tmpRotation.mulScalar(-1);
+            this.constants.set(file.fileIndex, {
+                rotation: [tmpRotation.x, tmpRotation.y, tmpRotation.z, tmpRotation.w],
+                scale: [tmpScale.x, tmpScale.y, tmpScale.z, 0]
+            });
+        }
+        this.patchWorkBuffer(manager.world.workBuffer);
+        this.evict();
+        if (this.packedActive()) {
+            for (const file of set.files)
+                this.prepare(file.resource);
+        }
+    }
+    // Repack a file (and decode its palette) the first time it is seen, before any node of it
+    // is drawn, and queue the engine's textures of it for release at the frame's end, when
+    // every read of them has been submitted.
+    prepare(resource) {
+        if (this.packed.has(resource))
+            return;
+        this.ensurePacked(resource);
+        if (this.decodedActive())
+            this.ensureDecodedSH(resource);
+        this.pendingRelease.push(resource);
+    }
+    // The copies of the files the engine has unloaded: their textures leave the resource and the
+    // codebook, which this source never destroys itself, goes with them. A file merely out of
+    // the resident set keeps its copy, as the engine keeps the file through its cooldown and
+    // brings it back without a reload. The last dispatch reading a copy was a frame ago.
+    evict() {
+        const alive = (resource) => {
+            const codebook = resource.streams.textures.get('sogCodebook');
+            return !!codebook?.device;
+        };
+        for (const [resource, { geom, color }] of this.packed) {
+            if (alive(resource))
+                continue;
+            geom.destroy();
+            color.destroy();
+            this.packed.delete(resource);
+        }
+        for (const [resource, { texture, compute }] of this.decodedSH) {
+            if (alive(resource))
+                continue;
+            texture.destroy();
+            compute.destroy();
+            this.decodedSH.delete(resource);
+        }
+        for (const resource of this.ranges.keys()) {
+            if (!alive(resource))
+                this.ranges.delete(resource);
+        }
+    }
+    frameEnd() {
+        // the engine applies its file releases inside its update, with or without a new version
+        this.evict();
+        for (const resource of this.pendingRelease) {
+            // the cpu image sources go with the textures: the octree already asked for this, a
+            // single-file scene would keep them for device-loss recovery
+            resource.releaseTextureSources?.();
+            const { textures } = resource.streams;
+            for (const name of ['means_l', 'means_u', 'quats', 'scales', 'sh0', 'sh_labels', 'sh_centroids']) {
+                textures.get(name)?.destroy();
+            }
+        }
+        this.pendingRelease.length = 0;
+    }
+    decodedActive() {
+        return this.packedActive() && this.hasSH();
+    }
+    // the file's codebook range
+    codebookRange(resource) {
+        let range = this.ranges.get(resource);
+        if (!range) {
+            const codebook = shCodebook(resource);
+            let min = Infinity;
+            let max = -Infinity;
+            for (const value of codebook) {
+                min = Math.min(min, value);
+                max = Math.max(max, value);
+            }
+            range = [min, Math.max(max - min, 1e-6), 0, 0];
+            this.ranges.set(resource, range);
+        }
+        return range;
+    }
+    // decode a file's sh palette once: codebook indices to 11/11/10-bit coefficients
+    ensureDecodedSH(resource) {
+        if (this.decodedSH.has(resource))
+            return;
+        const { device } = this;
+        const centroids = resource.streams.textures.get('sh_centroids');
+        const texture = new Texture(device, {
+            name: 'sse-splat-sh-decoded',
+            width: centroids.width,
+            height: centroids.height,
+            format: PIXELFORMAT_R32U,
+            mipmaps: false,
+            storage: true,
+            minFilter: FILTER_NEAREST,
+            magFilter: FILTER_NEAREST,
+            addressU: ADDRESS_CLAMP_TO_EDGE,
+            addressV: ADDRESS_CLAMP_TO_EDGE
+        });
+        if (!this.decodeSHShader) {
+            this.decodeSHShader = new Shader(device, {
+                name: 'sse-splat-decode-sh',
+                shaderLanguage: SHADERLANGUAGE_WGSL,
+                cshader: decodeSHWGSL,
+                computeUniformBufferFormats: {
+                    uniforms: new UniformBufferFormat(device, [new UniformFormat('shRange', UNIFORMTYPE_VEC4)])
+                },
+                computeBindGroupFormat: new BindGroupFormat(device, [
+                    new BindUniformBufferFormat('uniforms', SHADERSTAGE_COMPUTE),
+                    new BindTextureFormat('sh_centroids', SHADERSTAGE_COMPUTE, undefined, SAMPLETYPE_FLOAT, false),
+                    new BindTextureFormat('sogCodebook', SHADERSTAGE_COMPUTE, undefined, SAMPLETYPE_UNFILTERABLE_FLOAT, false),
+                    new BindStorageTextureFormat('outSH', PIXELFORMAT_R32U, TEXTUREDIMENSION_2D)
+                ])
+            });
+        }
+        const compute = new Compute(device, this.decodeSHShader, 'sse-splat-decode-sh');
+        compute.setParameter('sh_centroids', centroids);
+        compute.setParameter('sogCodebook', resource.streams.textures.get('sogCodebook'));
+        compute.setParameter('outSH', texture);
+        compute.setParameter('shRange', this.codebookRange(resource));
+        compute.setupDispatch(Math.ceil(centroids.width / 16), Math.ceil(centroids.height / 16), 1);
+        device.computeDispatch([compute], 'sse-splat-decode-sh');
+        this.decodedSH.set(resource, { texture, compute });
+    }
+    // the packed layout applies to sog v2 files, the only ones the repack reads
+    packedActive() {
+        const textures = this.resource?.streams.textures;
+        return !!textures && textures.has('sogCodebook');
+    }
+    hasSH() {
+        const textures = this.resource?.streams.textures;
+        return !!textures && textures.has('sh_labels') && textures.has('sh_centroids');
+    }
+    // repack a file once: its six RGBA8 textures into one geometry texel and one colour texel
+    ensurePacked(resource) {
+        if (this.packed.has(resource))
+            return;
+        const { device } = this;
+        const { x: width, y: height } = resource.textureDimensions;
+        const options = {
+            width,
+            height,
+            mipmaps: false,
+            storage: true,
+            minFilter: FILTER_NEAREST,
+            magFilter: FILTER_NEAREST,
+            addressU: ADDRESS_CLAMP_TO_EDGE,
+            addressV: ADDRESS_CLAMP_TO_EDGE
+        };
+        const geom = new Texture(device, { ...options, name: 'sse-splat-packed-geom', format: PIXELFORMAT_RGBA32U });
+        const color = new Texture(device, { ...options, name: 'sse-splat-packed-color', format: PIXELFORMAT_R32U });
+        if (!this.repack) {
+            const inputs = ['means_l', 'means_u', 'quats', 'scales', 'sh0', 'sh_labels'];
+            this.repack = new Compute(device, new Shader(device, {
+                name: 'sse-splat-repack',
+                shaderLanguage: SHADERLANGUAGE_WGSL,
+                cshader: repackWGSL,
+                computeBindGroupFormat: new BindGroupFormat(device, [
+                    ...inputs.map((name) => new BindTextureFormat(name, SHADERSTAGE_COMPUTE, undefined, SAMPLETYPE_FLOAT, false)),
+                    new BindStorageTextureFormat('outGeom', PIXELFORMAT_RGBA32U, TEXTUREDIMENSION_2D),
+                    new BindStorageTextureFormat('outColor', PIXELFORMAT_R32U, TEXTUREDIMENSION_2D)
+                ])
+            }), 'sse-splat-repack');
+        }
+        const compute = this.repack;
+        for (const name of ['means_l', 'means_u', 'quats', 'scales', 'sh0']) {
+            compute.setParameter(name, resource.streams.textures.get(name));
+        }
+        // a file without sh has no labels: any texture serves, the label bits go unread
+        const textures = resource.streams.textures;
+        compute.setParameter('sh_labels', textures.get('sh_labels') ?? textures.get('sh0'));
+        compute.setParameter('outGeom', geom);
+        compute.setParameter('outColor', color);
+        compute.setupDispatch(Math.ceil(width / 16), Math.ceil(height / 16), 1);
+        device.computeDispatch([compute], 'sse-splat-repack');
+        this.packed.set(resource, { geom, color });
+    }
+    suspend() {
+        this.restoreWorkBuffer();
+        this.restoreFiles();
+    }
+    // The engine's renderer draws the files from their own textures, which were released once a
+    // file was repacked (those repacked this frame still have theirs): rebuild them from the
+    // packed copies. The copies then go, as the engine's renderer reads none of them; the next
+    // update() repacks and releases again. The engine destroys a texture's gpu side after the
+    // frame's submit, so the copies can go before the unpack has run
+    restoreFiles() {
+        this.evict();
+        for (const resource of this.packed.keys()) {
+            if (!this.pendingRelease.includes(resource))
+                this.restoreTextures(resource);
+        }
+        this.pendingRelease.length = 0;
+        for (const { geom, color } of this.packed.values()) {
+            geom.destroy();
+            color.destroy();
+        }
+        this.packed.clear();
+        for (const { texture, compute } of this.decodedSH.values()) {
+            texture.destroy();
+            compute.destroy();
+        }
+        this.decodedSH.clear();
+    }
+    // One file's engine textures from its packed copy, and its palette from the decoded one, put
+    // where the engine reads them: the resource's streams, its data (which destroys them with the
+    // file) and the materials of the work buffer's copies, which bound the released ones
+    restoreTextures(resource) {
+        const { device } = this;
+        const textures = resource.streams.textures;
+        const rebuilt = new Map();
+        // a texture like the released one, written by the inverse
+        const rebuild = (name) => {
+            const released = textures.get(name);
+            const texture = new Texture(device, {
+                name: released.name,
+                width: released.width,
+                height: released.height,
+                format: PIXELFORMAT_RGBA8,
+                mipmaps: false,
+                storage: true,
+                minFilter: released.minFilter,
+                magFilter: released.magFilter,
+                addressU: released.addressU,
+                addressV: released.addressV
+            });
+            rebuilt.set(name, texture);
+            return texture;
+        };
+        const sh = textures.has('sh_labels');
+        const { geom, color } = this.packed.get(resource);
+        for (const group of UNPACK_GROUPS) {
+            const outputs = sh && group.includes('sh0') ? [...group, 'sh_labels'] : group;
+            const unpack = this.unpackCompute(outputs);
+            unpack.setParameter('packedGeom', geom);
+            unpack.setParameter('packedColor', color);
+            for (const name of outputs)
+                unpack.setParameter(name, rebuild(name));
+            unpack.setupDispatch(Math.ceil(geom.width / 16), Math.ceil(geom.height / 16), 1);
+            device.computeDispatch([unpack], 'sse-splat-unpack');
+        }
+        const decoded = this.decodedSH.get(resource)?.texture;
+        if (decoded) {
+            const levels = new Texture(device, {
+                name: 'sse-splat-sh-levels',
+                width: 2048,
+                height: 2,
+                format: PIXELFORMAT_R8U,
+                mipmaps: false,
+                minFilter: FILTER_NEAREST,
+                magFilter: FILTER_NEAREST,
+                addressU: ADDRESS_CLAMP_TO_EDGE,
+                addressV: ADDRESS_CLAMP_TO_EDGE,
+                levels: [levelIndices(shCodebook(resource), this.codebookRange(resource))]
+            });
+            const encode = this.encodeSHCompute();
+            encode.setParameter('decodedSH', decoded);
+            encode.setParameter('levelIndices', levels);
+            encode.setParameter('sh_centroids', rebuild('sh_centroids'));
+            encode.setupDispatch(Math.ceil(decoded.width / 16), Math.ceil(decoded.height / 16), 1);
+            device.computeDispatch([encode], 'sse-splat-encode-sh');
+            levels.destroy();
+        }
+        for (const [name, texture] of rebuilt) {
+            textures.set(name, texture);
+            Reflect.set(resource.gsplatData, name, texture);
+            for (const { material } of resource.workBufferRenderInfos.values())
+                material.setParameter(name, texture);
+        }
+    }
+    unpackCompute(outputs) {
+        const key = outputs.join(',');
+        let compute = this.unpackComputes.get(key);
+        if (!compute) {
+            const { device } = this;
+            const name = `sse-splat-unpack-${key}`;
+            compute = new Compute(device, new Shader(device, {
+                name,
+                shaderLanguage: SHADERLANGUAGE_WGSL,
+                cshader: unpackWGSL(outputs),
+                computeBindGroupFormat: new BindGroupFormat(device, [
+                    new BindTextureFormat('packedGeom', SHADERSTAGE_COMPUTE, undefined, SAMPLETYPE_UINT, false),
+                    new BindTextureFormat('packedColor', SHADERSTAGE_COMPUTE, undefined, SAMPLETYPE_UINT, false),
+                    ...outputs.map((output) => new BindStorageTextureFormat(output, PIXELFORMAT_RGBA8, TEXTUREDIMENSION_2D))
+                ])
+            }), name);
+            this.unpackComputes.set(key, compute);
+        }
+        return compute;
+    }
+    encodeSHCompute() {
+        if (!this.encodeSH) {
+            const { device } = this;
+            this.encodeSH = new Compute(device, new Shader(device, {
+                name: 'sse-splat-encode-sh',
+                shaderLanguage: SHADERLANGUAGE_WGSL,
+                cshader: encodeSHWGSL,
+                computeBindGroupFormat: new BindGroupFormat(device, [
+                    new BindTextureFormat('decodedSH', SHADERSTAGE_COMPUTE, undefined, SAMPLETYPE_UINT, false),
+                    new BindTextureFormat('levelIndices', SHADERSTAGE_COMPUTE, undefined, SAMPLETYPE_UINT, false),
+                    new BindStorageTextureFormat('sh_centroids', PIXELFORMAT_RGBA8, TEXTUREDIMENSION_2D)
+                ])
+            }), 'sse-splat-encode-sh');
+        }
+        return this.encodeSH;
+    }
+    // The engine's copies into the work buffer are wasted work for this path and its textures
+    // wasted memory (28 bytes a slot over the whole budget), so the copies are skipped and the
+    // buffer kept at 1x1. The engine's manager sizes and fills it once before the first
+    // frame:ready, so a buffer already sized is shrunk here, order buffer included (the engine
+    // only ever grows that one). The size the engine asks for is still reported back to it: its
+    // budget enforcement pads its estimate to the buffer's row width, and must see the width its
+    // own renderer would, or the lod it chooses differs from the engine's.
+    patchWorkBuffer(workBuffer) {
+        if (this.patched?.workBuffer === workBuffer)
+            return;
+        this.restoreWorkBuffer();
+        const { render, renderColor, resize } = workBuffer;
+        this.patched = { workBuffer, render, renderColor, resize };
+        let requested = workBuffer.textureSize;
+        if (requested > 1) {
+            resize.call(workBuffer, 1);
+            // TEMPORARY: with playcanvas/engine#9763 the order buffer grows only for a CPU sort, so
+            // it stays at 4 bytes here, where the engine sorts on the GPU. Once the viewer requires
+            // an engine with it, delete these two lines, their imports and "order buffer included"
+            // above
+            workBuffer.orderBuffer.destroy();
+            workBuffer.orderBuffer = new StorageBuffer(workBuffer.device, 4, BUFFERUSAGE_COPY_DST);
+        }
+        const skip = () => undefined;
+        workBuffer.render = skip;
+        workBuffer.renderColor = skip;
+        workBuffer.resize = (textureSize) => {
+            requested = textureSize;
+        };
+        Object.defineProperty(workBuffer, 'textureSize', { configurable: true, get: () => requested });
+    }
+    restoreWorkBuffer() {
+        if (!this.patched)
+            return;
+        const { workBuffer, render, renderColor, resize } = this.patched;
+        workBuffer.render = render;
+        workBuffer.renderColor = renderColor;
+        workBuffer.resize = resize;
+        // the class getter reports the real (1x1) size again, so the engine's rebuild resizes
+        Reflect.deleteProperty(workBuffer, 'textureSize');
+        this.patched = null;
+    }
+    readChunk(bindingBase) {
+        if (this.packedActive())
+            return packedReadWGSL(bindingBase, this.fileBands());
+        const format = this.require().format;
+        // The format's read chunk reads the file's own space and returns sh0 colour + alpha;
+        // the adapter below applies the file's model transform and evaluates its sh for this
+        // camera. Its loose `uniform` and texture declarations (dequantisation constants, the
+        // compressed format's chunk texture) are reflected by the engine into a second bind
+        // group and set by name like any other parameter.
+        // The engine writes its 32-bit float streams (the sog v2 codebook) as `texture_2d<uff>`,
+        // an alias only its reflection of loose declarations resolves; explicit bindings need
+        // the wgsl type, and the matching unfilterable sample type in bindFormats()
+        const declarations = format
+            .getComputeInputDeclarations(bindingBase)
+            .replace(/texture_2d<uff>/g, 'texture_2d<f32>');
+        return /* wgsl */ `
+#include "halfTypesCS"
+#include "gsplatEvalSHVS"
+${declarations}
+${format.getReadCode()}
+
+var<private> srcWorldCenter: vec3f;
+var<private> srcColorCache: vec4f;
+
+fn quatMulF(a: vec4f, b: vec4f) -> vec4f {
+    return vec4f(a.w * b.xyz + b.w * a.xyz + cross(a.xyz, b.xyz), a.w * b.w - dot(a.xyz, b.xyz));
+}
+
+// v rotated by the inverse of q (x, y, z, w)
+fn quatRotateInvF(q: vec4f, v: vec3f) -> vec3f {
+    let u = -q.xyz;
+    return v + 2.0 * cross(u, cross(u, v) + q.w * v);
+}
+
+fn srcCenter() -> vec3f {
+    srcWorldCenter = (uniforms.model * vec4f(getCenter(), 1.0)).xyz;
+    return srcWorldCenter;
+}
+
+fn srcOpacity() -> f32 {
+    srcColorCache = getColor();
+    return srcColorCache.a;
+}
+
+// the format returns (w, x, y, z); world = model * source
+fn srcRotation() -> vec4f {
+    let q = quatMulF(uniforms.modelRotation, getRotation().yzwx);
+    return q.wxyz;
+}
+
+fn srcScale() -> vec3f {
+    return uniforms.modelScale.xyz * getScale();
+}
+
+fn srcColor() -> vec3f {
+    var color = srcColorCache.rgb;
+    #if SH_BANDS > 0
+        // the view direction in the file's space; orthographic rays all run along the camera forward
+        let view = uniforms.view;
+        let orthoDir = vec3f(0.0, 0.0, -1.0) * mat3x3f(view[0].xyz, view[1].xyz, view[2].xyz);
+        let viewDir = select(srcWorldCenter - uniforms.cameraPosition.xyz, orthoDir, uniforms.isOrtho != 0u);
+        let dir = normalize(quatRotateInvF(uniforms.modelRotation, viewDir));
+        var sh: array<half3, SH_COEFFS>;
+        var shScale: f32;
+        readSHData(&sh, &shScale);
+        color += vec3f(evalSH(&sh, dir) * half(shScale));
+    #endif
+    return color;
+}
+`;
+    }
+    bindFormats() {
+        if (this.packedActive()) {
+            return [
+                new BindTextureFormat('packedGeom', SHADERSTAGE_COMPUTE, undefined, SAMPLETYPE_UINT, false),
+                new BindTextureFormat('packedColor', SHADERSTAGE_COMPUTE, undefined, SAMPLETYPE_UINT, false),
+                ...(this.hasSH()
+                    ? [new BindTextureFormat('sh_centroids', SHADERSTAGE_COMPUTE, undefined, SAMPLETYPE_UINT, false)]
+                    : []),
+                new BindTextureFormat('sogCodebook', SHADERSTAGE_COMPUTE, undefined, SAMPLETYPE_UNFILTERABLE_FLOAT, false)
+            ];
+        }
+        const format = this.require().format;
+        const entries = format.getComputeBindFormats();
+        for (const entry of entries) {
+            const stream = format.streams.find((s) => s.name === entry.name);
+            if (stream?.format === PIXELFORMAT_RGBA32F)
+                entry.sampleType = SAMPLETYPE_UNFILTERABLE_FLOAT;
+        }
+        return entries;
+    }
+    shaderIncludes() {
+        // the read chunks include the engine's own gsplat chunks by name
+        return new Map(ShaderChunks.get(this.device, SHADERLANGUAGE_WGSL));
+    }
+    shaderDefines() {
+        const defines = new Map();
+        this.require().configureMaterialDefines(defines);
+        if (this.packedActive())
+            defines.set('SSE_PACKED_SOURCE', '1');
+        if (this.decodedActive())
+            defines.set('SSE_SH_DECODED', '1');
+        return defines;
+    }
+    // the file's sh bands, from the defines the engine sets for it
+    fileBands() {
+        const defines = new Map();
+        this.require().configureMaterialDefines(defines);
+        return Number(defines.get('SH_BANDS') ?? 0);
+    }
+    chunkBase(node) {
+        return node.sourceBase;
+    }
+    dispatchPlan(set) {
+        // one run of the chunk table per file (the table is built file by file)
+        const groups = [];
+        let chunkBase = 0;
+        const hash = this.resource?.format.hash;
+        for (const file of set.files) {
+            let chunkCount = 0;
+            for (const node of file.nodes)
+                chunkCount += Math.ceil(node.count / 256);
+            if (chunkCount > 0 && file.resource.format.hash === hash) {
+                groups.push({ fileIndex: file.fileIndex, chunkBase, chunkCount });
+            }
+            chunkBase += chunkCount;
+        }
+        return groups;
+    }
+    bind(compute, group, set) {
+        const file = set.files[group.fileIndex];
+        const { resource } = file;
+        if (this.packedActive()) {
+            // update() repacks the set's files; this covers one it has not seen
+            this.prepare(resource);
+            const packed = this.packed.get(resource);
+            compute.setParameter('packedGeom', packed.geom);
+            compute.setParameter('packedColor', packed.color);
+            if (this.decodedActive()) {
+                compute.setParameter('sh_centroids', this.decodedSH.get(resource).texture);
+                compute.setParameter('shRange', this.codebookRange(resource));
+            }
+            compute.setParameter('sogCodebook', resource.streams.textures.get('sogCodebook'));
+        }
+        else {
+            for (const [name, texture] of resource.streams.textures) {
+                compute.setParameter(name, texture);
+            }
+        }
+        for (const [name, value] of resource.parameters) {
+            compute.setParameter(name, value);
+        }
+        const constants = this.constants.get(file.fileIndex);
+        compute.setParameter('model', file.modelMatrix.data);
+        compute.setParameter('modelRotation', constants.rotation);
+        compute.setParameter('modelScale', constants.scale);
+    }
+    textureSize(group) {
+        return this.set?.files[group.fileIndex].resource.textureDimensions.x ?? 0;
+    }
+    gpuBytes() {
+        // the engine's file textures are released once repacked (counted by app.stats.vram until
+        // then); the repacked copies are this source's
+        let bytes = 0;
+        for (const { geom, color } of this.packed.values())
+            bytes += geom.gpuSize + color.gpuSize;
+        for (const { texture } of this.decodedSH.values())
+            bytes += texture.gpuSize;
+        return bytes;
+    }
+    shaderKey() {
+        const resource = this.resource;
+        if (!resource)
+            return 'direct:';
+        const defines = this.shaderDefines();
+        return `direct:${resource.format.hash}:${[...defines].map(([k, v]) => `${k}=${v}`).join(',')}`;
+    }
+    destroy() {
+        this.restoreWorkBuffer();
+        this.pendingRelease.length = 0;
+        for (const { geom, color } of this.packed.values()) {
+            geom.destroy();
+            color.destroy();
+        }
+        this.packed.clear();
+        this.repack?.shader.destroy();
+        this.repack?.destroy();
+        this.repack = null;
+        for (const compute of [...this.unpackComputes.values(), this.encodeSH]) {
+            compute?.shader.destroy();
+            compute?.destroy();
+        }
+        this.unpackComputes.clear();
+        this.encodeSH = null;
+        for (const { texture, compute } of this.decodedSH.values()) {
+            texture.destroy();
+            compute.destroy();
+        }
+        this.decodedSH.clear();
+        this.ranges.clear();
+        this.decodeSHShader?.destroy();
+        this.decodeSHShader = null;
+        this.resource = null;
+        this.set = null;
+        this.constants.clear();
+    }
+    require() {
+        if (!this.resource)
+            throw new Error('DirectSplatSource: update() has not run');
+        return this.resource;
+    }
+}
+
+class WorkBufferSplatSource {
+    kind = 'workbuffer';
+    workBuffer = null;
+    update(set, manager) {
+        this.workBuffer = manager.world.workBuffer;
+    }
+    suspend() {
+        // the engine keeps filling the work buffer for this source; nothing to undo
+    }
+    frameEnd() {
+        // nothing of the engine's is released on this path
+    }
+    readChunk(bindingBase) {
+        const format = this.require().format;
+        // the engine's declarations bind one texture per stream from bindingBase and define
+        // loadDataX(); its read code decodes them into getCenter() and friends, already in
+        // world space with the sh colour baked for this camera
+        return /* wgsl */ `
+${format.getComputeInputDeclarations(bindingBase)}
+${format.getReadCode()}
+fn srcCenter() -> vec3f { return getCenter(); }
+fn srcOpacity() -> f32 { return getOpacity(); }
+fn srcRotation() -> vec4f { return getRotation(); }
+fn srcScale() -> vec3f { return getScale(); }
+fn srcColor() -> vec3f { return getColor(); }
+`;
+    }
+    bindFormats() {
+        return this.require().format.getComputeBindFormats();
+    }
+    shaderIncludes() {
+        return undefined;
+    }
+    shaderDefines() {
+        return undefined;
+    }
+    chunkBase(node) {
+        return node.slotBase;
+    }
+    dispatchPlan(set, numChunks) {
+        return [{ fileIndex: -1, chunkBase: 0, chunkCount: numChunks }];
+    }
+    bind(compute) {
+        const workBuffer = this.require();
+        for (const stream of workBuffer.format.streams) {
+            compute.setParameter(stream.name, workBuffer.getTexture(stream.name));
+        }
+    }
+    textureSize() {
+        return this.require().textureSize;
+    }
+    gpuBytes() {
+        // the work buffer belongs to the engine and is counted by app.stats.vram
+        return 0;
+    }
+    shaderKey() {
+        const workBuffer = this.workBuffer;
+        return workBuffer ? `wb:${workBuffer.format.streams.map((s) => s.name).join(',')}` : 'wb:';
+    }
+    destroy() {
+        this.workBuffer = null;
+    }
+    require() {
+        if (!this.workBuffer)
+            throw new Error('WorkBufferSplatSource: update() has not run');
+        return this.workBuffer;
+    }
+}
+
+// GPUBufferUsage and GPUMapMode
+const MAP_READ = 0x0001;
+const COPY_SRC = 0x0004;
+const COPY_DST = 0x0008;
+const UNIFORM = 0x0040;
+const STORAGE = 0x0080;
+const rateMapWGSL = /* wgsl */ `
+// the texture's size, and its middle column and row
+struct Params { size: vec2u, mid: vec2u }
+@group(0) @binding(0) var<uniform> params: Params;
+// the logical ndc x of each column's centre along the middle row, then the ndc y of each row's
+// centre along the middle column
+@group(0) @binding(1) var<storage, read_write> map: array<f32>;
+// the last column and row a fragment landed in
+@group(0) @binding(2) var<storage, read_write> extent: array<atomic<u32>, 2>;
+
+struct Varyings {
+    @builtin(position) position: vec4f,
+    @location(0) ndc: vec2f
+}
+
+@vertex
+fn vertexMain(@builtin(vertex_index) index: u32) -> Varyings {
+    var corners = array<vec2f, 3>(vec2f(-1.0, -1.0), vec2f(3.0, -1.0), vec2f(-1.0, 3.0));
+    var out: Varyings;
+    out.position = vec4f(corners[index], 0.0, 1.0);
+    out.ndc = corners[index];
+    return out;
+}
+
+@fragment
+fn fragmentMain(input: Varyings) -> @location(0) vec4f {
+    let texel = vec2u(input.position.xy);
+    if (texel.y == params.mid.y && texel.x < params.size.x) {
+        map[texel.x] = input.ndc.x;
+        atomicMax(&extent[0], texel.x);
+    }
+    if (texel.x == params.mid.x && texel.y < params.size.y) {
+        map[params.size.x + texel.y] = input.ndc.y;
+        atomicMax(&extent[1], texel.y);
+    }
+    return vec4f(0.0);
+}
+`;
+/**
+ * Whether an eye is rasterised at a variable rate: its logical viewport is larger than its texture.
+ * Otherwise there is nothing to measure.
+ */
+const variableRate = (sub) => sub.viewport.width > sub.colorTexture.width || sub.viewport.height > sub.colorTexture.height;
+/**
+ * Measure every eye's rate map. Call it after the frame's own rendering has been submitted and
+ * while the sub-images are still the frame's (the engine's frameend). Resolves with one map per
+ * eye, or null for an eye whose map could not be read.
+ */
+const measureXrRateMaps = async (gpu, subImages) => {
+    const module = gpu.createShaderModule({ code: rateMapWGSL });
+    const encoder = gpu.createCommandEncoder();
+    const eyes = subImages.map((sub) => {
+        const { width, height } = sub.colorTexture;
+        const pipeline = gpu.createRenderPipeline({
+            layout: 'auto',
+            vertex: { module, entryPoint: 'vertexMain' },
+            fragment: { module, entryPoint: 'fragmentMain', targets: [{ format: sub.viewFormat, writeMask: 0 }] },
+            primitive: { topology: 'triangle-list' }
+        });
+        const params = gpu.createBuffer({ size: 16, usage: UNIFORM | COPY_DST });
+        gpu.queue.writeBuffer(params, 0, new Uint32Array([width, height, width >> 1, height >> 1]));
+        const mapBytes = (width + height) * 4;
+        const map = gpu.createBuffer({ size: mapBytes, usage: STORAGE | COPY_SRC });
+        const extent = gpu.createBuffer({ size: 8, usage: STORAGE | COPY_SRC });
+        const readMap = gpu.createBuffer({ size: mapBytes, usage: MAP_READ | COPY_DST });
+        const readExtent = gpu.createBuffer({ size: 8, usage: MAP_READ | COPY_DST });
+        const bindGroup = gpu.createBindGroup({
+            layout: pipeline.getBindGroupLayout(0),
+            entries: [
+                { binding: 0, resource: { buffer: params } },
+                { binding: 1, resource: { buffer: map } },
+                { binding: 2, resource: { buffer: extent } }
+            ]
+        });
+        const pass = encoder.beginRenderPass({
+            colorAttachments: [
+                { view: sub.colorTexture.createView(sub.viewDescriptor ?? undefined), loadOp: 'load', storeOp: 'store' }
+            ]
+        });
+        const { viewport } = sub;
+        pass.setPipeline(pipeline);
+        pass.setViewport(viewport.x, viewport.y, viewport.width, viewport.height, 0, 1);
+        pass.setBindGroup(0, bindGroup);
+        pass.draw(3);
+        pass.end();
+        encoder.copyBufferToBuffer(map, 0, readMap, 0, mapBytes);
+        encoder.copyBufferToBuffer(extent, 0, readExtent, 0, 8);
+        return { width, height, buffers: [params, map, extent, readMap, readExtent], readMap, readExtent };
+    });
+    gpu.queue.submit([encoder.finish()]);
+    try {
+        return await Promise.all(eyes.map(async ({ width, readMap, readExtent }) => {
+            await Promise.all([readMap.mapAsync(MAP_READ), readExtent.mapAsync(MAP_READ)]);
+            const values = new Float32Array(readMap.getMappedRange().slice(0));
+            const [lastColumn, lastRow] = new Uint32Array(readExtent.getMappedRange().slice(0));
+            readMap.unmap();
+            readExtent.unmap();
+            const map = {
+                width: lastColumn + 1,
+                height: lastRow + 1,
+                columns: values.slice(0, lastColumn + 1),
+                rows: values.slice(width, width + lastRow + 1)
+            };
+            // a map has to be strictly monotonic: columns rise to the right, rows fall downward
+            for (let i = 1; i < map.width; i++)
+                if (!(map.columns[i] > map.columns[i - 1]))
+                    return null;
+            for (let j = 1; j < map.height; j++)
+                if (!(map.rows[j] < map.rows[j - 1]))
+                    return null;
+            return map.width > 1 && map.height > 1 ? map : null;
+        }));
+    }
+    finally {
+        for (const eye of eyes)
+            for (const buffer of eye.buffers)
+                buffer.destroy();
+    }
+};
+
+// The stochastic splat renderer (WebGPU, opt-in). The engine keeps LOD, streaming and the
+// work-buffer copy; this owns everything after: per frame it culls nodes on the cpu, projects
+// the resident splats in a compute pass into a dense cache, writes the indirect draw arguments,
+// rasterises the survivors as opaque depth-tested quads into its own colour + depth target
+// (StochasticSplats: keep a fragment with probability alpha, no sort), and composes that target
+// over the camera's target from a fullscreen quad in the World layer that also writes depth.
+//
+// Frame flow: the compute runs inside the engine's gsplat update (the `frame:ready` hook, before
+// the frame graph), the raster pass runs from `camera.beforePasses`, and the compose is an
+// ordinary mesh instance in the camera's forward pass. See docs/stochastic-renderer.md.
+//
+// A view (SplatView) is what one image needs: its targets, history and projected splats. There is
+// one for the camera, and in a stereo XR session one per eye: the compute projects every eye in
+// the hook, and the engine replays the camera's passes once per eye, so the first of them binds
+// that eye's view (device.xrCurrentViewIndex) before the raster, the accumulation and the compose
+// draw.
+const defaultVariant = () => ({
+    compose: 'blend',
+    cull: 'auto',
+    contribution: 0,
+    coverage: 'pixel',
+    jitter: 0,
+    strata: 4,
+    interleaveArea: 0,
+    taa: 'on',
+    taaMax: 256,
+    taaMoveMax: 16,
+    taaClip: 1.25,
+    taaReproj: 'sample',
+    taaMotion: 4,
+    taaParallax: 'on',
+    taaSharp: 16,
+    taaHistory: 'auto',
+    taaSharpen: 0,
+    taaDebug: 0,
+    warp: 'auto',
+    stereo: 'shared',
+    units: 'engine'
+});
+const taaCount = (value) => Math.min(TAA_MAX_COUNT, Math.max(1, Math.round(value)));
+const parseVariant = (text) => {
+    const variant = defaultVariant();
+    for (const part of (text ?? '').split(',')) {
+        const [key, value] = part.split(':').map((s) => s.trim());
+        if (!key || value === undefined)
+            continue;
+        if (key === 'compose' && (value === 'blend' || value === 'depth'))
+            variant.compose = value;
+        if (key === 'cull' && (value === 'off' || value === 'l1' || value === 'l2' || value === 'auto')) {
+            variant.cull = value;
+        }
+        if (key === 'contribution' && Number.isFinite(Number(value)))
+            variant.contribution = Math.max(0, Number(value));
+        if (key === 'coverage' && (value === 'pixel' || value === 'splat' || value === 'interleaved'))
+            variant.coverage = value;
+        if (key === 'jitter' && ['0', '1', '2'].includes(value))
+            variant.jitter = Number(value);
+        if (key === 'strata' && ['1', '2', '4'].includes(value))
+            variant.strata = Number(value);
+        if (key === 'interleaveArea' && Number.isFinite(Number(value)))
+            variant.interleaveArea = Math.max(0, Number(value));
+        if (key === 'taa' && (value === 'on' || value === 'off'))
+            variant.taa = value;
+        if (key === 'taaMax' && Number.isFinite(Number(value)))
+            variant.taaMax = taaCount(Number(value));
+        if (key === 'taaMoveMax' && Number.isFinite(Number(value)))
+            variant.taaMoveMax = taaCount(Number(value));
+        if (key === 'taaClip' && Number.isFinite(Number(value)))
+            variant.taaClip = Math.max(0, Number(value));
+        if (key === 'taaReproj' && (value === 'sample' || value === 'history'))
+            variant.taaReproj = value;
+        if (key === 'taaMotion' && Number.isFinite(Number(value)))
+            variant.taaMotion = Math.max(0, Number(value));
+        if (key === 'taaParallax' && (value === 'on' || value === 'off'))
+            variant.taaParallax = value;
+        if (key === 'taaSharp' && Number.isFinite(Number(value)))
+            variant.taaSharp = Math.max(0, Number(value));
+        if (key === 'taaHistory' && (value === 'auto' || value === 'fixed' || value === 'half'))
+            variant.taaHistory = value;
+        if (key === 'taaSharpen' && Number(value) >= 0)
+            variant.taaSharpen = Number(value);
+        if (key === 'taaDebug' && Number.isFinite(Number(value)))
+            variant.taaDebug = Number(value);
+        if (key === 'warp' && (value === 'auto' || value === 'off'))
+            variant.warp = value;
+        if (key === 'warp' && Number(value) > 1)
+            variant.warp = Number(value);
+        if (key === 'stereo' && (value === 'shared' || value === 'separate'))
+            variant.stereo = value;
+        if (key === 'units' && (value === 'px' || value === 'engine'))
+            variant.units = value;
+    }
+    return variant;
+};
+// The switches each mode starts from, before `variant` applies its own: per-pixel coverage (the
+// defaults) for quality, and for phones and headsets the interleaved pixel sets with jittered
+// strata, small splats drawn per splat and no colour clamp, the fastest at that quality on a Mali
+// phone (docs/mobile-gpu-splat-rendering.md)
+const MODE_VARIANTS = {
+    pixel: '',
+    mobile: 'coverage:interleaved,jitter:2,interleaveArea:256,taaClip:0'
+};
+// The switches a stereo session adds over the mode's. A head never rests, so every frame takes the
+// moving history, whose cap of 16 left the coverage noise pulsing in semi-transparent areas; the
+// eyes keep up to 64 samples and shorten them four times as fast with the motion
+// (docs/stochastic-renderer.md, XR stereo). No display sharpen: it helped on the Quest 3
+// (2026-10-16), which no longer offers the stochastic renderer, and on Apple Vision Pro, the one
+// headset that does, its denser displays leave no visible blur for it to take back (2026-10-20),
+// while its 5x5 taps cost about 2.4 ms a frame for two eyes on the Quest
+const STEREO_VARIANT = 'taaMoveMax:64,taaMotion:1';
+// Whether two eyes see the same view depth, so the first eye's cached depth serves both in the
+// shared stereo projection: their view axes within a degree of parallel (a headset's eyes differ
+// by a fraction of a degree, Apple Vision Pro's by 0.13; canted displays by several), so the eyes
+// are offset only across the view and a splat's depth is the same in both
+const EYES_PARALLEL_COS = Math.cos((1 * Math.PI) / 180);
+const eyesShareDepth = (eyes) => {
+    const a = eyes[0].viewOffMat.data;
+    const b = eyes[1].viewOffMat.data;
+    // the view's z axis in world space: the third row of the view matrix's rotation
+    return a[2] * b[2] + a[6] * b[6] + a[10] * b[10] >= EYES_PARALLEL_COS;
+};
+// Renders an explicit mesh-instance list into the renderer's own target (the raster and the
+// taa resolve). Not a layer: a layer in camera.layers is culled once and drawn by every pass
+// for the camera, so the scene pass would draw the splats into the camera target as well.
+class SplatRasterPass extends RenderPass {
+    forward;
+    camera;
+    instances;
+    constructor(device, forward, 
+    // the camera to draw with: an XR camera would set each eye's viewport on these targets
+    camera, instances, name = 'sse-splat-raster') {
+        super(device);
+        this.forward = forward;
+        this.camera = camera;
+        this.instances = instances;
+        this.name = name;
+    }
+    execute() {
+        this.forward.renderForwardLayer(this.camera(), this.renderTarget, null, undefined, SHADER_FORWARD, {
+            meshInstances: this.instances
+        });
+    }
+}
+// First among the camera's passes: binds the view the passes after it draw, the eye the engine is
+// replaying them for in a stereo session
+class SplatBindPass extends FramePass {
+    bind;
+    constructor(device, bind) {
+        super(device);
+        this.bind = bind;
+        this.name = 'sse-splat-bind';
+    }
+    execute() {
+        this.bind();
+    }
+}
+const createQuadMesh = (device, quads) => {
+    const positions = new Float32Array(quads * 4 * 3);
+    const indices = new Uint32Array(quads * 6);
+    for (let i = 0; i < quads; ++i) {
+        // z carries the quad's index within the instance
+        positions.set([-1, -1, i, 1, -1, i, 1, 1, i, -1, 1, i], i * 12);
+        const v = i * 4;
+        indices.set([v, v + 1, v + 2, v, v + 2, v + 3], i * 6);
+    }
+    const mesh = new Mesh(device);
+    mesh.setPositions(positions, 3);
+    mesh.setIndices(indices);
+    mesh.update(PRIMITIVE_TRIANGLES);
+    return mesh;
+};
+// coverage other than pixel: a polygon per splat on the unit circle (POLYGON_SIDES corners),
+// fanned from its first vertex
+const createPolygonMesh = (device, polygons) => {
+    const sides = POLYGON_SIDES;
+    const positions = new Float32Array(polygons * sides * 3);
+    const indices = new Uint32Array(polygons * (sides - 2) * 3);
+    for (let i = 0; i < polygons; ++i) {
+        for (let s = 0; s < sides; ++s) {
+            const angle = (2 * Math.PI * s) / sides;
+            // z carries the polygon's index within the instance
+            positions.set([Math.cos(angle), Math.sin(angle), i], (i * sides + s) * 3);
+        }
+        const v = i * sides;
+        for (let s = 1; s < sides - 1; ++s) {
+            indices.set([v, v + s, v + s + 1], (i * (sides - 2) + s - 1) * 3);
+        }
+    }
+    const mesh = new Mesh(device);
+    mesh.setPositions(positions, 3);
+    mesh.setIndices(indices);
+    mesh.update(PRIMITIVE_TRIANGLES);
+    return mesh;
+};
+const createFullscreenMesh = (device) => {
+    const mesh = new Mesh(device);
+    mesh.setPositions(new Float32Array([-1, -1, 1, -1, 1, 1, -1, 1]), 2);
+    mesh.setIndices(new Uint16Array([0, 1, 2, 0, 2, 3]));
+    mesh.update(PRIMITIVE_TRIANGLES);
+    return mesh;
+};
+const tmpVec2 = new Vec2();
+const tmpVec3 = new Vec3();
+const tmpMat4 = new Mat4();
+// a target texture sized per frame; depth textures keep the engine's default filtering
+const createViewTexture = (device, name, format, filter) => new Texture(device, {
+    name,
+    width: 4,
+    height: 4,
+    format,
+    mipmaps: false,
+    ...(filter !== undefined ? { minFilter: filter, magFilter: filter } : {}),
+    addressU: ADDRESS_CLAMP_TO_EDGE,
+    addressV: ADDRESS_CLAMP_TO_EDGE
+});
+// whether a projected cache of this size fits one storage binding on the device
+const cacheBytesFit = (device, bytes) => {
+    const limit = device.wgpu?.limits
+        ?.maxStorageBufferBindingSize;
+    return !limit || bytes <= limit;
+};
+// Everything one image needs and remembers: the camera's, or one eye's in a stereo session. A
+// compute owns the uniform buffer its dispatch reads, so each view dispatches its own.
+class SplatView {
+    device;
+    suffix;
+    // the raster target: colour, and a depth texture the compose, the occlusion cull and the
+    // picker read
+    colorTexture;
+    depthTexture;
+    target;
+    // variant coverage:interleaved: each pixel set's colour and depth, and its target
+    setTextures = [];
+    setTargets = [];
+    // taa: ping-pong history (premultiplied colour + coverage as unorm16 or half floats, and the
+    // depth mean and sample count packed in 32 bits; shaders/taa.ts), sized with the target on the
+    // first accumulating frame, and shrunk back while taa is off
+    taaColor = [];
+    // whether the colour is in half floats (variant taaHistory)
+    taaHalf = false;
+    taaInfo = [];
+    taaTargets = [];
+    // variant coverage:interleaved with taa: history targets with the raster's depth texture
+    // attached (made per size: a resize rebuilds the textures their views point at)
+    taaSetTargets = [];
+    taaWrite = 0;
+    // whether the history holds the previous on-screen frame at the current size
+    taaHistoryValid = false;
+    taaWidth = 0;
+    taaHeight = 0;
+    // the previous taa frame's matrices as the pass reads them, and this frame's, copied over at
+    // the start of the next frame: the material holds the data arrays by reference and uploads
+    // them when it draws, after the hook has run
+    taaPrevViewProjection = new Mat4();
+    taaPrevView = new Mat4();
+    taaLastViewProjection = new Mat4();
+    taaLastView = new Mat4();
+    // the model the last taa frame's matrices were recorded under (see followModel)
+    taaLastModel = new Mat4();
+    // the view's world transform, for the accumulation's reprojection
+    cameraWorld = new Mat4();
+    // frames since the view or the scene last changed, for converging at rest
+    restFrames = 0;
+    // the occlusion grid: farthest depth per 8 px block (level 1), then per 32 px block (level 2)
+    occGrid;
+    occBlocks = { x1: 0, y1: 0, x2: 0, y2: 0 };
+    reduceL1;
+    reduceL2;
+    // the previous frame the grid and the reprojection describe; valid only when that frame
+    // rendered to the same target at the same size from the same world state
+    prevValid = false;
+    prevViewProjection = new Mat4();
+    prevView = new Mat4();
+    prevProjection = new Mat4();
+    // the model the previous frame's matrices were recorded under (see followModel)
+    prevModel = new Mat4();
+    prevClipZ = [0, 0, 0, 0];
+    prevViewport = [0, 0];
+    prevFocal = [0, 0];
+    prevFlip = 1;
+    prevWidth = 0;
+    prevHeight = 0;
+    prevVersion = -1;
+    prevOrtho = false;
+    // this frame's projection, and the splats it projected
+    shaderProjection = new Mat4();
+    viewProjection = new Mat4();
+    nodeVisibleData = new Uint32Array(0);
+    nodeVisibleBuffer = null;
+    cacheBuffer = null;
+    cacheSlots = 0;
+    // whether the cache has room for a shared stereo projection's second eye
+    cacheStereo = false;
+    counter;
+    // the draw order (shaders/order.ts): bucket counts then offsets, and the ordered slot list
+    orderBuckets;
+    orderedBuffer = null;
+    // entries the ordered list holds: a survivor takes one, or one per pixel set it keeps
+    orderedCapacity = 0;
+    setRanges;
+    // one projector compute per shader and dispatch group (per-file sources dispatch per file)
+    projectorComputes = new Map();
+    args;
+    orderScan;
+    orderScatter;
+    orderScatterSets;
+    setArgs;
+    // what the passes read for this view, recorded by the frame and applied by the bind pass
+    bindings = [];
+    // variant warp: the table the view renders through (shaders/warp.ts), a placeholder while it
+    // renders unwarped, what the table holds ('' for nothing) and the target it lays out
+    warpBuffer;
+    warpKey = '';
+    // the table itself, for a shared stereo projection's combined one
+    warpTable = null;
+    warpWidth = 0;
+    warpHeight = 0;
+    constructor(device, shaders, suffix) {
+        this.device = device;
+        this.suffix = suffix;
+        this.colorTexture = createViewTexture(device, `sse-splat-color${suffix}`, PIXELFORMAT_RGBA8, FILTER_LINEAR);
+        this.depthTexture = createViewTexture(device, `sse-splat-depth${suffix}`, PIXELFORMAT_DEPTH);
+        this.target = new RenderTarget({
+            name: `sse-splat-target${suffix}`,
+            colorBuffer: this.colorTexture,
+            depthBuffer: this.depthTexture,
+            samples: 1
+        });
+        for (let i = 0; i < 4; i++) {
+            // the taa's quad mean fetches the colour bilinearly
+            const color = createViewTexture(device, `sse-splat-set-${i}-color${suffix}`, PIXELFORMAT_RGBA8, FILTER_LINEAR);
+            const depth = createViewTexture(device, `sse-splat-set-${i}-depth${suffix}`, PIXELFORMAT_DEPTH);
+            this.setTextures.push(color, depth);
+            this.setTargets.push(new RenderTarget({
+                name: `sse-splat-set-${i}${suffix}`,
+                colorBuffer: color,
+                depthBuffer: depth,
+                samples: 1
+            }));
+        }
+        for (let i = 0; i < 2; i++) {
+            this.taaInfo.push(createViewTexture(device, `sse-splat-taa-info-${i}${suffix}`, PIXELFORMAT_R32U, FILTER_NEAREST));
+        }
+        this.createHistoryColor();
+        this.occGrid = new StorageBuffer(device, 8, BUFFERUSAGE_COPY_DST);
+        this.reduceL1 = new Compute(device, shaders.reduceL1, 'sse-splat-reduce1');
+        this.reduceL2 = new Compute(device, shaders.reduceL2, 'sse-splat-reduce2');
+        this.counter = new StorageBuffer(device, 16, BUFFERUSAGE_COPY_DST | BUFFERUSAGE_COPY_SRC);
+        this.orderBuckets = new StorageBuffer(device, 2 * ORDER_BUCKETS * 4, BUFFERUSAGE_COPY_DST);
+        this.setRanges = new StorageBuffer(device, SET_GROUPS * 8);
+        this.args = new Compute(device, shaders.args, 'sse-splat-args');
+        this.orderScan = new Compute(device, shaders.orderScan, 'sse-splat-order-scan');
+        this.orderScatter = new Compute(device, shaders.orderScatter, 'sse-splat-order-scatter');
+        this.orderScatterSets = new Compute(device, shaders.orderScatterSets, 'sse-splat-order-scatter');
+        this.setArgs = new Compute(device, shaders.setArgs, 'sse-splat-set-args');
+        this.warpBuffer = new StorageBuffer(device, 16, BUFFERUSAGE_COPY_DST);
+    }
+    // the history's colour textures in the current format, and the targets they make with the
+    // depth records; the half floats filter, for the moving fetch's bilinear taps
+    createHistoryColor() {
+        const format = this.taaHalf ? PIXELFORMAT_RGBA16F : PIXELFORMAT_RGBA16U;
+        const filter = this.taaHalf ? FILTER_LINEAR : FILTER_NEAREST;
+        for (let i = 0; i < 2; i++) {
+            this.taaColor.push(createViewTexture(this.device, `sse-splat-taa-color-${i}${this.suffix}`, format, filter));
+            this.taaTargets.push(new RenderTarget({
+                name: `sse-splat-taa-${i}${this.suffix}`,
+                colorBuffers: [this.taaColor[i], this.taaInfo[i]],
+                depth: false,
+                samples: 1
+            }));
+        }
+    }
+    // switch the history's colour format; the history starts over, sized on the next frame
+    setTaaHalf(half) {
+        this.releaseTaaSetTargets();
+        for (const target of this.taaTargets)
+            target.destroy();
+        for (const texture of this.taaColor)
+            texture.destroy();
+        this.taaTargets.length = 0;
+        this.taaColor.length = 0;
+        this.taaHalf = half;
+        this.createHistoryColor();
+        for (const texture of this.taaInfo)
+            texture.resize(4, 4);
+        this.taaWidth = 0;
+        this.taaHeight = 0;
+        this.taaHistoryValid = false;
+        this.restFrames = 0;
+    }
+    // render through a warp's table from now on, or unwarped (null)
+    setWarp(key, map) {
+        const table = map ? buildWarpTable(map) : null;
+        const bytes = table ? table.byteLength : 16;
+        if (this.warpBuffer.byteSize !== bytes) {
+            this.warpBuffer.destroy();
+            this.warpBuffer = new StorageBuffer(this.device, bytes, BUFFERUSAGE_COPY_DST);
+        }
+        if (table)
+            this.warpBuffer.write(0, table, 0, table.length);
+        this.warpTable = table;
+        this.warpKey = key;
+        this.warpWidth = map ? map.width : 0;
+        this.warpHeight = map ? map.height : 0;
+        // a history or a previous frame laid out otherwise would be read in the wrong places
+        this.taaHistoryValid = false;
+        this.restFrames = 0;
+        this.prevValid = false;
+    }
+    get gpuBytes() {
+        let bytes = 0;
+        const buffers = [
+            this.nodeVisibleBuffer,
+            this.cacheBuffer,
+            this.orderedBuffer,
+            this.counter,
+            this.orderBuckets,
+            this.warpBuffer
+        ];
+        for (const buffer of [...buffers, this.occGrid])
+            bytes += buffer?.byteSize ?? 0;
+        bytes += this.colorTexture.gpuSize + this.depthTexture.gpuSize;
+        for (const texture of [...this.taaColor, ...this.taaInfo])
+            bytes += texture.gpuSize;
+        return bytes;
+    }
+    // the targets only, not the textures they share
+    releaseTaaSetTargets() {
+        for (const target of this.taaSetTargets)
+            target.destroy();
+        this.taaSetTargets.length = 0;
+    }
+    destroyProjectorComputes() {
+        for (const compute of this.projectorComputes.values())
+            compute.destroy();
+        this.projectorComputes.clear();
+    }
+    destroy() {
+        this.destroyProjectorComputes();
+        for (const compute of [this.args, this.orderScan, this.orderScatter, this.orderScatterSets, this.setArgs])
+            compute.destroy();
+        for (const compute of [this.reduceL1, this.reduceL2])
+            compute.destroy();
+        for (const buffer of [this.occGrid, this.counter, this.orderBuckets, this.setRanges, this.warpBuffer])
+            buffer.destroy();
+        this.orderedBuffer?.destroy();
+        this.cacheBuffer?.destroy();
+        this.nodeVisibleBuffer?.destroy();
+        this.orderedBuffer = this.cacheBuffer = this.nodeVisibleBuffer = null;
+        this.releaseTaaSetTargets();
+        for (const target of [...this.taaTargets, ...this.setTargets, this.target])
+            target.destroy();
+        for (const texture of [...this.taaColor, ...this.taaInfo, ...this.setTextures])
+            texture.destroy();
+        this.colorTexture.destroy();
+        this.depthTexture.destroy();
+    }
+}
+class StochasticSplatRenderer {
+    variant;
+    /** The mode's switches, which setVariant's string applies over. */
+    modeVariant;
+    /** setVariant's last string, applied again when a stereo session starts or ends. */
+    variantText;
+    source;
+    app;
+    device;
+    camera;
+    worldLayer;
+    provider;
+    unsubscribe;
+    enabled = true;
+    // the resident set and its chunk table
+    set = null;
+    numChunks = 0;
+    chunkData = new Uint32Array(0);
+    chunkBuffer = null;
+    // the camera's view, and a second eye's while a stereo session runs
+    views;
+    viewShaders;
+    // whether this frame draws one view per eye of an XR session
+    stereo = false;
+    // variant stereo:shared: both eyes' warp tables, the first eye's then the second's, for the
+    // projector that serves both (and what it holds); whether the raster is built to read the
+    // second eye's words (SSE_STEREO); and the first eye's indirect draw slots this frame, which
+    // the second eye's draws share
+    stereoWarp = null;
+    stereoWarpKey = '';
+    stereoDefined = false;
+    stereoSlots = { draw: 0, sets: 0 };
+    eye1ViewProjection = new Mat4();
+    // what the renderer's own passes draw with in a stereo session: the XR camera would set each
+    // eye's viewport on their targets
+    passCamera;
+    bindPass;
+    // compute
+    // one projector shader per source and occlusion / coverage specialisation: the test's code
+    // costs a little even when a uniform disables it, so a disabled or suspended cull runs
+    // without it (each view keeps its own computes of them)
+    projectorShaders = new Map();
+    projectorBindGroupFormat = null;
+    projectorSourceKey = '';
+    argsBindGroupFormat;
+    orderFormats = [];
+    reduceFormats = [];
+    // the allocations resident when the previous frame drew, and whether any of them has gone
+    // since: only a removed splat can make the previous depth wrong (it may have hidden what is
+    // now behind it), so arrivals leave the cull on while a scene streams in
+    residentAllocIds = new Set();
+    nodesRemoved = false;
+    /** Whether the last frame ran the occlusion cull, for the debug panel and the harness. */
+    culling = false;
+    /** Whether cull:auto currently has the test switched off for culling too little. */
+    get cullSuspended() {
+        return this.variant.cull === 'auto' && (!this.cullActive || this.cullSuspendedFrames > 0);
+    }
+    // cull:auto bookkeeping. The last decision holds while a readback is in flight: while the
+    // test is active every culled frame's counts are read back and a poor one suspends it;
+    // while suspended the frames count down, then one probe frame runs the test and the rest
+    // wait for its counts. The camera's view (the first eye's in stereo) decides for all
+    cullActive = true;
+    cullSuspendedFrames = 0;
+    cullStatsPending = false;
+    /** Frames the test stays off after culling too little (cull:auto). */
+    /**
+     * Whether the projected cache for `splats` resident splats fits one storage binding on this
+     * device. The cache reserves 25% over the resident count; adapters differ in the limit
+     * (128 MiB is the WebGPU default), so a viewer checks before opting in.
+     */
+    static cacheFits(device, splats) {
+        return cacheBytesFit(device, Math.ceil(splats * 1.25) * CACHE_WORDS * 4);
+    }
+    static CULL_SUSPEND_FRAMES = 60;
+    /** The culled fraction below which cull:auto suspends the test. */
+    static CULL_MIN_FRACTION = 0.08;
+    /**
+     * Let a capture (query) frame cull against the previous on-screen frame when it renders at
+     * the same size. Off by default: a query frame is not culled, since its cull thins what a
+     * pick or a thumbnail should see. The harness turns it on to photograph culled frames.
+     */
+    allowQueryCull = false;
+    // raster
+    rasterMesh;
+    // coverage other than pixel: a square per splat, turned per frame or circumscribing the
+    // jittered stratum's ellipse (shaders/raster.ts)
+    polygonMesh;
+    // variant coverage:interleaved: each pixel set's raster pass and draw (their targets are the
+    // view's), and the copy back into the full target when taa is off or small splats draw over
+    // them. (One target with a quadrant and viewport per set, in one pass, measured 1 ms slower on
+    // the Pixel 7 Pro: the passes are not what the sets cost, their triangles are.)
+    setPasses = [];
+    setInstances = [];
+    interleaveMaterial;
+    interleaveInstance;
+    rasterMaterial;
+    rasterInstance;
+    rasterPass;
+    // taa: the resolve, a fullscreen pass from the raster target and the view's previous history
+    // into its other history
+    taaMesh;
+    taaMaterial;
+    taaInstance;
+    // variant coverage:interleaved with taa: the same resolve reading the pixel sets' targets,
+    // writing their depth into the full target's
+    taaSetMaterial;
+    taaSetInstance;
+    // the two with a half-float history (variant taaHistory)
+    taaHalfMaterial;
+    taaSetHalfMaterial;
+    // whether this frame's taa reads the pixel sets (and the raster pass draws nothing)
+    setsFolded = false;
+    // whether the taa pass and its instances, and the compose, are set up for a half-float history
+    taaPassHalf = false;
+    composeHalf = false;
+    // variant warp:auto: the eyes' rate maps in a WebGPU XR session, measured at the end of its
+    // first frame (xr-rate-map.ts); null until then, and for a session without them
+    rateMaps = null;
+    rateMapState = 'idle';
+    // bumped as a session ends, so a measurement that resolves after it is dropped
+    rateMapSession = 0;
+    // whether the taa and compose shaders are built to warp (SSE_WARP)
+    warpDefined = false;
+    destroyed = false;
+    taaPass;
+    /** The frame the depth texture holds, null while it holds a capture's or nothing. */
+    depthFrame = null;
+    depthFrameCount = 0;
+    depthFrameCamera = createPickCameraSnapshot();
+    // a frame requested from inside the render: the engine clears app.renderNextFrame right
+    // after render(), so the request is applied on frameend instead
+    frameWanted = false;
+    requestFrame;
+    onFrameEnd = () => {
+        this.source.frameEnd();
+        if (this.rateMapState === 'wanted')
+            this.measureRateMaps();
+        if (this.frameWanted) {
+            this.frameWanted = false;
+            this.requestFrame();
+        }
+    };
+    frameIndex = 0;
+    // the seed the harness sets; the frame index replaces it while taa accumulates
+    userSeed = 0;
+    /** Whether the last frame ran the temporal accumulation, for the debug panel. */
+    taaActive = false;
+    /**
+     * Let a capture (query) frame at the on-screen size run the accumulation over the on-screen
+     * history, so the harness can photograph converged and moving frames. Off by default.
+     */
+    allowQueryTaa = false;
+    // compose
+    composeMesh;
+    composeMaterial;
+    composeInstance;
+    frustum = new Frustum();
+    sphere = new BoundingSphere();
+    frameSeed = 0;
+    ready = false;
+    /** The renderer's depth texture: the nearest surviving sample per pixel of `depthFrame`. */
+    get frameDepthTexture() {
+        return this.views[0].depthTexture;
+    }
+    /** The camera view's projected splats and their draw order, for the bench harness. */
+    get cacheBuffer() {
+        return this.views[0].cacheBuffer;
+    }
+    get orderedBuffer() {
+        return this.views[0].orderedBuffer;
+    }
+    get cacheSlots() {
+        return this.views[0].cacheSlots;
+    }
+    /** Byte sizes of the buffers this renderer owns, for the bench harness and the debug panel. */
+    get gpuBytes() {
+        let bytes = (this.chunkBuffer?.byteSize ?? 0) + (this.stereoWarp?.byteSize ?? 0);
+        for (const view of this.views)
+            bytes += view.gpuBytes;
+        return bytes + this.source.gpuBytes();
+    }
+    /**
+     * The seed mixed into every coverage hash. 0 makes a still camera reproduce its frame;
+     * the harness varies it to measure the sampling noise floor, and TAA will animate it.
+     */
+    get seed() {
+        return this.frameSeed;
+    }
+    set seed(value) {
+        this.userSeed = value >>> 0;
+        this.frameSeed = this.userSeed;
+        this.app.renderNextFrame = true;
+    }
+    /** The last projected frame's survivor count and occlusion-culled count, read back from the gpu. */
+    async readStats() {
+        // without a typed array the engine hands back bytes
+        const data = new Uint32Array(2);
+        await this.views[0].counter.read(0, 8, data, true);
+        return { survivors: data[0], occluded: data[1] };
+    }
+    // the occlusion grid's two levels at this size
+    ensureOccGrid(view, width, height) {
+        const x1 = Math.ceil(width / 8);
+        const y1 = Math.ceil(height / 8);
+        const x2 = Math.ceil(x1 / 4);
+        const y2 = Math.ceil(y1 / 4);
+        if (view.occBlocks.x1 !== x1 || view.occBlocks.y1 !== y1) {
+            view.occGrid.destroy();
+            view.occGrid = new StorageBuffer(this.device, (x1 * y1 + x2 * y2) * 4, BUFFERUSAGE_COPY_DST);
+            view.occBlocks = { x1, y1, x2, y2 };
+        }
+    }
+    // level 2 from level 1
+    reduceLevel2(view) {
+        const { x1, y1, x2, y2 } = view.occBlocks;
+        const l2 = view.reduceL2;
+        l2.setParameter('grid', view.occGrid);
+        l2.setParameter('blocksX1', x1);
+        l2.setParameter('blocksY1', y1);
+        l2.setParameter('blocksX2', x2);
+        l2.setParameter('blocksY2', y2);
+        Compute.calcDispatchSize(Math.ceil((x2 * y2) / 64), tmpVec2);
+        l2.setupDispatch(tmpVec2.x, tmpVec2.y, 1);
+        this.device.computeDispatch([l2], 'sse-splat-reduce2');
+    }
+    // reduce the view's previous depth into the two grid levels
+    reduceDepth(view, width, height) {
+        const { device } = this;
+        this.ensureOccGrid(view, width, height);
+        const { x1, y1 } = view.occBlocks;
+        const l1 = view.reduceL1;
+        l1.setParameter('prevDepth', view.depthTexture);
+        l1.setParameter('blockMax', view.occGrid);
+        l1.setParameter('width', width);
+        l1.setParameter('height', height);
+        l1.setParameter('blocksX', x1);
+        l1.setParameter('blocksY', y1);
+        l1.setupDispatch(x1, y1, 1);
+        device.computeDispatch([l1], 'sse-splat-reduce1');
+        this.reduceLevel2(view);
+    }
+    /** Survivors of the last frame's projection are only known to the gpu; this is the resident count. */
+    activeSplats = 0;
+    constructor(app, camera, worldLayer, options = {}) {
+        this.app = app;
+        this.device = app.graphicsDevice;
+        this.camera = camera;
+        this.worldLayer = worldLayer;
+        this.requestFrame =
+            options.requestFrame ??
+                (() => {
+                    this.app.renderNextFrame = true;
+                });
+        this.modeVariant = MODE_VARIANTS[options.mode ?? 'pixel'];
+        this.variantText = options.variant ?? '';
+        this.variant = parseVariant(`${this.modeVariant},${this.variantText}`);
+        const { device } = this;
+        this.passCamera = new Camera$1(device);
+        this.passCamera.node = camera.entity;
+        this.source = options.source === 'workbuffer' ? new WorkBufferSplatSource() : new DirectSplatSource(device);
+        // indirect draw arguments
+        this.argsBindGroupFormat = new BindGroupFormat(device, [
+            new BindStorageBufferFormat('counter', SHADERSTAGE_COMPUTE, true),
+            new BindStorageBufferFormat('indirectDrawArgs', SHADERSTAGE_COMPUTE),
+            new BindStorageBufferFormat('indirectDispatchArgs', SHADERSTAGE_COMPUTE),
+            new BindUniformBufferFormat('uniforms', SHADERSTAGE_COMPUTE)
+        ]);
+        const args = new Shader(device, {
+            name: 'sse-splat-args',
+            shaderLanguage: SHADERLANGUAGE_WGSL,
+            cshader: argsWGSL,
+            computeUniformBufferFormats: {
+                uniforms: new UniformBufferFormat(device, [
+                    new UniformFormat('drawSlot', UNIFORMTYPE_UINT),
+                    new UniformFormat('indexCount', UNIFORMTYPE_UINT),
+                    new UniformFormat('quadsPerInstance', UNIFORMTYPE_UINT),
+                    new UniformFormat('dispatchSlot', UNIFORMTYPE_UINT),
+                    new UniformFormat('scatterWorkgroupSize', UNIFORMTYPE_UINT)
+                ])
+            },
+            computeBindGroupFormat: this.argsBindGroupFormat
+        });
+        // the ordering passes
+        const scanFormat = new BindGroupFormat(device, [new BindStorageBufferFormat('buckets', SHADERSTAGE_COMPUTE)]);
+        const scatterFormat = new BindGroupFormat(device, [
+            new BindStorageBufferFormat('counter', SHADERSTAGE_COMPUTE, true),
+            new BindStorageBufferFormat('cache', SHADERSTAGE_COMPUTE, true),
+            new BindStorageBufferFormat('buckets', SHADERSTAGE_COMPUTE),
+            new BindStorageBufferFormat('ordered', SHADERSTAGE_COMPUTE)
+        ]);
+        const setArgsFormat = new BindGroupFormat(device, [
+            new BindStorageBufferFormat('buckets', SHADERSTAGE_COMPUTE, true),
+            new BindStorageBufferFormat('indirectDrawArgs', SHADERSTAGE_COMPUTE),
+            new BindStorageBufferFormat('setRanges', SHADERSTAGE_COMPUTE),
+            new BindUniformBufferFormat('uniforms', SHADERSTAGE_COMPUTE)
+        ]);
+        this.orderFormats = [scanFormat, scatterFormat, setArgsFormat];
+        const orderScan = new Shader(device, {
+            name: 'sse-splat-order-scan',
+            shaderLanguage: SHADERLANGUAGE_WGSL,
+            cshader: orderScanWGSL,
+            computeBindGroupFormat: scanFormat
+        });
+        const orderScatter = new Shader(device, {
+            name: 'sse-splat-order-scatter',
+            shaderLanguage: SHADERLANGUAGE_WGSL,
+            cshader: orderScatterWGSL,
+            computeBindGroupFormat: scatterFormat
+        });
+        const orderScatterSets = new Shader(device, {
+            name: 'sse-splat-order-scatter-sets',
+            shaderLanguage: SHADERLANGUAGE_WGSL,
+            cshader: orderScatterSetsWGSL,
+            computeBindGroupFormat: scatterFormat
+        });
+        const setArgs = new Shader(device, {
+            name: 'sse-splat-set-args',
+            shaderLanguage: SHADERLANGUAGE_WGSL,
+            cshader: setArgsWGSL,
+            computeUniformBufferFormats: {
+                uniforms: new UniformBufferFormat(device, [
+                    new UniformFormat('drawSlot', UNIFORMTYPE_UINT),
+                    new UniformFormat('indexCount', UNIFORMTYPE_UINT),
+                    new UniformFormat('quadsPerInstance', UNIFORMTYPE_UINT)
+                ])
+            },
+            computeBindGroupFormat: setArgsFormat
+        });
+        // the occlusion grid's two reduce passes
+        const reduceL1Format = new BindGroupFormat(device, [
+            new BindTextureFormat('prevDepth', SHADERSTAGE_COMPUTE, TEXTUREDIMENSION_2D, SAMPLETYPE_DEPTH, false),
+            new BindStorageBufferFormat('blockMax', SHADERSTAGE_COMPUTE),
+            new BindUniformBufferFormat('uniforms', SHADERSTAGE_COMPUTE)
+        ]);
+        const reduceL2Format = new BindGroupFormat(device, [
+            new BindStorageBufferFormat('grid', SHADERSTAGE_COMPUTE),
+            new BindUniformBufferFormat('uniforms', SHADERSTAGE_COMPUTE)
+        ]);
+        this.reduceFormats = [reduceL1Format, reduceL2Format];
+        const reduceL1 = new Shader(device, {
+            name: 'sse-splat-reduce1',
+            shaderLanguage: SHADERLANGUAGE_WGSL,
+            cshader: reduceL1WGSL,
+            computeUniformBufferFormats: {
+                uniforms: new UniformBufferFormat(device, [
+                    new UniformFormat('width', UNIFORMTYPE_UINT),
+                    new UniformFormat('height', UNIFORMTYPE_UINT),
+                    new UniformFormat('blocksX', UNIFORMTYPE_UINT),
+                    new UniformFormat('blocksY', UNIFORMTYPE_UINT)
+                ])
+            },
+            computeBindGroupFormat: reduceL1Format
+        });
+        const reduceL2 = new Shader(device, {
+            name: 'sse-splat-reduce2',
+            shaderLanguage: SHADERLANGUAGE_WGSL,
+            cshader: reduceL2WGSL,
+            computeUniformBufferFormats: {
+                uniforms: new UniformBufferFormat(device, [
+                    new UniformFormat('blocksX1', UNIFORMTYPE_UINT),
+                    new UniformFormat('blocksY1', UNIFORMTYPE_UINT),
+                    new UniformFormat('blocksX2', UNIFORMTYPE_UINT),
+                    new UniformFormat('blocksY2', UNIFORMTYPE_UINT)
+                ])
+            },
+            computeBindGroupFormat: reduceL2Format
+        });
+        this.viewShaders = { args, orderScan, orderScatter, orderScatterSets, setArgs, reduceL1, reduceL2 };
+        this.views = [new SplatView(device, this.viewShaders, '')];
+        const view = this.views[0];
+        // the renderer's own passes draw with the camera, or in a stereo session with a camera of
+        // its own at the same node
+        const passCamera = () => (this.stereo ? this.passCamera : camera.camera);
+        const forward = app.renderer;
+        this.rasterMesh = createQuadMesh(device, QUADS_PER_INSTANCE);
+        this.polygonMesh = createPolygonMesh(device, QUADS_PER_INSTANCE);
+        this.rasterMaterial = new ShaderMaterial({
+            uniqueName: 'sse-splat-raster',
+            vertexWGSL: rasterVertexWGSL,
+            fragmentWGSL: rasterFragmentWGSL,
+            attributes: { vertex_position: SEMANTIC_POSITION }
+        });
+        this.rasterMaterial.blendType = BLEND_NONE;
+        this.rasterMaterial.depthWrite = true;
+        this.rasterMaterial.depthTest = true;
+        this.rasterMaterial.cull = CULLFACE_NONE;
+        // the forward renderer reads the instance's node for its cull setup and world transform
+        this.rasterInstance = new MeshInstance(this.rasterMesh, this.rasterMaterial, new GraphNode('sse-splat-raster'));
+        this.rasterInstance.cull = false;
+        this.rasterInstance.castShadow = false;
+        this.rasterInstance.receiveShadow = false;
+        this.rasterPass = new SplatRasterPass(device, forward, passCamera, [this.rasterInstance]);
+        this.rasterPass.init(view.target);
+        this.rasterPass.setClearColor(new Color(0, 0, 0, 0));
+        this.rasterPass.setClearDepth(1);
+        // nothing to draw, and no buffers bound, until the first populated frame
+        this.rasterPass.enabled = false;
+        // variant coverage:interleaved: a pass and draw per pixel set into the view's set targets,
+        // sized per frame
+        for (let i = 0; i < 4; i++) {
+            const instance = new MeshInstance(this.polygonMesh, this.rasterMaterial, new GraphNode(`sse-splat-set-${i}`));
+            instance.cull = false;
+            instance.castShadow = false;
+            instance.receiveShadow = false;
+            instance.setParameter('setIndex', i);
+            this.setInstances.push(instance);
+            const pass = new SplatRasterPass(device, forward, passCamera, [instance], `sse-splat-raster-set-${i}`);
+            pass.init(view.setTargets[i]);
+            pass.setClearColor(new Color(0, 0, 0, 0));
+            pass.setClearDepth(1);
+            pass.enabled = false;
+            this.setPasses.push(pass);
+        }
+        // the copy back: drawn by the raster pass in place of the splats (after the small splats
+        // of variant interleaveArea, depth-tested against them: a frag_depth draw first in the
+        // pass would cost the small splats their early depth rejection)
+        this.interleaveMaterial = new ShaderMaterial({
+            uniqueName: 'sse-splat-interleave',
+            vertexWGSL: taaVertexWGSL,
+            fragmentWGSL: interleaveFragmentWGSL,
+            attributes: { vertex_position: SEMANTIC_POSITION }
+        });
+        this.interleaveMaterial.blendType = BLEND_NONE;
+        this.interleaveMaterial.depthWrite = true;
+        this.interleaveMaterial.depthTest = true;
+        this.interleaveMaterial.depthFunc = FUNC_LESS;
+        this.interleaveMaterial.cull = CULLFACE_NONE;
+        this.interleaveInstance = new MeshInstance(createFullscreenMesh(device), this.interleaveMaterial, new GraphNode('sse-splat-interleave'));
+        this.interleaveInstance.cull = false;
+        this.interleaveInstance.castShadow = false;
+        this.interleaveInstance.receiveShadow = false;
+        // the taa resolve: a fullscreen pass from the raster target and the view's previous
+        // history into its other history
+        this.taaMesh = createFullscreenMesh(device);
+        // One material per history format (variant taaHistory), whose outputs differ. Variant
+        // coverage:interleaved's reads the pixel sets' targets and writes their depth into the full
+        // target's, so no pass copies the sets back
+        const taaMaterial = (name, sets, half) => {
+            const material = new ShaderMaterial({
+                uniqueName: name,
+                vertexWGSL: taaVertexWGSL,
+                fragmentWGSL: taaFragmentWGSL,
+                attributes: { vertex_position: SEMANTIC_POSITION },
+                fragmentOutputTypes: [half ? 'vec4' : 'uvec4', 'uint']
+            });
+            if (sets)
+                material.setDefine('SSE_SETS', '');
+            if (half)
+                material.setDefine('SSE_TAA_HALF', '');
+            material.blendType = BLEND_NONE;
+            material.depthWrite = sets;
+            material.depthTest = sets;
+            if (sets)
+                material.depthFunc = FUNC_ALWAYS;
+            material.cull = CULLFACE_NONE;
+            return material;
+        };
+        this.taaMaterial = taaMaterial('sse-splat-taa', false, false);
+        this.taaSetMaterial = taaMaterial('sse-splat-taa-sets', true, false);
+        this.taaHalfMaterial = taaMaterial('sse-splat-taa-half', false, true);
+        this.taaSetHalfMaterial = taaMaterial('sse-splat-taa-sets-half', true, true);
+        this.taaInstance = new MeshInstance(this.taaMesh, this.taaMaterial, new GraphNode('sse-splat-taa'));
+        this.taaInstance.cull = false;
+        this.taaInstance.castShadow = false;
+        this.taaInstance.receiveShadow = false;
+        this.bindSetTextures(view);
+        for (const material of [this.taaSetMaterial, this.taaSetHalfMaterial])
+            material.update();
+        this.taaSetInstance = new MeshInstance(this.taaMesh, this.taaSetMaterial, new GraphNode('sse-splat-taa-sets'));
+        this.taaSetInstance.cull = false;
+        this.taaSetInstance.castShadow = false;
+        this.taaSetInstance.receiveShadow = false;
+        this.taaPass = new SplatRasterPass(device, forward, passCamera, [this.taaInstance], 'sse-splat-taa');
+        this.initTaaPass(view.taaTargets[0]);
+        this.taaPass.enabled = false;
+        // the compose quad, blended over the skybox and opaque meshes with the splat depth
+        this.composeMesh = createFullscreenMesh(device);
+        this.composeMaterial = new ShaderMaterial({
+            uniqueName: 'sse-splat-compose',
+            vertexWGSL: composeVertexWGSL,
+            fragmentWGSL: composeFragmentWGSL,
+            attributes: { vertex_position: SEMANTIC_POSITION }
+        });
+        this.composeMaterial.blendType = BLEND_PREMULTIPLIED;
+        this.composeMaterial.depthWrite = true;
+        this.composeMaterial.depthTest = true;
+        this.composeMaterial.cull = CULLFACE_NONE;
+        this.composeMaterial.setParameter('splatColor', view.colorTexture);
+        this.composeMaterial.setParameter('splatDepth', view.depthTexture);
+        // always bound, even while taa is off: a declared texture without a value makes the
+        // engine create and upload a placeholder inside the forward pass, which submits the
+        // command buffer mid-pass on WebGPU
+        this.composeMaterial.setParameter('taaColor', view.taaColor[0]);
+        this.composeMaterial.setParameter('taaInfo', view.taaInfo[0]);
+        this.composeInstance = new MeshInstance(this.composeMesh, this.composeMaterial, new GraphNode('sse-splat-compose'));
+        this.composeInstance.cull = false;
+        this.composeInstance.castShadow = false;
+        this.composeInstance.receiveShadow = false;
+        // the picker pass draws every pickable instance of the layer into a target without a
+        // depth attachment; this shader writes frag_depth, which makes that pipeline invalid
+        // and drops the whole submit, the frame's command buffer included
+        this.composeInstance.pick = false;
+        // first among the transparents, whichever way the layer sorts them
+        this.composeInstance.drawOrder = -1e3;
+        this.composeInstance.calculateSortDistance = () => Number.MAX_VALUE;
+        this.bindPass = new SplatBindPass(device, () => this.bindView());
+        this.applyVariant();
+        this.provider = new EngineResidentSetProvider(app, camera, worldLayer);
+        this.unsubscribe = this.provider.onFrame((set, changed, manager) => this.frame(set, changed, manager));
+        app.on('frameend', this.onFrameEnd);
+        this.attach();
+    }
+    /** Switch the renderer off and hand the splats back to the engine's renderer (XR), or on again. */
+    setEnabled(value) {
+        if (this.enabled === value)
+            return;
+        this.enabled = value;
+        if (value) {
+            this.attach();
+        }
+        else {
+            this.detach();
+        }
+        this.app.renderNextFrame = true;
+    }
+    /** Replace the experiment switches from a `key:value,key:value` string (unset keys reset to the mode's, and the session's). */
+    setVariant(text) {
+        this.variantText = text;
+        const stereo = this.stereo ? STEREO_VARIANT : '';
+        Object.assign(this.variant, parseVariant(`${this.modeVariant},${stereo},${text}`));
+        // the cull decides afresh under new switches
+        this.cullActive = true;
+        this.cullSuspendedFrames = 0;
+        this.applyVariant();
+    }
+    /**
+     * Drop the temporal history; the next frame starts accumulating from its own sample. The
+     * coverage seeds restart too, so a variant accumulates the same samples every time (the
+     * harness compares builds image for image).
+     */
+    resetHistory() {
+        for (const view of this.views) {
+            view.taaHistoryValid = false;
+            view.restFrames = 0;
+        }
+        this.frameIndex = 0;
+    }
+    /** Set the display sharpen (variant taaSharpen): a display-only switch, so the history stays. */
+    setSharpen(strength) {
+        this.variant.taaSharpen = Math.max(0, strength);
+        this.app.renderNextFrame = true;
+    }
+    /** Re-read {@link variant} after a field changed. */
+    applyVariant() {
+        // a switch changes what the frames hold; an old history would leak into the new ones
+        this.resetHistory();
+        const splatCoverage = this.variant.coverage !== 'pixel';
+        this.rasterMaterial.setDefine('SSE_COVERAGE_SPLAT', splatCoverage ? '' : undefined);
+        this.rasterMaterial.setDefine('SSE_INTERLEAVED', this.variant.coverage === 'interleaved' ? '' : undefined);
+        this.rasterInstance.mesh = splatCoverage ? this.polygonMesh : this.rasterMesh;
+        // variant jitter: the square contains the ellipse and the fragments discard outside it,
+        // so it needs no turning; the pixel sets draw from four strata, a per-splat draw from
+        // `strata` (the full target's instance also serves as the interleaved mode's group 4)
+        const { jitter, strata } = this.variant;
+        const jittered = splatCoverage && jitter > 0;
+        this.rasterMaterial.setDefine('SSE_JITTER', jittered ? '' : undefined);
+        this.rasterMaterial.setDefine('SSE_POLYGON_ROTATE', splatCoverage && !jittered ? '' : undefined);
+        const scale = Number(polygonScale(jitter > 0));
+        const subs = Math.max(jitter, 1);
+        for (const instance of this.setInstances)
+            instance.setParameter('jitterParams', [jitter, 4, 1 / (4 * subs), scale]);
+        this.rasterInstance.setParameter('jitterParams', [jitter, strata, 1 / (strata * subs), scale]);
+        this.rasterInstance.setParameter('setIndex', 4);
+        this.rasterInstance.setParameter('setMap', [1, 0, 1, 0]);
+        this.composeMaterial.setDefine('SSE_SHOW_DEPTH', this.variant.compose === 'depth' ? '' : undefined);
+        this.rasterMaterial.update();
+        this.composeMaterial.update();
+        this.setReady(this.ready);
+        this.app.renderNextFrame = true;
+    }
+    // the raster pass and the compose only run once a frame has bound the buffers they read
+    setReady(value) {
+        this.ready = value;
+        this.rasterPass.enabled = value && !this.setsFolded;
+        for (const pass of this.setPasses)
+            pass.enabled = value && this.variant.coverage === 'interleaved';
+        this.composeInstance.visible = value;
+    }
+    attach() {
+        const passes = this.camera.camera.beforePasses;
+        // the bind pass first: the passes after it draw the view it binds
+        if (!passes.includes(this.bindPass))
+            passes.push(this.bindPass);
+        for (const pass of this.setPasses)
+            if (!passes.includes(pass))
+                passes.push(pass);
+        if (!passes.includes(this.rasterPass))
+            passes.push(this.rasterPass);
+        if (!passes.includes(this.taaPass))
+            passes.push(this.taaPass);
+        this.worldLayer.addMeshInstances([this.composeInstance]);
+        this.provider.setActive(true);
+    }
+    detach() {
+        const passes = this.camera.camera.beforePasses;
+        for (const pass of [this.bindPass, ...this.setPasses, this.rasterPass, this.taaPass]) {
+            const index = passes.indexOf(pass);
+            if (index >= 0)
+                passes.splice(index, 1);
+        }
+        this.resetHistory();
+        this.depthFrame = null;
+        // the views' memory too: their caches, history and targets (125 MB at the 1M budget on an
+        // iPhone), which the first frame after attach() sizes again into one empty view, as it
+        // does for a session's eyes. The passes and materials take them from each frame's bindings
+        for (const view of this.views)
+            view.destroy();
+        this.views = [new SplatView(this.device, this.viewShaders, '')];
+        this.worldLayer.removeMeshInstances([this.composeInstance]);
+        // the source first: the engine's renderer draws from the work buffer it may have patched
+        this.source.suspend();
+        // and the set it was given: the first frame after attach() updates the source again,
+        // which patches the work buffer and repacks, even when the resident set has not changed
+        this.set = null;
+        this.provider.setActive(false);
+    }
+    // The eyes of a stereo session the engine renders once per eye (the condition of its
+    // ForwardRenderer._isMultiview), or null for the camera's own view
+    stereoViews() {
+        const cam = this.camera.camera;
+        const views = cam.xrActive ? cam.xrViews : null;
+        return this.device.isWebGPU && views && views.length >= 2 ? views : null;
+    }
+    // bind the view the camera's passes draw now: in a stereo session the eye the engine is
+    // replaying them for, else the camera's
+    bindView() {
+        const replaying = this.device.xrCurrentViewIndex ?? -1;
+        const index = this.stereo ? Math.min(Math.max(replaying, 0), this.views.length - 1) : 0;
+        for (const bind of this.views[index].bindings)
+            bind();
+    }
+    // the pixel sets' textures, where the copy back and the folded accumulation read them
+    bindSetTextures(view) {
+        for (let i = 0; i < 4; i++) {
+            for (const material of [this.interleaveMaterial, this.taaSetMaterial, this.taaSetHalfMaterial]) {
+                material.setParameter(`setColor${i}`, view.setTextures[i * 2]);
+                material.setParameter(`setDepth${i}`, view.setTextures[i * 2 + 1]);
+            }
+        }
+    }
+    frame(set, changed, manager) {
+        if (!this.enabled)
+            return;
+        const { device, camera } = this;
+        const cam = camera.camera;
+        this.nodesRemoved = false;
+        if (changed || this.set !== set) {
+            const ids = new Set(set.nodes.map((node) => node.allocId));
+            for (const id of this.residentAllocIds) {
+                if (!ids.has(id)) {
+                    this.nodesRemoved = true;
+                    break;
+                }
+            }
+            this.residentAllocIds = ids;
+            this.source.update(set, manager);
+            this.rebuildChunkTable(set);
+            this.activeSplats = set.activeSplats;
+            this.pruneProjectorComputes(set);
+            // recorded last, so a rebuild that throws is retried next frame
+            this.set = set;
+        }
+        if (this.numChunks === 0) {
+            // nothing resident: draw nothing
+            this.setReady(false);
+            return;
+        }
+        // A session's views arrive with its first XR frame, and until then the camera is in the
+        // session with none: the released engine then binds no view bind group for a pass drawing
+        // with it (fixed on the engine's feat/webgpu-xr-depth), so draw nothing that frame
+        const xrCamera = cam;
+        if (xrCamera.xrActive && !xrCamera.xrViews?.length) {
+            this.setReady(false);
+            this.taaPass.enabled = false;
+            return;
+        }
+        // one view per eye while the engine renders a stereo session, the camera's otherwise
+        const eyes = this.stereoViews();
+        if (this.stereo !== !!eyes) {
+            this.stereo = !!eyes;
+            // the stereo switches come and go with the session
+            this.setVariant(this.variantText);
+        }
+        const count = eyes ? eyes.length : 1;
+        while (this.views.length < count) {
+            this.views.push(new SplatView(device, this.viewShaders, `-eye${this.views.length}`));
+        }
+        while (this.views.length > count)
+            this.views.pop().destroy();
+        // the eyes' matrices are refreshed at render time, after this hook
+        if (eyes)
+            cam.updateViewTransforms();
+        this.followModel(set);
+        // variant warp:auto: a session whose eyes the browser rasterises at a variable rate has
+        // their rate maps measured at the end of a frame, once its sub-images are known
+        if (!eyes) {
+            if (this.rateMapState !== 'idle')
+                this.rateMapSession++;
+            this.rateMaps = null;
+            this.rateMapState = 'idle';
+        }
+        else if (this.rateMapState === 'idle' && this.variant.warp === 'auto') {
+            const subs = device.xrSubImages ?? [];
+            if (subs.length >= count)
+                this.rateMapState = device.wgpu && subs.some(variableRate) ? 'wanted' : 'done';
+        }
+        // the target follows whatever the camera renders into this frame: the backbuffer, or a
+        // capture's render target at another size
+        const rt = camera.renderTarget;
+        const width = rt ? rt.width : device.width;
+        const height = rt ? rt.height : device.height;
+        const isOrtho = cam.projection === PROJECTION_ORTHOGRAPHIC;
+        const viewOf = (i) => (eyes ? eyes[i].viewOffMat : cam.viewMatrix);
+        const projectionOf = (i) => (eyes ? eyes[i].projMat : cam.projectionMatrix);
+        // Temporal accumulation runs on on-screen frames (and, for the harness, on a capture at
+        // the same size); the history is only trusted when it holds the previous such frame at
+        // this size. While it runs the coverage seed changes every frame, and a resting camera
+        // keeps requesting frames until the history has filled its cap
+        const isQuery = !!rt;
+        const first = this.views[0];
+        const taaOn = this.variant.taa === 'on' &&
+            (!isQuery || (this.allowQueryTaa && width === first.taaWidth && height === first.taaHeight));
+        this.frameSeed = taaOn ? this.frameIndex++ >>> 0 : this.userSeed;
+        this.taaActive = taaOn;
+        // The occlusion cull reads the depth texture as the previous frame left it, so it needs
+        // that frame to have drawn to this target at this size (a resize loses the texture, a
+        // capture draws elsewhere), with no splat removed since (its depth would hide what is
+        // now behind it; arrivals are safe) and the same projection type. A capture frame is
+        // never culled and never becomes the previous frame.
+        // a new world state can change what is occluded: try the test again
+        if (first.prevVersion !== set.version) {
+            this.cullSuspendedFrames = 0;
+            this.cullActive = true;
+        }
+        const cullMode = this.variant.cull;
+        let wanted = cullMode !== 'off';
+        let probe = false;
+        if (cullMode === 'auto' && !isQuery) {
+            if (this.cullSuspendedFrames > 0) {
+                // a moving camera changes what is occluded, so the probe comes sooner
+                const moved = this.viewMoved(first, viewOf(0), projectionOf(0));
+                this.cullSuspendedFrames = Math.max(0, this.cullSuspendedFrames - (moved ? 4 : 1));
+                wanted = false;
+            }
+            else if (!this.cullActive) {
+                // suspended and due: one probe frame, then wait for its counts
+                probe = !this.cullStatsPending;
+                wanted = probe;
+            }
+        }
+        // every view's target first: a shared projection places the splats in both eyes' at once
+        const targets = this.views.map((view, i) => this.prepareTarget(view, i, !!eyes, width, height));
+        // variant stereo:shared, while the two eyes render alike targets, see the same depth and
+        // the lead's cache has room for the second eye's words in one storage binding. Otherwise
+        // each eye projects into its own cache, which the viewer's startup check (cacheFits) sized
+        const shared = count === 2 &&
+            this.variant.stereo === 'shared' &&
+            !!eyes &&
+            eyesShareDepth(eyes) &&
+            targets[0].width === targets[1].width &&
+            targets[0].height === targets[1].height &&
+            targets[0].warped === targets[1].warped &&
+            cacheBytesFit(device, this.cacheSlotsFor(first, set.activeSplats) * (CACHE_WORDS + 3) * 4);
+        if (shared !== this.stereoDefined) {
+            this.stereoDefined = shared;
+            this.rasterMaterial.setDefine('SSE_STEREO', shared ? '' : undefined);
+            this.rasterMaterial.update();
+        }
+        // the projector reads both eyes' tables from one buffer
+        const stereoWarpKey = shared && targets[0].warped ? `${this.views[0].warpKey}|${this.views[1].warpKey}` : '';
+        if (stereoWarpKey !== this.stereoWarpKey) {
+            this.stereoWarpKey = stereoWarpKey;
+            this.stereoWarp?.destroy();
+            this.stereoWarp = null;
+            const [a, b] = [this.views[0].warpTable, this.views[1]?.warpTable];
+            if (stereoWarpKey && a && b) {
+                this.stereoWarp = new StorageBuffer(device, (a.length + b.length) * 4, BUFFERUSAGE_COPY_DST);
+                this.stereoWarp.write(0, a, 0, a.length);
+                this.stereoWarp.write(a.length * 4, b, 0, b.length);
+            }
+        }
+        for (let i = 0; i < count; i++) {
+            const role = shared ? (i === 0 ? 'lead' : 'follow') : 'own';
+            this.frameView(this.views[i], i, set, changed, viewOf(i), projectionOf(i), !!eyes, role, {
+                ...targets[i],
+                isOrtho,
+                isQuery,
+                taaOn,
+                cullWanted: wanted,
+                eye1: shared ? { view: this.views[1], viewMatrix: viewOf(1), projection: projectionOf(1) } : null
+            });
+        }
+        // the shaders that read the warp's table, built for it when the views render through one
+        const warped = this.views[0].warpKey !== '';
+        if (warped !== this.warpDefined) {
+            this.warpDefined = warped;
+            const taa = [this.taaMaterial, this.taaSetMaterial, this.taaHalfMaterial, this.taaSetHalfMaterial];
+            for (const material of [...taa, this.composeMaterial]) {
+                material.setDefine('SSE_WARP', warped ? '' : undefined);
+                material.update();
+            }
+        }
+        // the compose reads the history in the views' format (every view of a frame shares it)
+        const half = this.views[0].taaHalf;
+        if (half !== this.composeHalf) {
+            this.composeHalf = half;
+            this.composeMaterial.setDefine('SSE_TAA_HALF', half ? '' : undefined);
+            this.composeMaterial.update();
+        }
+        // a stereo frame's depth is an eye's, not the camera's, and a warped frame's is not where
+        // the picker reads it: nothing for the picker
+        if (isQuery || eyes || warped)
+            this.depthFrame = null;
+        this.setReady(true);
+    }
+    // The view's target this frame, the frame's size or with variant warp its table's, which the
+    // view renders through from now on
+    prepareTarget(view, index, eye, frameWidth, frameHeight) {
+        const warp = this.warpOf(index, eye, frameWidth, frameHeight);
+        if (view.warpKey !== (warp?.key ?? ''))
+            view.setWarp(warp?.key ?? '', warp ? warp.map() : null);
+        const warped = !!warp;
+        const width = warped ? view.warpWidth : frameWidth;
+        const height = warped ? view.warpHeight : frameHeight;
+        if (view.target.width !== width || view.target.height !== height) {
+            view.target.resize(width, height);
+            // their views point at the depth texture just rebuilt
+            view.releaseTaaSetTargets();
+        }
+        return { width, height, warped };
+    }
+    // whether the view's occlusion grid can come from its previous frame (see frame())
+    canCull(view, width, height, isOrtho, isQuery) {
+        return ((!isQuery || this.allowQueryCull) &&
+            view.prevValid &&
+            view.prevWidth === width &&
+            view.prevHeight === height &&
+            !this.nodesRemoved &&
+            view.prevOrtho === isOrtho);
+    }
+    // The warp a view renders through this frame (variant warp), as the key of its table and the
+    // map it is built from: the editor's function at a number, else an XR eye's rate map
+    warpOf(index, eye, width, height) {
+        const { warp } = this.variant;
+        if (typeof warp === 'number') {
+            return { key: `m${warp}:${width}x${height}`, map: () => analyticWarpMap(warp, width, height) };
+        }
+        const measured = eye && warp === 'auto' ? this.rateMaps?.[index] : undefined;
+        return measured ? { key: `xr${this.rateMapSession}:${index}`, map: () => measured } : null;
+    }
+    // variant warp:auto: measure the eyes' rate maps now that this frame has rendered into them
+    measureRateMaps() {
+        const { device } = this;
+        const subs = device.xrSubImages ?? [];
+        if (!device.wgpu || !subs.length)
+            return;
+        this.rateMapState = 'measuring';
+        const session = this.rateMapSession;
+        measureXrRateMaps(device.wgpu, subs)
+            .then((maps) => {
+            if (this.destroyed || session !== this.rateMapSession)
+                return;
+            // every eye warps or none does: the shaders are built one way for all of them
+            if (maps.every((map) => map)) {
+                this.rateMaps = maps;
+                this.app.renderNextFrame = true;
+            }
+        })
+            .catch(() => {
+            // the eyes stay unwarped for the session
+        })
+            .finally(() => {
+            if (session === this.rateMapSession)
+                this.rateMapState = 'done';
+        });
+    }
+    // One view's share of the frame: its projection, cull, dispatches, accumulation and the
+    // bindings its passes draw with. With variant stereo:shared the first eye ('lead') projects
+    // and orders the splats for both eyes and the second ('follow') draws the lead's; otherwise
+    // every view projects its own ('own')
+    frameView(view, index, set, changed, viewMatrix, projection, eye, role, frame) {
+        const { device, camera } = this;
+        const cam = camera.camera;
+        const { width, height, warped, isOrtho, isQuery, taaOn } = frame;
+        const bindings = view.bindings;
+        bindings.length = 0;
+        const bind = (target, name, value) => bindings.push(() => target.setParameter(name, value));
+        const projects = role !== 'follow';
+        // the views whose buffers the passes draw: the lead's for both eyes
+        const source = role === 'follow' ? this.views[0] : view;
+        // the clip z the raster shader reconstructs must match the engine's WebGPU depth range;
+        // an eye's projection is already the session's
+        const shaderProjection = eye
+            ? view.shaderProjection.copy(projection)
+            : Camera$1.applyShaderProjectionTransform(projection, view.shaderProjection, false, true);
+        view.viewProjection.mul2(shaderProjection, viewMatrix);
+        // The splats' own depth: clip z = a * depth + b (over w = depth for a perspective
+        // camera). The camera's far plane is fitted to the scene bound, which can leave a sky
+        // outside it, and splats clamped there share one depth and lose their order; so a
+        // perspective raster puts its far plane at infinity (z = 1 - near / depth), with the same
+        // near plane and, near where precision matters, the same resolution. The compose converts
+        // back to the camera's depth where the splats meet the rest of the scene. An orthographic
+        // camera keeps its own mapping: a linear depth has no far plane at infinity.
+        const cameraClipZ = [-shaderProjection.data[10], shaderProjection.data[14]];
+        const clipZ = isOrtho ? cameraClipZ : [1, cameraClipZ[1] / cameraClipZ[0]];
+        const clipZParams = [clipZ[0], clipZ[1], isOrtho ? 1 : 0, 0];
+        // the lead's second eye, whose view the node cull and the projector take as well
+        const { eye1 } = frame;
+        const eye1ViewProjection = eye1 ? this.eye1ViewProjection.mul2(eye1.projection, eye1.viewMatrix) : null;
+        if (projects)
+            this.cullNodes(view, set, eye1ViewProjection ? [view.viewProjection, eye1ViewProjection] : [view.viewProjection]);
+        const focal = [Math.abs(projection.data[0]) * width * 0.5, Math.abs(projection.data[5]) * height * 0.5];
+        const gsplat = this.app.scene.gsplat;
+        // splats, quads and fragments below it are dropped
+        const alphaClip = gsplat.alphaClipForward;
+        // the moving-camera contribution cull: a raised threshold while the view changes, then
+        // one more frame at the scene's threshold once it has stopped
+        const moved = this.viewMoved(view, viewMatrix, projection);
+        const raised = moved && this.variant.contribution > 0;
+        const minContribution = raised
+            ? Math.max(gsplat.minContribution, this.variant.contribution)
+            : gsplat.minContribution;
+        if (raised)
+            this.frameWanted = true;
+        // variant taaHistory: an XR eye's history in half floats, unless the variant says otherwise
+        const { taaHistory } = this.variant;
+        const half = taaHistory === 'half' || (taaHistory === 'auto' && eye);
+        if (view.taaHalf !== half)
+            view.setTaaHalf(half);
+        if (taaOn) {
+            if (view.taaWidth !== width || view.taaHeight !== height) {
+                this.resizeHistory(view, width, height);
+                view.taaWidth = width;
+                view.taaHeight = height;
+                view.taaHistoryValid = false;
+                view.restFrames = 0;
+            }
+            if (moved || changed)
+                view.restFrames = 0;
+            else
+                view.restFrames++;
+            if (view.restFrames < this.variant.taaMax + 2)
+                this.frameWanted = true;
+        }
+        else {
+            // a capture at another size does not accumulate; the next on-screen frame starts over
+            view.taaHistoryValid = false;
+            view.restFrames = 0;
+            // switched off: the history goes back to its placeholder size until it is wanted
+            if (this.variant.taa === 'off' && view.taaWidth !== 0) {
+                this.resizeHistory(view, 4, 4);
+                view.taaWidth = 0;
+                view.taaHeight = 0;
+            }
+        }
+        const cullMode = this.variant.cull;
+        // a shared projection culls only against both eyes' previous frames
+        const culling = frame.cullWanted &&
+            this.canCull(view, width, height, isOrtho, isQuery) &&
+            (!eye1 || this.canCull(eye1.view, width, height, isOrtho, isQuery));
+        if (index === 0)
+            this.culling = culling;
+        if (culling && projects) {
+            this.reduceDepth(view, width, height);
+            if (eye1)
+                this.reduceDepth(eye1.view, width, height);
+        }
+        const { coverage } = this.variant;
+        const interleaved = coverage === 'interleaved';
+        // variant interleaveArea: the small splats draw per splat into the full target, over the
+        // sets copied back, so the accumulation reads the full target as usual
+        const smallSplats = interleaved && this.variant.interleaveArea > 0;
+        // the view's position, for the view-dependent colour: an eye's is its own
+        view.cameraWorld.copy(viewMatrix).invert();
+        // the indirect draws: the projecting view's slots, which a follower's draws share
+        let drawSlot = this.stereoSlots.draw;
+        let setSlot = this.stereoSlots.sets;
+        if (projects) {
+            view.counter.clear();
+            this.ensureCache(view, set.activeSplats, !!eye1);
+            // the draw order (shaders/order.ts): front to back, so early depth rejection takes most
+            // of what the depth test would; the interleaved pixel sets split their draws by it too
+            view.orderBuckets.clear();
+            this.ensureOrdered(view, view.cacheSlots * (interleaved ? 4 : 1));
+            // the order key spans the fitted clip range, log-spaced
+            const logNear = Math.log(Math.max(cam.nearClip, 1e-6));
+            const invLogRange = 1 / Math.max(Math.log(Math.max(cam.farClip, 1e-6)) - logNear, 1e-6);
+            const position = eye ? view.cameraWorld.getTranslation(tmpVec3) : camera.entity.getPosition();
+            // variant stereo:shared: the second eye's view, or this view's again where it projects
+            // alone (the shader reads them only in stereo)
+            const other = eye1?.view ?? view;
+            const otherProjection = eye1?.projection ?? projection;
+            const focalEye1 = [
+                Math.abs(otherProjection.data[0]) * width * 0.5,
+                Math.abs(otherProjection.data[5]) * height * 0.5
+            ];
+            const groups = this.source.dispatchPlan(set, this.numChunks);
+            for (const group of groups) {
+                // a file with no node in the frustum has nothing to dispatch
+                if (group.fileIndex >= 0 && !this.anyNodeVisible(view, set.files[group.fileIndex].nodes))
+                    continue;
+                const projector = this.ensureProjector(view, culling, coverage, warped, !!eye1, group);
+                this.source.bind(projector, group, set);
+                projector.setParameter('chunks', this.chunkBuffer);
+                projector.setParameter('nodeVisible', view.nodeVisibleBuffer);
+                projector.setParameter('cache', view.cacheBuffer);
+                projector.setParameter('counter', view.counter);
+                projector.setParameter('occ', view.occGrid);
+                projector.setParameter('buckets', view.orderBuckets);
+                projector.setParameter('view', viewMatrix.data);
+                projector.setParameter('viewProj', view.viewProjection.data);
+                projector.setParameter('prevViewProj', view.prevViewProjection.data);
+                projector.setParameter('prevView', view.prevView.data);
+                projector.setParameter('prevClipZ', view.prevClipZ);
+                projector.setParameter('viewport', [width, height]);
+                projector.setParameter('focal', focal);
+                projector.setParameter('prevViewport', view.prevViewport);
+                projector.setParameter('prevFocal', view.prevFocal);
+                projector.setParameter('numChunks', group.chunkCount);
+                projector.setParameter('chunkBase', group.chunkBase);
+                projector.setParameter('cameraPosition', [position.x, position.y, position.z, 0]);
+                projector.setParameter('splatTextureSize', this.source.textureSize(group));
+                projector.setParameter('isOrtho', isOrtho ? 1 : 0);
+                projector.setParameter('minPixelSize', gsplat.minPixelSize);
+                projector.setParameter('alphaClip', alphaClip);
+                projector.setParameter('minContribution', minContribution);
+                projector.setParameter('unitScale', this.variant.units === 'engine' ? 2 : 1);
+                projector.setParameter('occBlocksX1', view.occBlocks.x1);
+                projector.setParameter('occBlocksY1', view.occBlocks.y1);
+                projector.setParameter('occBlocksX2', view.occBlocks.x2);
+                projector.setParameter('occBlocksY2', view.occBlocks.y2);
+                projector.setParameter('occlusionMode', culling ? (cullMode === 'l1' ? 1 : 2) : 0);
+                projector.setParameter('prevFlip', view.prevFlip);
+                projector.setParameter('keyLogNear', logNear);
+                projector.setParameter('keyInvLogRange', invLogRange);
+                projector.setParameter('frameSeed', this.frameSeed);
+                projector.setParameter('jitterSubs', this.variant.jitter);
+                projector.setParameter('strata', this.variant.strata);
+                projector.setParameter('interleaveArea', interleaved ? this.variant.interleaveArea : 0);
+                projector.setParameter('warpTable', eye1 && this.stereoWarp ? this.stereoWarp : view.warpBuffer);
+                projector.setParameter('viewEye1', (eye1?.viewMatrix ?? viewMatrix).data);
+                projector.setParameter('viewProjEye1', (eye1ViewProjection ?? view.viewProjection).data);
+                projector.setParameter('prevViewProjEye1', other.prevViewProjection.data);
+                projector.setParameter('prevViewEye1', other.prevView.data);
+                projector.setParameter('focalEye1', focalEye1);
+                projector.setParameter('prevFocalEye1', other.prevFocal);
+                projector.setParameter('occEye1', other.occGrid);
+                projector.setParameter('occL2Base', view.occBlocks.x1 * view.occBlocks.y1);
+                projector.setParameter('stereoBase', view.cacheSlots * CACHE_WORDS);
+                projector.setParameter('warpBaseEye1', view.warpTable?.length ?? 0);
+                Compute.calcDispatchSize(group.chunkCount, tmpVec2);
+                projector.setupDispatch(tmpVec2.x, tmpVec2.y, 1);
+                device.computeDispatch([projector], 'sse-splat-project');
+            }
+            // indirect draw arguments for the raster and dispatch size for the scatter; slots are
+            // per frame
+            drawSlot = device.getIndirectDrawSlot(1);
+            const dispatchSlot = device.getIndirectDispatchSlot(1);
+            const args = view.args;
+            args.setParameter('counter', view.counter);
+            args.setParameter('indirectDrawArgs', device.indirectDrawBuffer);
+            args.setParameter('indirectDispatchArgs', device.indirectDispatchBuffer);
+            args.setParameter('drawSlot', drawSlot);
+            // two triangles per splat, the quad's or the square's
+            const indicesPerSplat = 6;
+            args.setParameter('indexCount', QUADS_PER_INSTANCE * indicesPerSplat);
+            args.setParameter('quadsPerInstance', QUADS_PER_INSTANCE);
+            args.setParameter('dispatchSlot', dispatchSlot);
+            args.setParameter('scatterWorkgroupSize', ORDER_BUCKETS);
+            args.setupDispatch(1, 1, 1);
+            device.computeDispatch([args], 'sse-splat-args');
+            // bucket offsets, then every survivor claims its place in its bucket
+            view.orderScan.setParameter('buckets', view.orderBuckets);
+            view.orderScan.setupDispatch(1, 1, 1);
+            device.computeDispatch([view.orderScan], 'sse-splat-order-scan');
+            if (interleaved) {
+                // each group's range and draw, from the offsets before the scatter advances them:
+                // the four sets, and the full target's small splats
+                setSlot = device.getIndirectDrawSlot(SET_GROUPS);
+                const setArgs = view.setArgs;
+                setArgs.setParameter('buckets', view.orderBuckets);
+                setArgs.setParameter('indirectDrawArgs', device.indirectDrawBuffer);
+                setArgs.setParameter('setRanges', view.setRanges);
+                setArgs.setParameter('drawSlot', setSlot);
+                setArgs.setParameter('indexCount', QUADS_PER_INSTANCE * indicesPerSplat);
+                setArgs.setParameter('quadsPerInstance', QUADS_PER_INSTANCE);
+                setArgs.setupDispatch(1, 1, 1);
+                device.computeDispatch([setArgs], 'sse-splat-set-args');
+            }
+            const scatter = interleaved ? view.orderScatterSets : view.orderScatter;
+            scatter.setParameter('counter', view.counter);
+            scatter.setParameter('cache', view.cacheBuffer);
+            scatter.setParameter('buckets', view.orderBuckets);
+            scatter.setParameter('ordered', view.orderedBuffer);
+            scatter.setupIndirectDispatch(dispatchSlot);
+            device.computeDispatch([scatter], 'sse-splat-order-scatter');
+            this.stereoSlots = { draw: drawSlot, sets: setSlot };
+        }
+        if (interleaved) {
+            bindings.push(() => this.rasterInstance.setIndirect(null, setSlot + 4, 1));
+            this.prepareSets(view, width, height, setSlot);
+        }
+        else {
+            bindings.push(() => this.rasterInstance.setIndirect(null, drawSlot, 1));
+        }
+        // the view's targets, where the passes draw
+        bindings.push(() => {
+            this.rasterPass.renderTarget = view.target;
+            for (let i = 0; i < 4; i++)
+                this.setPasses[i].renderTarget = view.setTargets[i];
+            this.bindSetTextures(view);
+        });
+        const raster = this.rasterMaterial;
+        bind(raster, 'splatCache', source.cacheBuffer);
+        bind(raster, 'splatCount', source.counter);
+        bind(raster, 'orderedSlots', source.orderedBuffer);
+        bind(raster, 'viewportSize', [width, height, 2 / width, 2 / height]);
+        bind(raster, 'clipZParams', clipZParams);
+        bind(raster, 'sseAlphaClip', alphaClip);
+        bind(raster, 'frameSeed', this.frameSeed);
+        if (interleaved)
+            bind(raster, 'setRanges', source.setRanges);
+        if (role !== 'own') {
+            bind(raster, 'stereoBase', source.cacheSlots * CACHE_WORDS);
+            bind(raster, 'stereoEye', role === 'follow' ? 1 : 0);
+        }
+        // the pixel sets draw in their own passes; the raster pass copies them back, after the
+        // small splats it draws into the full target first
+        this.rasterPass.instances = interleaved
+            ? smallSplats
+                ? [this.rasterInstance, this.interleaveInstance]
+                : [this.interleaveInstance]
+            : [this.rasterInstance];
+        // interleaved pixel sets go straight into the taa, which writes their depth, so the
+        // raster pass has nothing to do; with small splats drawn over them it copies them back
+        const folded = interleaved && taaOn && !smallSplats;
+        if (folded)
+            this.ensureTaaSetTargets(view);
+        if (folded !== this.setsFolded || half !== this.taaPassHalf) {
+            this.setsFolded = folded;
+            this.taaPassHalf = half;
+            this.initTaaPass(folded ? view.taaSetTargets[0] : view.taaTargets[0]);
+            this.taaPass.instances = [folded ? this.taaSetInstance : this.taaInstance];
+            this.taaInstance.material = half ? this.taaHalfMaterial : this.taaMaterial;
+            this.taaSetInstance.material = half ? this.taaSetHalfMaterial : this.taaSetMaterial;
+        }
+        this.taaPass.enabled = taaOn;
+        if (!taaOn) {
+            // declared either way, and a history format switch destroys what it pointed at
+            bind(this.composeMaterial, 'taaColor', view.taaColor[0]);
+            bind(this.composeMaterial, 'taaInfo', view.taaInfo[0]);
+        }
+        if (taaOn) {
+            const read = view.taaWrite ^ 1;
+            const taa = folded
+                ? half
+                    ? this.taaSetHalfMaterial
+                    : this.taaSetMaterial
+                : half
+                    ? this.taaHalfMaterial
+                    : this.taaMaterial;
+            view.taaPrevViewProjection.copy(view.taaLastViewProjection);
+            view.taaPrevView.copy(view.taaLastView);
+            if (!folded) {
+                bind(taa, 'curColor', view.colorTexture);
+                bind(taa, 'curDepth', view.depthTexture);
+            }
+            bind(taa, 'histColor', view.taaColor[read]);
+            bind(taa, 'histInfo', view.taaInfo[read]);
+            bind(taa, 'cameraWorld', view.cameraWorld.data);
+            // x_ndc = (m00 x + m02 z) / -z for a perspective camera, m00 x + m03 for an orthographic one
+            const sp = shaderProjection.data;
+            bind(taa, 'unproject', isOrtho ? [sp[0], sp[5], sp[12], sp[13]] : [sp[0], sp[5], sp[8], sp[9]]);
+            bind(taa, 'prevViewProj', view.taaPrevViewProjection.data);
+            bind(taa, 'prevView', view.taaPrevView.data);
+            bind(taa, 'clipZParams', clipZParams);
+            // a changed resident set (detail streamed in) keeps the history but caps its weight,
+            // so the new content shows within taaMoveMax frames rather than 1 / taaMax a frame
+            bind(taa, 'taaParams', [
+                moved || changed ? this.variant.taaMoveMax : this.variant.taaMax,
+                view.taaHistoryValid ? 1 : 0,
+                moved ? 1 : 0,
+                view.restFrames
+            ]);
+            bind(taa, 'taaViewport', [width, height, 1 / width, 1 / height]);
+            bind(taa, 'taaControl', [
+                view.target.flipY ? -1 : 1,
+                this.variant.taaClip,
+                this.variant.taaReproj === 'history' ? 1 : 0,
+                this.variant.taaMotion
+            ]);
+            bind(taa, 'taaMoving', [this.variant.taaParallax === 'on' ? 1 : 0, this.variant.taaSharp]);
+            bind(taa, 'taaDebug', this.variant.taaDebug);
+            bind(taa, 'warpTable', view.warpBuffer);
+            const taaTarget = (folded ? view.taaSetTargets : view.taaTargets)[view.taaWrite];
+            bindings.push(() => {
+                this.taaPass.renderTarget = taaTarget;
+            });
+            bind(this.composeMaterial, 'taaColor', view.taaColor[view.taaWrite]);
+            bind(this.composeMaterial, 'taaInfo', view.taaInfo[view.taaWrite]);
+            view.taaLastViewProjection.copy(view.viewProjection);
+            view.taaLastView.copy(viewMatrix);
+            view.taaLastModel.copy(set.files[0]?.modelMatrix ?? Mat4.IDENTITY);
+            view.taaHistoryValid = true;
+            view.taaWrite ^= 1;
+        }
+        // an offscreen target's rows run the other way to the backbuffer's on WebGPU
+        const rt = camera.renderTarget;
+        const targetFlipY = rt ? rt.flipY : device.backBuffer.flipY;
+        const compose = this.composeMaterial;
+        bind(compose, 'splatColor', view.colorTexture);
+        bind(compose, 'splatDepth', view.depthTexture);
+        bind(compose, 'composeParams', [view.target.flipY !== targetFlipY ? 1 : 0, isOrtho ? 1 : 0, taaOn ? 1 : 0, 0]);
+        bind(compose, 'sharpenParams', [this.variant.taaSharpen, this.variant.taaMax, 0, 0]);
+        bind(compose, 'depthViewParams', [
+            clipZ[0],
+            clipZ[1],
+            Math.max(cam.nearClip, 1e-4),
+            Math.max(cam.farClip, cam.nearClip * 2)
+        ]);
+        bind(compose, 'cameraClipZ', [cameraClipZ[0], cameraClipZ[1], isOrtho ? 1 : 0, 0]);
+        bind(compose, 'warpTable', view.warpBuffer);
+        // cull:auto: read this culled frame's counts back (asynchronously, off the frame) and
+        // keep the test only while it removes enough to pay for itself
+        if (index === 0 && culling && cullMode === 'auto' && !isQuery && !this.cullStatsPending) {
+            this.cullStatsPending = true;
+            const data = new Uint32Array(2);
+            view.counter
+                .read(0, 8, data, false)
+                .then(() => {
+                const total = data[0] + data[1];
+                const worthwhile = total > 0 && data[1] / total >= StochasticSplatRenderer.CULL_MIN_FRACTION;
+                this.cullActive = worthwhile;
+                if (!worthwhile)
+                    this.cullSuspendedFrames = StochasticSplatRenderer.CULL_SUSPEND_FRAMES;
+            })
+                .catch(() => {
+                // a lost device or a destroyed buffer; the next frame tries again
+            })
+                .finally(() => {
+                this.cullStatsPending = false;
+            });
+        }
+        // this frame becomes the previous one, unless it is a capture
+        if (isQuery) {
+            // the capture drew elsewhere; the on-screen depth texture is no longer this frame's
+            view.prevValid = false;
+            return;
+        }
+        if (!eye) {
+            captureCameraSnapshot(camera.entity, this.depthFrameCamera);
+            this.depthFrame = {
+                id: ++this.depthFrameCount,
+                camera: this.depthFrameCamera,
+                width,
+                height,
+                clipZ: [clipZ[0], clipZ[1]]
+            };
+        }
+        view.prevViewProjection.copy(view.viewProjection);
+        view.prevView.copy(viewMatrix);
+        view.prevProjection.copy(projection);
+        view.prevModel.copy(set.files[0]?.modelMatrix ?? Mat4.IDENTITY);
+        view.prevClipZ = clipZParams;
+        view.prevViewport = [width, height];
+        view.prevFocal = focal;
+        view.prevFlip = view.target.flipY ? -1 : 1;
+        view.prevWidth = width;
+        view.prevHeight = height;
+        view.prevVersion = set.version;
+        view.prevOrtho = isOrtho;
+        view.prevValid = true;
+    }
+    resizeHistory(view, width, height) {
+        for (const texture of [...view.taaColor, ...view.taaInfo])
+            texture.resize(width, height);
+        for (const target of view.taaTargets)
+            target.resize(width, height);
+        view.releaseTaaSetTargets();
+    }
+    // the pass's attachment operations follow the target it is initialised with: whether it
+    // stores depth. It writes every texel, so nothing is loaded. Every view's targets of a kind
+    // are alike, so the bind pass swaps them
+    initTaaPass(target) {
+        this.taaPass.init(target);
+        this.taaPass.setClearColor(new Color(0, 0, 0, 0));
+        if (target.depthBuffer)
+            this.taaPass.setClearDepth(1);
+    }
+    ensureTaaSetTargets(view) {
+        if (view.taaSetTargets.length)
+            return;
+        for (let i = 0; i < 2; i++) {
+            view.taaSetTargets.push(new RenderTarget({
+                name: `sse-splat-taa-sets-${i}`,
+                colorBuffers: [view.taaColor[i], view.taaInfo[i]],
+                depthBuffer: view.depthTexture,
+                samples: 1
+            }));
+        }
+    }
+    // whether the view or the projection differs from the view's previous on-screen frame's
+    // beyond float noise (the camera controllers settle over many frames; a fov animation moves
+    // the image without moving the camera)
+    // A model that moved since a view's previous frame (an XR grab moves the splat entity) moved its
+    // splats under the camera, which the previous frame's matrices know nothing of. They are
+    // composed with that motion, previous model times inverse current model, so the occlusion cull
+    // and the accumulation reproject each splat to where it was, as for a camera move, and the
+    // frame counts as moving. The viewer moves one entity, whose files share its transform: the
+    // first file's stands for all of them
+    followModel(set) {
+        const model = set.files[0]?.modelMatrix;
+        if (!model)
+            return;
+        for (const view of this.views) {
+            if (!view.prevModel.equals(model)) {
+                tmpMat4.copy(model).invert().mul2(view.prevModel, tmpMat4);
+                view.prevViewProjection.mul(tmpMat4);
+                view.prevView.mul(tmpMat4);
+                view.prevModel.copy(model);
+            }
+            if (!view.taaLastModel.equals(model)) {
+                tmpMat4.copy(model).invert().mul2(view.taaLastModel, tmpMat4);
+                view.taaLastViewProjection.mul(tmpMat4);
+                view.taaLastView.mul(tmpMat4);
+                view.taaLastModel.copy(model);
+            }
+        }
+    }
+    viewMoved(view, viewMatrix, projection) {
+        for (let i = 0; i < 16; i++) {
+            if (Math.abs(viewMatrix.data[i] - view.prevView.data[i]) > 1e-6)
+                return true;
+            if (Math.abs(projection.data[i] - view.prevProjection.data[i]) > 1e-6)
+                return true;
+        }
+        return false;
+    }
+    // one chunk-table entry per CHUNK_SIZE splats of every resident node
+    rebuildChunkTable(set) {
+        let count = 0;
+        for (const node of set.nodes)
+            count += Math.ceil(node.count / CHUNK_SIZE);
+        if (this.chunkData.length < count * 4) {
+            this.chunkData = new Uint32Array(Math.ceil(count * 1.25) * 4);
+            this.chunkBuffer?.destroy();
+            this.chunkBuffer = new StorageBuffer(this.device, this.chunkData.byteLength, BUFFERUSAGE_COPY_DST);
+        }
+        const data = this.chunkData;
+        let k = 0;
+        set.nodes.forEach((node, nodeIndex) => {
+            const base = this.source.chunkBase(node);
+            for (let offset = 0; offset < node.count; offset += CHUNK_SIZE) {
+                data[k++] = base + offset;
+                data[k++] = Math.min(CHUNK_SIZE, node.count - offset);
+                data[k++] = nodeIndex;
+                data[k++] = (node.lodIndex & 0xffff) | (node.fileIndex << 16);
+            }
+        });
+        this.numChunks = count;
+        // writeBuffer counts typed-array elements, not bytes
+        if (count > 0)
+            this.chunkBuffer.write(0, data, 0, count * 4);
+    }
+    // the cache is dense (indexed by compact slot), so it only needs room for the resident
+    // splats, not the allocator's address space; grown geometrically, never shrunk. A shared
+    // stereo projection appends the second eye's three words per slot after the entries, kept
+    // until the cache next grows without one
+    ensureCache(view, splats, stereo = false) {
+        if (splats <= view.cacheSlots && (view.cacheStereo || !stereo))
+            return;
+        view.cacheBuffer?.destroy();
+        view.orderedBuffer?.destroy();
+        view.cacheSlots = this.cacheSlotsFor(view, splats);
+        view.cacheStereo = stereo;
+        const words = CACHE_WORDS + (view.cacheStereo ? 3 : 0);
+        view.cacheBuffer = new StorageBuffer(this.device, view.cacheSlots * words * 4, BUFFERUSAGE_COPY_SRC);
+        view.orderedBuffer = null;
+        view.orderedCapacity = 0;
+    }
+    // the slots ensureCache gives the view's cache for this many resident splats
+    cacheSlotsFor(view, splats) {
+        return splats <= view.cacheSlots ? view.cacheSlots : Math.max(1, Math.ceil(splats * 1.25));
+    }
+    // the ordered list: one entry per survivor, or with interleaved pixel sets one per set it
+    // keeps pixels in, up to four
+    ensureOrdered(view, entries) {
+        if (entries <= view.orderedCapacity)
+            return;
+        view.orderedBuffer?.destroy();
+        view.orderedCapacity = entries;
+        view.orderedBuffer = new StorageBuffer(this.device, entries * 4);
+    }
+    // Variant coverage:interleaved: size the view's pixel sets' targets to half the full target,
+    // rounded up, and point each set's draw at its indirect arguments and its map into its
+    // target. In framebuffer pixels the full target's (2i + x, 2j + y) is the set (x, y)'s (i, j);
+    // as a map of clip x and y over w (y down in the framebuffer from ndc +1)
+    prepareSets(view, width, height, drawSlot) {
+        const w = Math.ceil(width / 2);
+        const h = Math.ceil(height / 2);
+        for (let i = 0; i < 4; i++) {
+            const target = view.setTargets[i];
+            if (target.width !== w || target.height !== h)
+                target.resize(w, h);
+            const x = i & 1;
+            const y = i >> 1;
+            const instance = this.setInstances[i];
+            const setMap = [
+                width / (2 * w),
+                (width / 2 - x + 0.5) / w - 1,
+                height / (2 * h),
+                1 - (height / 2 - y + 0.5) / h
+            ];
+            view.bindings.push(() => {
+                instance.setIndirect(null, drawSlot + i, 1);
+                instance.setParameter('setMap', setMap);
+            });
+        }
+    }
+    // sphere-frustum test per node on the cpu: thousands of nodes, one bit each, set where any
+    // of the view-projections (both eyes' for a shared projection) sees the node
+    cullNodes(view, set, viewProjections) {
+        const words = Math.max(1, Math.ceil(set.nodes.length / 32));
+        if (view.nodeVisibleData.length < words) {
+            view.nodeVisibleData = new Uint32Array(words);
+            view.nodeVisibleBuffer?.destroy();
+            view.nodeVisibleBuffer = new StorageBuffer(this.device, words * 4, BUFFERUSAGE_COPY_DST);
+        }
+        const bits = view.nodeVisibleData;
+        bits.fill(0);
+        const spheres = set.nodeSpheres;
+        const { sphere } = this;
+        for (const viewProjection of viewProjections) {
+            this.frustum.setFromMat4(viewProjection);
+            for (let i = 0; i < set.nodes.length; i++) {
+                sphere.center.set(spheres[i * 4], spheres[i * 4 + 1], spheres[i * 4 + 2]);
+                sphere.radius = spheres[i * 4 + 3];
+                if (this.frustum.containsSphere(sphere) !== 0) {
+                    bits[i >> 5] |= 1 << (i & 31);
+                }
+            }
+        }
+        view.nodeVisibleBuffer.write(0, bits, 0, words);
+    }
+    anyNodeVisible(view, nodes) {
+        const bits = view.nodeVisibleData;
+        return nodes.some((node) => (bits[node.nodeIndex >> 5] >>> (node.nodeIndex & 31)) & 1);
+    }
+    ensureProjector(view, occlusion, coverage, warp, stereo, group) {
+        const sourceKey = this.source.shaderKey();
+        if (this.projectorSourceKey !== sourceKey) {
+            // a different source: every specialisation and the bind group format go
+            this.destroyProjector();
+            this.projectorSourceKey = sourceKey;
+        }
+        const key = `${occlusion ? 'occlusion' : 'plain'}-${coverage}${warp ? '-warp' : ''}${stereo ? '-stereo' : ''}`;
+        const computeKey = `${key}:${group.fileIndex}`;
+        const existing = view.projectorComputes.get(computeKey);
+        if (existing)
+            return existing;
+        const shader = this.ensureProjectorShader(key, occlusion, coverage, warp, stereo);
+        const compute = new Compute(this.device, shader, 'sse-splat-project');
+        view.projectorComputes.set(computeKey, compute);
+        return compute;
+    }
+    // drop the computes of files that left the resident set
+    pruneProjectorComputes(set) {
+        for (const view of this.views) {
+            for (const [key, compute] of view.projectorComputes) {
+                const fileIndex = Number(key.slice(key.lastIndexOf(':') + 1));
+                if (fileIndex >= 0 && !set.files[fileIndex]) {
+                    compute.destroy();
+                    view.projectorComputes.delete(key);
+                }
+            }
+        }
+    }
+    ensureProjectorShader(key, occlusion, coverage, warp, stereo) {
+        const existing = this.projectorShaders.get(key);
+        if (existing)
+            return existing;
+        const { device } = this;
+        const fixed = [
+            new BindStorageBufferFormat('chunks', SHADERSTAGE_COMPUTE, true),
+            new BindStorageBufferFormat('nodeVisible', SHADERSTAGE_COMPUTE, true),
+            new BindStorageBufferFormat('cache', SHADERSTAGE_COMPUTE),
+            new BindStorageBufferFormat('counter', SHADERSTAGE_COMPUTE),
+            new BindUniformBufferFormat('uniforms', SHADERSTAGE_COMPUTE),
+            new BindStorageBufferFormat('occ', SHADERSTAGE_COMPUTE, true),
+            new BindStorageBufferFormat('buckets', SHADERSTAGE_COMPUTE),
+            // read only by the warped shaders, bound always (a placeholder while unwarped)
+            new BindStorageBufferFormat('warpTable', SHADERSTAGE_COMPUTE, true),
+            // read only by the stereo shaders, bound always (the view's own grid while it projects
+            // alone). Eight storage buffers in all, the WebGPU default per stage: the second eye's
+            // warp table follows the first's in warpTable, and its words follow the entries in cache
+            new BindStorageBufferFormat('occEye1', SHADERSTAGE_COMPUTE, true)
+        ];
+        const formats = [...fixed, ...this.source.bindFormats()];
+        this.projectorBindGroupFormat ??= new BindGroupFormat(device, formats);
+        const shader = new Shader(device, {
+            name: `sse-splat-project-${key}`,
+            shaderLanguage: SHADERLANGUAGE_WGSL,
+            cshader: projectorWGSL(this.source.readChunk(fixed.length), occlusion, coverage, warp, stereo),
+            cincludes: this.source.shaderIncludes(),
+            cdefines: this.source.shaderDefines(),
+            computeUniformBufferFormats: {
+                // the same order as the wgsl struct; both follow the same alignment rules
+                uniforms: new UniformBufferFormat(device, [
+                    new UniformFormat('view', UNIFORMTYPE_MAT4),
+                    new UniformFormat('viewProj', UNIFORMTYPE_MAT4),
+                    new UniformFormat('prevViewProj', UNIFORMTYPE_MAT4),
+                    new UniformFormat('prevView', UNIFORMTYPE_MAT4),
+                    new UniformFormat('prevClipZ', UNIFORMTYPE_VEC4),
+                    new UniformFormat('viewport', UNIFORMTYPE_VEC2),
+                    new UniformFormat('focal', UNIFORMTYPE_VEC2),
+                    new UniformFormat('prevViewport', UNIFORMTYPE_VEC2),
+                    new UniformFormat('prevFocal', UNIFORMTYPE_VEC2),
+                    new UniformFormat('numChunks', UNIFORMTYPE_UINT),
+                    new UniformFormat('splatTextureSize', UNIFORMTYPE_UINT),
+                    new UniformFormat('isOrtho', UNIFORMTYPE_UINT),
+                    new UniformFormat('minPixelSize', UNIFORMTYPE_FLOAT),
+                    new UniformFormat('alphaClip', UNIFORMTYPE_FLOAT),
+                    new UniformFormat('minContribution', UNIFORMTYPE_FLOAT),
+                    new UniformFormat('occBlocksX1', UNIFORMTYPE_UINT),
+                    new UniformFormat('occBlocksY1', UNIFORMTYPE_UINT),
+                    new UniformFormat('occBlocksX2', UNIFORMTYPE_UINT),
+                    new UniformFormat('occBlocksY2', UNIFORMTYPE_UINT),
+                    new UniformFormat('occlusionMode', UNIFORMTYPE_UINT),
+                    new UniformFormat('prevFlip', UNIFORMTYPE_FLOAT),
+                    new UniformFormat('keyLogNear', UNIFORMTYPE_FLOAT),
+                    new UniformFormat('keyInvLogRange', UNIFORMTYPE_FLOAT),
+                    new UniformFormat('chunkBase', UNIFORMTYPE_UINT),
+                    new UniformFormat('model', UNIFORMTYPE_MAT4),
+                    new UniformFormat('modelRotation', UNIFORMTYPE_VEC4),
+                    new UniformFormat('modelScale', UNIFORMTYPE_VEC4),
+                    new UniformFormat('cameraPosition', UNIFORMTYPE_VEC4),
+                    new UniformFormat('unitScale', UNIFORMTYPE_FLOAT),
+                    new UniformFormat('frameSeed', UNIFORMTYPE_UINT),
+                    new UniformFormat('jitterSubs', UNIFORMTYPE_UINT),
+                    new UniformFormat('strata', UNIFORMTYPE_UINT),
+                    new UniformFormat('interleaveArea', UNIFORMTYPE_FLOAT),
+                    new UniformFormat('viewEye1', UNIFORMTYPE_MAT4),
+                    new UniformFormat('viewProjEye1', UNIFORMTYPE_MAT4),
+                    new UniformFormat('prevViewProjEye1', UNIFORMTYPE_MAT4),
+                    new UniformFormat('prevViewEye1', UNIFORMTYPE_MAT4),
+                    new UniformFormat('focalEye1', UNIFORMTYPE_VEC2),
+                    new UniformFormat('prevFocalEye1', UNIFORMTYPE_VEC2),
+                    new UniformFormat('occL2Base', UNIFORMTYPE_UINT),
+                    new UniformFormat('stereoBase', UNIFORMTYPE_UINT),
+                    new UniformFormat('warpBaseEye1', UNIFORMTYPE_UINT)
+                ])
+            },
+            computeBindGroupFormat: this.projectorBindGroupFormat
+        });
+        this.projectorShaders.set(key, shader);
+        return shader;
+    }
+    destroyProjector() {
+        for (const view of this.views)
+            view.destroyProjectorComputes();
+        for (const shader of this.projectorShaders.values())
+            shader.destroy();
+        this.projectorShaders.clear();
+        this.projectorBindGroupFormat?.destroy();
+        this.projectorBindGroupFormat = null;
+        this.projectorSourceKey = '';
+    }
+    destroy() {
+        this.destroyed = true;
+        this.unsubscribe();
+        this.app.off('frameend', this.onFrameEnd);
+        this.detach();
+        this.provider.destroy();
+        this.source.destroy();
+        this.destroyProjector();
+        for (const view of this.views)
+            view.destroy();
+        this.views.length = 0;
+        for (const shader of Object.values(this.viewShaders))
+            shader.destroy();
+        this.argsBindGroupFormat.destroy();
+        for (const format of [...this.reduceFormats, ...this.orderFormats])
+            format.destroy();
+        this.chunkBuffer?.destroy();
+        this.chunkBuffer = null;
+        this.stereoWarp?.destroy();
+        this.stereoWarp = null;
+        this.bindPass.destroy();
+        this.rasterPass.destroy();
+        this.rasterInstance.destroy();
+        this.rasterMaterial.destroy();
+        for (const pass of this.setPasses)
+            pass.destroy();
+        for (const instance of this.setInstances)
+            instance.destroy();
+        this.setPasses.length = 0;
+        this.setInstances.length = 0;
+        const interleaveMesh = this.interleaveInstance.mesh;
+        this.interleaveInstance.destroy();
+        interleaveMesh.destroy();
+        this.interleaveMaterial.destroy();
+        this.rasterMesh.destroy();
+        this.polygonMesh.destroy();
+        this.taaPass.destroy();
+        this.taaInstance.destroy();
+        this.taaMaterial.destroy();
+        this.taaSetInstance.destroy();
+        this.taaSetMaterial.destroy();
+        this.taaHalfMaterial.destroy();
+        this.taaSetHalfMaterial.destroy();
+        this.taaMesh.destroy();
+        this.composeInstance.destroy();
+        this.composeMaterial.destroy();
+        this.composeMesh.destroy();
+    }
+}
+
+// The quality module: the one place that decides the splat budget, the renderer and the
+// resolution for every device and session (docs/quality-plan.md, step 1). The user has two
+// controls, the Quality slider (state.quality: performance, default, high, max) and the
+// Stochastic toggle (state.stochastic); this module turns them into a budget from the device
+// class's ladder, a resolution scale, the XR session's start parameters and the renderer, and
+// disables the slider positions the device cannot hold (state.qualityAvailable).
+/** The slider's positions, left to right. */
+const QUALITY_LEVELS = ['performance', 'default', 'high', 'max'];
+// Standalone headsets run XR on a mobile gpu, which draws every splat once per eye, but their
+// browsers report a desktop platform. Their sessions render with fixed foveation and a 72 Hz
+// target, at 0.8x resolution at the Performance position, and from a ladder of their own
+const standaloneHeadset = /OculusBrowser|PicoBrowser/.test(globalThis.navigator?.userAgent ?? '');
+// Apple Vision Pro's Safari reports a Mac, but one with touch points. Its pinches aim by the eyes,
+// which its teleports follow (iPad's Safari in desktop mode reports the
+// same, but offers no VR; both are mobile-class devices for the budget)
+const visionPro = /Macintosh/.test(globalThis.navigator?.userAgent ?? '') && (globalThis.navigator?.maxTouchPoints ?? 0) > 0;
+// The budget ladders, millions of splats per slider position. A budget is a ceiling: a scene
+// with fewer splats draws them all, and null is a position the ladder does not offer. Standalone
+// headsets' two eyes at 1680x1760 cost more than any phone screen, so their sessions use the
+// mobile ladder shifted down one position, without Max: a Quest 3 holds 3.8M at most (its 128 MiB
+// storage binding), which it draws at 11-17 fps
+const LADDERS = {
+    desktop: [2, 4, 8, 16],
+    mobile: [1, 2, 4, 8],
+    standaloneXr: [0.5, 1, 2, null]
+};
+// The resolution at the Performance position: half on screens (as the Performance Mode switch
+// did), 0.8x of the recommended framebuffer in a standalone headset's session. The stochastic
+// renderer keeps full resolution there: its image is already softer than sorted's
+const PERFORMANCE_SCALE = 0.5;
+const PERFORMANCE_XR_SCALE = 0.8;
+// The memory model, from the device runs (docs/device-benchmarks-2026-10-14.md, Memory): the
+// same on every gpu within 5-15 %. Per million of budget, with the scene's own data: the sorted
+// renderer's work buffer, projector cache and sort; the stochastic renderer's cache and ordered
+// list (no work buffer), plus its per-pixel targets (the accumulation history and the raster and
+// set targets). The per-splat caches each sit in one storage binding, sorted's at 32 bytes a
+// resident splat; the resident set runs a few percent over the budget (4.2M at 4M on the church)
+const SORTED_MB_PER_MILLION = 110;
+const STOCHASTIC_MB_PER_MILLION = 75;
+const STOCHASTIC_BYTES_PER_PIXEL = 40;
+const SORTED_CACHE_BYTES_PER_SPLAT = 32;
+const RESIDENT_OVER_BUDGET = 1.1;
+// The share of a device's gpu memory a viewer may plan on, in MB per class. Measured ceilings:
+// an iPhone's tab is killed at 2.0-2.5 GB of gpu buffers with no error first; a Quest 3 loses its
+// gpu process at about 3.8 GB; desktops held 2 GB without trouble and are unprobed. Conservative
+// until the device matrix measures more, and scaled down where Chrome reports little memory
+const CEILING_MB = { mobile: 1100, standaloneHeadset: 1900, desktop: 2600 };
+const DEVICE_MEMORY_SHARE = 0.35;
+// Level-of-detail selection: how much further away parts of the scene behind the camera count
+// when choosing their detail, which saves a lot of splats while orbiting, and the turn after which
+// detail is chosen again. XR sessions choose detail by distance alone, with no penalty and no
+// turn-triggered choices: a head turning less than 90 degrees brought the coarse detail chosen
+// for behind it into view
+const LOD_BEHIND_PENALTY = 5;
+const LOD_UPDATE_ANGLE = 90;
+// How far the camera turns before splat colours are refreshed, degrees: coarser at Performance
+const COLOR_UPDATE_ANGLE = 0.2;
+const COLOR_UPDATE_ANGLE_PERFORMANCE = 1;
+/**
+ * The canvas backbuffer's pixels per css pixel at full resolution: the display's ratio, capped so
+ * the screen's shorter side is at most 2160 pixels (1080 on a mobile device).
+ */
+const canvasPixelRatio = () => {
+    const maxPixelDim = platform.mobile ? 1080 : 2160;
+    return Math.min(maxPixelDim / Math.min(screen.width, screen.height), window.devicePixelRatio);
+};
+/** The resolution scale a slider position gives on a screen (the canvas backbuffer), for the sorted or the stochastic renderer. */
+const resolutionScaleFor = (level, stochastic) => level === 'performance' && !stochastic ? PERFORMANCE_SCALE : 1;
+class Quality {
+    deviceClass;
+    /** Whether the Stochastic toggle is offered: WebGPU, and not a standalone headset. */
+    stochasticAllowed;
+    app;
+    config;
+    state;
+    renderer;
+    ceilingMB;
+    handles;
+    constructor(app, config, state, events, renderer) {
+        this.app = app;
+        this.config = config;
+        this.state = state;
+        this.renderer = renderer;
+        const device = app.graphicsDevice;
+        const info = device.gpuAdapter?.info;
+        // the Vision Pro test (a Mac user agent with touch points) also matches a Mac with a touch
+        // screen; a Mac's Apple gpu reports a metal architecture, the Vision Pro's and an iPad's do not
+        const mac = info?.vendor === 'apple' && /^metal/.test(info.architecture ?? '');
+        this.deviceClass = {
+            ladder: platform.mobile || (visionPro && !mac) || standaloneHeadset ? 'mobile' : 'desktop',
+            standaloneHeadset,
+            visionPro,
+            gpu: info
+                ? [info.vendor, info.architecture, info.description].filter(Boolean).join(' / ')
+                : (device.unmaskedRenderer ?? '')
+        };
+        // the stochastic renderer runs on WebGPU; in a standalone headset it ties with the sorted
+        // renderer at twice the memory (docs/device-benchmarks-2026-10-14.md, VR), so it is off there
+        this.stochasticAllowed = renderer === 'webgpu' && !standaloneHeadset && config.stochastic !== 'off';
+        const deviceMemoryGB = globalThis.navigator?.deviceMemory;
+        const classCeiling = standaloneHeadset ? CEILING_MB.standaloneHeadset : CEILING_MB[this.deviceClass.ladder];
+        this.ceilingMB = deviceMemoryGB
+            ? Math.min(classCeiling, deviceMemoryGB * 1024 * DEVICE_MEMORY_SHARE)
+            : classCeiling;
+        // the available positions follow the renderer choice and the session
+        this.handles = [
+            events.on('stochastic:changed', () => this.updateAvailable()),
+            events.on('xrMode:changed', () => this.updateAvailable()),
+            events.on('quality:changed', () => this.updateAvailable())
+        ];
+        this.updateAvailable();
+    }
+    destroy() {
+        for (const handle of this.handles)
+            handle.off();
+    }
+    /** Whether the stochastic renderer should draw: forced by the flag, or chosen by the toggle where allowed. */
+    get stochastic() {
+        const { stochastic } = this.config;
+        if (stochastic === true || stochastic === 'mobile')
+            return this.renderer === 'webgpu';
+        return this.stochasticAllowed && this.state.stochastic;
+    }
+    /** Which stochastic mode the device gets: per-pixel coverage on a desktop, interleaved pixel sets on a mobile-class device. */
+    get stochasticMode() {
+        if (this.config.stochastic === 'mobile')
+            return 'mobile';
+        if (this.config.stochastic === true)
+            return 'pixel';
+        return this.deviceClass.ladder === 'mobile' ? 'mobile' : 'pixel';
+    }
+    /**
+     * The slider position in use: the stored one where it can be held, else the nearest available
+     * below it, else the lowest available. It differs from the stored position only in an XR
+     * session, which can hold fewer positions than the screen: the stored one stays the user's
+     * choice, and is back in use when the session ends.
+     */
+    get level() {
+        const available = this.state.qualityAvailable;
+        if (available.includes(this.state.quality))
+            return this.state.quality;
+        const index = QUALITY_LEVELS.indexOf(this.state.quality);
+        const below = [...available].reverse().find((level) => QUALITY_LEVELS.indexOf(level) < index);
+        return below ?? available[0] ?? this.state.quality;
+    }
+    /** The budget for the position in use, millions of splats. */
+    get budget() {
+        return this.budgetFor(this.level) ?? this.fallbackBudget();
+    }
+    /** The canvas backbuffer scale for the current position. */
+    get resolutionScale() {
+        return resolutionScaleFor(this.state.quality, this.stochastic);
+    }
+    /** The XR session's framebuffer scale, fixed when the session starts. */
+    get xrFramebufferScale() {
+        return standaloneHeadset && this.state.quality === 'performance' ? PERFORMANCE_XR_SCALE : 1;
+    }
+    /** Whether an XR session renders with fixed foveation (standalone headsets; it only reaches the sorted renderer). */
+    get xrFixedFoveation() {
+        return standaloneHeadset;
+    }
+    /** The XR session's target frame rate where the viewer sets one, or null for the browser's. */
+    get xrTargetFrameRate() {
+        return standaloneHeadset ? 72 : null;
+    }
+    get colorUpdateAngle() {
+        return this.state.quality === 'performance' ? COLOR_UPDATE_ANGLE_PERFORMANCE : COLOR_UPDATE_ANGLE;
+    }
+    get lodBehindPenalty() {
+        return this.state.xrMode === null ? LOD_BEHIND_PENALTY : 1;
+    }
+    get lodUpdateAngle() {
+        return this.state.xrMode === null ? LOD_UPDATE_ANGLE : 0;
+    }
+    /** The slider's positions with the budget each gives here, or null where the device cannot hold it. */
+    levels() {
+        const forced = this.config.budget;
+        if (forced !== undefined && Number.isFinite(forced) && forced > 0) {
+            return QUALITY_LEVELS.map((level) => ({ level, budget: forced }));
+        }
+        const ladder = standaloneHeadset && this.state.xrMode !== null ? LADDERS.standaloneXr : LADDERS[this.deviceClass.ladder];
+        let previous = 0;
+        return QUALITY_LEVELS.map((level, i) => {
+            const rung = ladder[i];
+            const fitted = rung === null ? null : this.fitBudget(rung);
+            // a position clamped down to a lower one's budget adds nothing, and is disabled
+            const budget = fitted !== null && fitted > previous ? fitted : null;
+            if (budget !== null)
+                previous = budget;
+            return { level, budget };
+        });
+    }
+    budgetFor(level) {
+        return this.levels().find((entry) => entry.level === level)?.budget ?? null;
+    }
+    // the nearest available position below the chosen one, or the lowest available
+    fallbackBudget() {
+        const levels = this.levels();
+        const index = QUALITY_LEVELS.indexOf(this.state.quality);
+        for (let i = index; i >= 0; i--) {
+            const budget = levels[i].budget;
+            if (budget !== null)
+                return budget;
+        }
+        return levels.find((entry) => entry.budget !== null)?.budget ?? levels[0].budget ?? 1;
+    }
+    // whether the toggle can switch renderers here: allowed, and not forced on by the flag
+    get switchable() {
+        const { stochastic } = this.config;
+        return this.stochasticAllowed && stochastic !== true && stochastic !== 'mobile';
+    }
+    // The largest budget up to `budget`, in steps of 0.1M, that every renderer which may draw it
+    // can hold: its cache in one storage binding and its estimated total under the ceiling; null
+    // when none does. Where the toggle can switch renderers, both are fitted, so a switch never
+    // changes the budget: the splats resident for one renderer's budget could overflow the other's
+    // binding (sorted fails every frame past it) until coarser detail streamed in and the finer
+    // files cooled down. It costs the stochastic renderer its headroom where it holds more (a
+    // 128 MiB binding at the 4M rung, 4.0M against sorted's 3.8M; Max on Chrome reporting 4 GB or
+    // less of memory)
+    fitBudget(budget) {
+        const renderers = this.switchable ? [false, true] : [this.stochastic];
+        for (let b = budget; b >= 0.1; b = Math.round((b - 0.1) * 10) / 10) {
+            const fits = (stochastic) => this.cacheFits(b, stochastic) && this.estimateMB(b, stochastic) <= this.ceilingMB;
+            if (renderers.every(fits))
+                return b;
+        }
+        return null;
+    }
+    cacheFits(budget, stochastic) {
+        const device = this.app.graphicsDevice;
+        const resident = budget * 1e6 * RESIDENT_OVER_BUDGET;
+        if (stochastic)
+            return StochasticSplatRenderer.cacheFits(device, resident);
+        const limit = device.wgpu?.limits?.maxStorageBufferBindingSize;
+        return limit === undefined || resident * SORTED_CACHE_BYTES_PER_SPLAT <= limit;
+    }
+    estimateMB(budget, stochastic) {
+        if (!stochastic)
+            return budget * SORTED_MB_PER_MILLION;
+        // the largest canvas the screen allows (fullscreen) at full resolution, rather than the
+        // canvas now, so the budget holds as the window resizes, goes fullscreen or changes renderer
+        // (sorted halves the canvas at Performance); a session draws two eyes, whose size is not known
+        // before it starts, so the screen stands in
+        const ratio = canvasPixelRatio();
+        const pixels = screen.width * screen.height * ratio * ratio * (this.state.xrMode !== null ? 2 : 1);
+        return budget * STOCHASTIC_MB_PER_MILLION + (pixels * STOCHASTIC_BYTES_PER_PIXEL) / 1048576;
+    }
+    updateAvailable() {
+        const available = this.levels()
+            .filter((entry) => entry.budget !== null)
+            .map((entry) => entry.level);
+        const current = this.state.qualityAvailable;
+        if (current.length !== available.length || current.some((level, i) => level !== available[i])) {
+            this.state.qualityAvailable = available;
+        }
+        // a position the screen cannot hold (stored from another device, or set by a host) falls
+        // back to the nearest available below it, so the slider shows what is drawn. Not in a
+        // session, which can hold fewer (a standalone headset's offers no Max, and the stochastic
+        // estimate counts two eyes): there the session draws at the level in use, and the stored
+        // position, which a change here would persist, stays as the user chose it
+        if (this.state.xrMode === null && available.length && !available.includes(this.state.quality)) {
+            this.state.quality = this.level;
+        }
+    }
+}
 
 // The single source of default experience settings, so every tool that writes a settings file
 // agrees. Several independent copies of these values had drifted apart; these are the ones
@@ -86648,7 +93515,7 @@ const importSettings = (settings) => {
     return result;
 };
 
-var version$1 = "1.37.0";
+var version = "1.38.1";
 
 class Tooltip {
     register;
@@ -87941,6 +94808,54 @@ const initPlayback = (viewer, root, showUI) => {
     };
 };
 
+// The vr flag's prompt (ViewerFlags.vr): it covers the viewer while VR can start and no session has
+// started, reading "Loading…" until the viewer fires vrPrompt:ready (the scene is placed, so a
+// session starts where the camera is), and then a tap on its pill starts a session through
+// vrPrompt:start, which the viewer handles within the tap. A tap elsewhere dismisses it, and after
+// the first session the toolbar's VR button takes over. VR that needs a reload into WebGL gets no
+// prompt: the VR button offers the reload, which keeps the flag.
+const initVrPrompt = (viewer, root, localize) => {
+    const { state, events } = viewer;
+    const prompt = root.querySelector('.sse-vrPrompt');
+    const pill = root.querySelector('.sse-vrPromptPill');
+    const text = root.querySelector('.sse-vrPromptText');
+    let ready = false;
+    let done = false;
+    const update = () => {
+        prompt.classList.toggle('sse-hidden', done || !state.canStartVR || state.xrMode !== null);
+        prompt.classList.toggle('sse-vrPromptLoading', !ready);
+        text.textContent = localize(ready ? 'vr-prompt.enter' : 'vr-prompt.loading');
+    };
+    const tap = (event) => {
+        if (!pill.contains(event.target)) {
+            done = true;
+            update();
+            return;
+        }
+        if (ready)
+            events.fire('vrPrompt:start');
+    };
+    prompt.addEventListener('click', tap);
+    const subscriptions = [
+        events.on('vrPrompt:ready', () => {
+            ready = true;
+            update();
+        }),
+        events.on('canStartVR:changed', update),
+        events.on('xrMode:changed', (mode) => {
+            if (mode)
+                done = true;
+            update();
+        })
+    ];
+    update();
+    return () => {
+        for (const subscription of subscriptions)
+            subscription.off();
+        prompt.removeEventListener('click', tap);
+    };
+};
+
 const initXrControls = (viewer, root) => {
     const { state, events } = viewer;
     const ar = root.querySelector('.sse-arMode');
@@ -87991,6 +94906,5084 @@ const initXrControls = (viewer, root) => {
         ok.removeEventListener('click', reloadWithWebgl);
         cancel.removeEventListener('click', hideModal);
         modal.removeEventListener('pointerdown', hideModal);
+    };
+};
+
+// TEMPORARY workaround for Safari on Apple Vision Pro (https://bugs.webkit.org/show_bug.cgi?id=327687):
+// after a session with hand tracking, it leaves the next session request pending without showing
+// its permission dialogs, until the page is hidden and shown again, which lets the request through
+// without hand tracking (2026-10-13: switching tabs and back let a stalled request through, with
+// WebGL and WebGPU alike). A dialog that does show hides the page, so once a request has waited
+// HINT_DELAY with the page showing, a hint says what to do. Once Safari is fixed, delete this file
+// and its init in ui.ts, the .sse-xrHint element in ui.html and its style in index.scss, the
+// xr-hint.stalled string in every locale, and the xrRequest:pending events xr.ts fires for it.
+const HINT_DELAY = 4000;
+const initXrHint = (viewer, root) => {
+    const hint = root.querySelector('.sse-xrHint');
+    let pending = false;
+    let timer = null;
+    // hide the hint, and wait again while a request is pending with the page showing
+    const arm = () => {
+        if (timer !== null)
+            clearTimeout(timer);
+        timer = null;
+        hint.classList.add('sse-hidden');
+        if (pending && document.visibilityState === 'visible') {
+            timer = setTimeout(() => {
+                timer = null;
+                hint.classList.remove('sse-hidden');
+            }, HINT_DELAY);
+        }
+    };
+    const subscription = viewer.events.on('xrRequest:pending', (value) => {
+        pending = value;
+        arm();
+    });
+    document.addEventListener('visibilitychange', arm);
+    return () => {
+        subscription.off();
+        document.removeEventListener('visibilitychange', arm);
+        if (timer !== null)
+            clearTimeout(timer);
+    };
+};
+
+/** @import { XrInputSource } from 'playcanvas' */
+
+/**
+ * Automatically loads and displays WebXR controller models (hands or gamepads) based on the
+ * WebXR Input Profiles specification. The script fetches controller models from the WebXR
+ * Input Profiles asset repository and updates their transforms each frame to match the
+ * tracked input sources.
+ *
+ * Features:
+ * - Automatic controller model loading from WebXR Input Profiles repository
+ * - Support for both hand tracking and gamepad controllers
+ * - Automatic cleanup on input source removal or XR session end, with each model loaded once and
+ *   kept for later input sources and sessions until the script is destroyed
+ * - Models hidden while their pose is not tracked, such as behind the system menu
+ * - Visibility control for integration with other XR scripts
+ * - Fires events for controller lifecycle coordination
+ *
+ * This script should be attached to a parent entity (typically the same entity as XrSession).
+ * Use it in conjunction with the `XrNavigation` and `XrMenu` scripts.
+ *
+ * @example
+ * // Add to camera parent entity
+ * cameraParent.addComponent('script');
+ * cameraParent.script.create(XrControllers, {
+ *     properties: {
+ *         basePath: 'https://cdn.jsdelivr.net/npm/@webxr-input-profiles/assets/dist/profiles'
+ *     }
+ * });
+ * @category XR
+ */
+class XrControllers extends Script {
+    static scriptName = 'xrControllers';
+
+    /**
+     * The base URL for fetching the WebXR input profiles.
+     *
+     * @attribute
+     * @type {string}
+     */
+    basePath = 'https://cdn.jsdelivr.net/npm/@webxr-input-profiles/assets/dist/profiles';
+
+    /**
+     * Map of input sources to their controller data (entity, joint mappings, asset, whether its
+     * pose is tracked, and the enabled state its entity returns to once tracking resumes). The asset
+     * is owned by the script and shared by every input source that uses the same model.
+     *
+     * @type {Map<XrInputSource, { entity: import('playcanvas').Entity, jointMap: Map, asset: import('playcanvas').Asset<'container'>, tracked: boolean, enabledWhenTracked: boolean }>}
+     */
+    controllers = new Map();
+
+    /**
+     * Set of input sources currently being loaded (to handle race conditions).
+     *
+     * @type {Set<XrInputSource>}
+     * @private
+     */
+    _pendingInputSources = new Set();
+
+    /**
+     * Model loads by URL, shared by every input source that uses the model. The asset registry
+     * hands back one asset per URL, so a model is loaded once and only unloaded when the script is
+     * destroyed: unloading it as one input source went away would take it from any other input
+     * source using it, or still waiting for it to load.
+     *
+     * @type {Map<string, { load: Promise<import('playcanvas').Asset<'container'>>, asset: import('playcanvas').Asset<'container'> | null }>}
+     * @private
+     */
+    _models = new Map();
+
+    /**
+     * Whether controller models are currently visible.
+     *
+     * @type {boolean}
+     * @private
+     */
+    _visible = true;
+
+    /**
+     * Bound event handlers for proper cleanup.
+     *
+     * @type {{ onAdd: (inputSource: XrInputSource) => void, onRemove: (inputSource: XrInputSource) => void, onXrEnd: () => void } | null}
+     * @private
+     */
+    _handlers = null;
+
+    initialize() {
+        if (!this.app.xr) {
+            console.error('XrControllers script requires XR to be enabled on the application');
+            return;
+        }
+
+        // Create bound handlers for proper cleanup
+        this._handlers = {
+            onAdd: this._onInputSourceAdd.bind(this),
+            onRemove: this._onInputSourceRemove.bind(this),
+            onXrEnd: this._onXrEnd.bind(this)
+        };
+
+        // Listen for input source changes
+        this.app.xr.input.on('add', this._handlers.onAdd);
+        this.app.xr.input.on('remove', this._handlers.onRemove);
+
+        // Listen for XR session end to clean up all controllers
+        this.app.xr.on('end', this._handlers.onXrEnd);
+
+        // Clean up on script destroy
+        this.once('destroy', () => {
+            this._onDestroy();
+        });
+    }
+
+    /**
+     * Cleans up all resources when the script is destroyed.
+     *
+     * @private
+     */
+    _onDestroy() {
+        if (this._handlers && this.app.xr) {
+            this.app.xr.input.off('add', this._handlers.onAdd);
+            this.app.xr.input.off('remove', this._handlers.onRemove);
+            this.app.xr.off('end', this._handlers.onXrEnd);
+        }
+
+        // Destroy all controller entities
+        this._destroyAllControllers();
+
+        this._handlers = null;
+        this._pendingInputSources.clear();
+
+        // Release the models now, as an application being destroyed drops its asset registry next,
+        // and those still loading once they land
+        for (const model of this._models.values()) {
+            if (model.asset) {
+                this._releaseModel(model.asset);
+            } else {
+                model.load.then(asset => this._releaseModel(asset), () => {});
+            }
+        }
+        this._models.clear();
+    }
+
+    /**
+     * Handles XR session end by cleaning up all controllers.
+     *
+     * @private
+     */
+    _onXrEnd() {
+        this._destroyAllControllers();
+        this._pendingInputSources.clear();
+    }
+
+    /**
+     * Destroys a single controller and its associated resources.
+     *
+     * @param {XrInputSource} inputSource - The input source to destroy.
+     * @private
+     */
+    _destroyController(inputSource) {
+        const controller = this.controllers.get(inputSource);
+        if (!controller) return;
+
+        // the model asset stays loaded for other input sources and later sessions
+        controller.entity.destroy();
+
+        this.controllers.delete(inputSource);
+        this.app.fire('xr:controller:remove', inputSource);
+    }
+
+    /**
+     * Destroys all controller entities and clears the map.
+     *
+     * @private
+     */
+    _destroyAllControllers() {
+        for (const inputSource of this.controllers.keys()) {
+            this._destroyController(inputSource);
+        }
+    }
+
+    /**
+     * Tries to load profiles sequentially, returning the first successful result.
+     *
+     * @param {XrInputSource} inputSource - The input source.
+     * @param {string[]} profiles - Array of profile IDs to try.
+     * @param {number} [index=0] - Current index in the profiles array.
+     * @returns {Promise<{ profileId: string, asset: import('playcanvas').Asset<'container'> } | null>} The result or null.
+     * @private
+     */
+    async _tryLoadProfiles(inputSource, profiles, index = 0) {
+        if (index >= profiles.length) return null;
+        if (!this._pendingInputSources.has(inputSource)) return null;
+
+        const result = await this._loadProfile(inputSource, profiles[index]);
+        if (result) return result;
+
+        return this._tryLoadProfiles(inputSource, profiles, index + 1);
+    }
+
+    /**
+     * Called when an input source is added.
+     *
+     * @param {XrInputSource} inputSource - The input source that was added.
+     * @private
+     */
+    async _onInputSourceAdd(inputSource) {
+        if (!inputSource.profiles?.length) {
+            console.warn('XrControllers: No profiles available for input source');
+            return;
+        }
+
+        // Track this input source as pending to handle race conditions
+        this._pendingInputSources.add(inputSource);
+
+        // Load profiles sequentially and stop on first success
+        const successfulResult = await this._tryLoadProfiles(inputSource, inputSource.profiles);
+
+        // Check if input source was removed during loading. Its model stays loaded, as an input
+        // source added since may be using it
+        if (!this._pendingInputSources.has(inputSource)) {
+            return;
+        }
+
+        // Remove from pending set
+        this._pendingInputSources.delete(inputSource);
+
+        if (successfulResult) {
+            const { asset } = successfulResult;
+            // loaded by _loadProfile, so the resource is present
+            const container = /** @type {import('playcanvas').ContainerResource} */ (asset.resource);
+            const entity = container.instantiateRenderEntity();
+            this.app.root.addChild(entity);
+
+            // Apply current visibility state
+            entity.enabled = this._visible;
+
+            // Build joint map for hand tracking
+            const jointMap = new Map();
+            if (inputSource.hand) {
+                for (const joint of inputSource.hand.joints) {
+                    const jointEntity = entity.findByName(joint.id);
+                    if (jointEntity) {
+                        jointMap.set(joint, jointEntity);
+                    }
+                }
+            }
+
+            this.controllers.set(inputSource, { entity, jointMap, asset, tracked: true, enabledWhenTracked: true });
+
+            // Fire event for other scripts to coordinate
+            this.app.fire('xr:controller:add', inputSource, entity);
+        } else {
+            console.warn('XrControllers: No compatible profiles found for input source');
+        }
+    }
+
+    /**
+     * Loads a single profile and its model.
+     *
+     * @param {XrInputSource} inputSource - The input source.
+     * @param {string} profileId - The profile ID to load.
+     * @returns {Promise<{ profileId: string, asset: import('playcanvas').Asset<'container'> } | null>} The result or null on failure.
+     * @private
+     */
+    async _loadProfile(inputSource, profileId) {
+        const profileUrl = `${this.basePath}/${profileId}/profile.json`;
+
+        try {
+            const response = await fetch(profileUrl);
+            if (!response.ok) {
+                return null;
+            }
+
+            const profile = await response.json();
+            const layoutPath = profile.layouts[inputSource.handedness]?.assetPath || '';
+            const assetPath = `${this.basePath}/${profile.profileId}/${inputSource.handedness}${layoutPath.replace(/^\/?(left|right)/, '')}`;
+
+            // the input source was removed, or the script destroyed, while the profile loaded
+            if (!this._pendingInputSources.has(inputSource)) return null;
+
+            const asset = await this._loadModel(assetPath);
+            return { profileId, asset };
+        } catch (error) {
+            // Silently fail for individual profiles - we'll try the next one
+            return null;
+        }
+    }
+
+    /**
+     * Loads a model, or returns the load already made for its URL.
+     *
+     * @param {string} url - The model URL.
+     * @returns {Promise<import('playcanvas').Asset<'container'>>} The loaded model asset.
+     * @private
+     */
+    _loadModel(url) {
+        const existing = this._models.get(url);
+        if (existing) return existing.load;
+
+        const model = {
+            load: new Promise((resolve, reject) => {
+                this.app.assets.loadFromUrl(url, 'container', (err, asset) => {
+                    if (err) reject(err);
+                    else resolve(asset);
+                });
+            }),
+            asset: null
+        };
+        this._models.set(url, model);
+
+        model.load.then((asset) => {
+            model.asset = asset;
+        }, () => {
+            // forget a failed load, so a later input source can try again
+            if (this._models.get(url) === model) this._models.delete(url);
+        });
+
+        return model.load;
+    }
+
+    /**
+     * Removes a model from the asset registry and unloads it.
+     *
+     * @param {import('playcanvas').Asset<'container'>} asset - The model asset.
+     * @private
+     */
+    _releaseModel(asset) {
+        // a destroyed application has unloaded its assets and dropped its registry
+        const { assets } = this.app;
+        if (!assets) return;
+
+        assets.remove(asset);
+        asset.unload();
+    }
+
+    /**
+     * Called when an input source is removed.
+     *
+     * @param {XrInputSource} inputSource - The input source that was removed.
+     * @private
+     */
+    _onInputSourceRemove(inputSource) {
+        // Remove from pending set if still loading
+        this._pendingInputSources.delete(inputSource);
+        this._destroyController(inputSource);
+    }
+
+    /**
+     * Sets the visibility state of controller models.
+     *
+     * @type {boolean}
+     */
+    set visible(value) {
+        if (this._visible === value) return;
+
+        this._visible = value;
+
+        for (const [, controller] of this.controllers) {
+            // a model hidden while untracked takes the new state once tracking resumes
+            if (controller.tracked) {
+                controller.entity.enabled = value;
+            } else {
+                controller.enabledWhenTracked = value;
+            }
+        }
+    }
+
+    /**
+     * Gets the visibility state of controller models.
+     *
+     * @type {boolean}
+     */
+    get visible() {
+        return this._visible;
+    }
+
+    update(dt) {
+        if (!this.app.xr?.active || !this._visible) return;
+
+        // While the session is not fully visible, such as behind the system menu, the browser
+        // sends no poses, so the models would stay frozen where they were last tracked
+        const sessionVisible = this.app.xr.visibilityState === 'visible';
+
+        for (const [inputSource, controller] of this.controllers) {
+            // a hand also loses tracking when it leaves the view of the headset. A model hidden
+            // while untracked gets back the enabled state it had, so one the app hid stays hidden
+            const tracked = sessionVisible && (!inputSource.hand || inputSource.hand.tracking);
+            if (controller.tracked !== tracked) {
+                controller.tracked = tracked;
+                if (tracked) {
+                    controller.entity.enabled = controller.enabledWhenTracked;
+                } else {
+                    controller.enabledWhenTracked = controller.entity.enabled;
+                    controller.entity.enabled = false;
+                }
+            }
+            if (!tracked) continue;
+
+            const { entity, jointMap } = controller;
+
+            if (inputSource.hand) {
+                // Update hand joint positions
+                for (const [joint, jointEntity] of jointMap) {
+                    jointEntity.setPosition(joint.getPosition());
+                    jointEntity.setRotation(joint.getRotation());
+                }
+            } else {
+                // Update controller position
+                const position = inputSource.getPosition();
+                const rotation = inputSource.getRotation();
+                if (position) entity.setPosition(position);
+                if (rotation) entity.setRotation(rotation);
+            }
+        }
+    }
+}
+
+/** @import { Entity, XrInputSource } from 'playcanvas' */
+/** @import { XrNavigation } from './xr-navigation.mjs' */
+
+// Minimum 3D hand separation (meters) below which the scale solve is held, avoiding division
+// blow-up when the two grip poses (near-)coincide
+const EPS_SEPARATION$1 = 1e-3;
+
+// Minimum XZ-plane projection (meters) of the hand-pair vector below which the yaw heading is
+// degenerate (hands stacked vertically) and the rotation solve is held
+const EPS_XZ$1 = 1e-4;
+
+const tmpHandLeft = new Vec3();
+const tmpHandRight = new Vec3();
+const tmpHandMid = new Vec3();
+const tmpHandDelta = new Vec3();
+const tmpPrevDelta = new Vec3();
+const tmpMidWorld = new Vec3();
+const tmpSolvedPos = new Vec3();
+const tmpScratch = new Vec3();
+const tmpQuat = new Quat();
+const tmpQuatB = new Quat();
+
+/**
+ * Rotates a vector in place around the world Y axis. Matches the rotation applied by a
+ * yaw-only entity rotation, i.e. `rotateY(v, yaw)` computes `R(yaw) * v`.
+ *
+ * @param {Vec3} v - The vector to rotate in place.
+ * @param {number} angle - The rotation angle in radians.
+ * @returns {Vec3} The rotated vector (same object as `v`).
+ */
+const rotateY$1 = (v, angle) => {
+    const c = Math.cos(angle);
+    const s = Math.sin(angle);
+    const x = v.x * c + v.z * s;
+    v.z = -v.x * s + v.z * c;
+    v.x = x;
+    return v;
+};
+
+/**
+ * Wraps an angle to the (-PI, PI] range.
+ *
+ * @param {number} angle - The angle in radians.
+ * @returns {number} The wrapped angle in radians.
+ */
+const wrapPi$1 = (angle) => {
+    angle %= Math.PI * 2;
+    if (angle > Math.PI) {
+        angle -= Math.PI * 2;
+    } else if (angle <= -Math.PI) {
+        angle += Math.PI * 2;
+    }
+    return angle;
+};
+
+/**
+ * Lets the user grab the world with both hands to drag, rotate and scale the scene in XR.
+ * Squeeze both grip buttons (or make fists with both tracked hands - the engine emulates
+ * squeeze from the fist gesture) to grab the world. While grabbing, the world sticks to the
+ * hands:
+ * - Drag: move both hands together to pull the world in any direction, including vertically
+ * - Rotate: swing the hand pair to yaw-rotate the world around the hands (yaw only, so floors
+ *   stay level)
+ * - Scale: change the distance between the hands to scale the world - spreading them apart
+ *   grows it. Horizontally the content follows the hands; vertically the scale pivots at the
+ *   user's feet by default ({@link XrManipulation#scalePivot}), so the user stays standing on
+ *   the world instead of the floor rising or sinking through them. Separation changes within
+ *   {@link XrManipulation#scaleThreshold} of the grab distance are ignored, so the incidental
+ *   hand convergence that occurs while pushing or pulling the world does not zoom it
+ *
+ * The manipulation is applied to the {@link XrManipulation#target} entity, under which the scene
+ * content to manipulate should be parented. The camera rig is never modified, so the XR rig
+ * keeps its 1:1 real-world mapping - controller models, hand meshes, menus and any user
+ * scripts that measure hand-space distances are unaffected by the world being scaled.
+ *
+ * Hand motion is measured in the camera rig's local space, so rig locomotion (XrNavigation
+ * teleports, snap turns) occurring mid-grab does not drag the world along; the grab re-anchors
+ * against the moved rig instead.
+ *
+ * Notes:
+ * - {@link XrManipulation#minScale}/{@link XrManipulation#maxScale} bound the target's scale
+ *   relative to its scale when the script initialized (1 = authored size).
+ * - The target keeps its manipulated transform when the XR session ends. Call
+ *   {@link XrManipulation#reset} (or fire {@link XrManipulation#resetEvent}) to restore it.
+ * - The target's parent chain should be unrotated and unscaled. The target itself may have
+ *   any transform; rotation stays yaw-only relative to its initial rotation.
+ * - World-anchored systems do not follow the target: XrNavigation's teleport ground plane
+ *   ({@link XrNavigation#groundHeight}) stays where it is, so consider assigning
+ *   {@link XrNavigation#castRay} if users can drag the world vertically. Physics colliders
+ *   under the target rebuild on scale changes (mesh shapes) or ignore scale entirely
+ *   (primitive shapes), so avoid parenting rigidbodies under the target where possible.
+ *
+ * Fires `xr:manipulation:active` (with a boolean) on the app when a grab starts or ends. Listens
+ * for `xr:menu:active` (fired by `XrMenu`) and blocks or ends grabs while a menu is open.
+ *
+ * The script can be attached to any entity (e.g. the camera rig alongside the other XR
+ * scripts). Use it alongside the `XrSession`, `XrControllers` and `XrNavigation` scripts.
+ *
+ * @example
+ * // Parent the scene content under a world root and grab-manipulate it
+ * const worldRoot = new Entity('WorldRoot');
+ * app.root.addChild(worldRoot);
+ * worldRoot.addChild(galleryEntity);
+ *
+ * cameraParent.addComponent('script');
+ * cameraParent.script.create(XrManipulation, {
+ *     properties: {
+ *         target: worldRoot,
+ *         minScale: 0.5,
+ *         maxScale: 4
+ *     }
+ * });
+ * @category XR
+ */
+class XrManipulation extends Script {
+    static scriptName = 'xrManipulation';
+
+    /**
+     * The entity that is dragged, rotated and scaled by the grab gesture. Parent the scene
+     * content to manipulate under this entity. The camera rig is never modified.
+     * @type {Entity}
+     * @attribute
+     */
+    target = null;
+
+    /**
+     * Enable dragging the world by moving both hands while grabbing.
+     * @attribute
+     */
+    enableTranslate = true;
+
+    /**
+     * Enable yaw-rotating the world by swinging the hand pair while grabbing.
+     * @attribute
+     */
+    enableRotate = true;
+
+    /**
+     * Enable scaling the world by changing the hand separation while grabbing.
+     * @attribute
+     */
+    enableScale = true;
+
+    /**
+     * Dead zone for scale activation, as a fraction of the grab-start hand separation.
+     * Separation changes within this band do not scale the world - hands naturally drift
+     * together or apart while pushing or pulling the world, and without a dead zone that
+     * incidental drift reads as a pinch-zoom. Once the separation leaves the band, scaling
+     * engages continuously from the band's edge (no jump). Set to 0 to scale immediately.
+     * @attribute
+     * @range [0, 0.5]
+     * @precision 0.01
+     * @enabledif {enableScale}
+     */
+    scaleThreshold = 0.15;
+
+    /**
+     * The vertical pivot used while scaling. One of:
+     * - `'feet'`: whatever sits at the user's floor level stays there while scaling - the
+     *   user remains standing on the world, and a scene floor stays aligned with
+     *   XrNavigation's teleport plane (default).
+     * - `'hands'`: the world scales symmetrically about the hand midpoint and sticks to the
+     *   hands vertically - suits tabletop/diorama targets.
+     * Horizontal behavior is identical in both modes: content follows the hands in XZ.
+     * @attribute
+     * @enabledif {enableScale}
+     */
+    scalePivot = 'feet';
+
+    /**
+     * Minimum scale of the target relative to its scale at initialization (1 is authored
+     * size). Grabbing cannot shrink the world below this factor.
+     * @attribute
+     * @range [0.01, 1]
+     * @precision 0.01
+     * @enabledif {enableScale}
+     */
+    minScale = 0.2;
+
+    /**
+     * Maximum scale of the target relative to its scale at initialization (1 is authored
+     * size). Grabbing cannot grow the world beyond this factor.
+     * @attribute
+     * @range [1, 50]
+     * @precision 0.1
+     * @enabledif {enableScale}
+     */
+    maxScale = 5;
+
+    /**
+     * App event that triggers {@link XrManipulation#reset}. Set to an empty string to disable.
+     * Read once at initialization.
+     * @type {string}
+     * @attribute
+     */
+    resetEvent = 'xr:manipulation:reset';
+
+    /** @type {Set<XrInputSource>} */
+    _inputSources = new Set();
+
+    // True while both grips are held and the world is being manipulated
+    _grabbing = false;
+
+    /** @type {XrInputSource | null} */
+    _leftSource = null;
+
+    /** @type {XrInputSource | null} */
+    _rightSource = null;
+
+    /** @type {Entity | null} */
+    _grabTarget = null;
+
+    // Grab frame: the camera rig transform captured at grab start (and refreshed when the rig
+    // moves mid-grab). Hand poses are measured in rig space and mapped to world space through
+    // this frame, so rig locomotion does not move the grabbed world
+    _framePos = new Vec3();
+
+    _frameYaw = 0;
+
+    _frameScale = 1;
+
+    // Target state captured at grab start (or at the last re-anchor)
+    _targetPos0 = new Vec3();
+
+    _targetRot0 = new Quat();
+
+    _targetScale0 = new Vec3();
+
+    // Hand-pair reference captured at grab start (rig space): midpoint, separation, heading
+    _midPose0 = new Vec3();
+
+    _grabDist = 0;
+
+    /** @type {number | null} */
+    _grabHeading = null;
+
+    // Rig-space hand positions from the previous grabbed frame (incremental mode)
+    _prevLeft = new Vec3();
+
+    _prevRight = new Vec3();
+
+    // enableTranslate as of the previous grabbed frame, to detect mid-grab toggle flips
+    _prevTranslateEnabled = true;
+
+    // True while an XrMenu is open (grabs are blocked)
+    _menuActive = false;
+
+    // Event name captured from resetEvent at initialization, for symmetric unsubscription
+    _resetEventName = '';
+
+    // Baseline transform of the target for reset() and the min/max scale bounds, captured
+    // when the target is first seen (tracked so a runtime target swap recaptures it)
+    /** @type {Entity | null} */
+    _baselineTarget = null;
+
+    _initPosition = new Vec3();
+
+    _initRotation = new Quat();
+
+    _initScale = new Vec3(1, 1, 1);
+
+    initialize() {
+        if (!this.app.xr) {
+            console.error('XrManipulation script requires XR to be enabled on the application');
+            return;
+        }
+
+        if (!this.target) {
+            console.warn('XrManipulation: No target entity assigned. Grabbing will not work until one is set.');
+        }
+
+        if (!this.enableTranslate && !this.enableRotate && !this.enableScale) {
+            console.warn('XrManipulation: All manipulation modes are disabled. Grabbing will not work.');
+        }
+
+        this._captureBaseline(this.target);
+
+        const onInputAdd = (inputSource) => {
+            this._inputSources.add(inputSource);
+        };
+        this.app.xr.input.on('add', onInputAdd);
+
+        const onInputRemove = (inputSource) => {
+            this._inputSources.delete(inputSource);
+            if (this._grabbing && (inputSource === this._leftSource || inputSource === this._rightSource)) {
+                this._endGrab();
+            }
+        };
+        this.app.xr.input.on('remove', onInputRemove);
+
+        const onMenuActive = (active) => {
+            this._menuActive = !!active;
+            if (this._menuActive) {
+                this._endGrab();
+            }
+        };
+        this.app.on('xr:menu:active', onMenuActive);
+
+        this._resetEventName = this.resetEvent;
+        if (this._resetEventName) {
+            this.app.on(this._resetEventName, this.reset, this);
+        }
+
+        this.once('destroy', () => {
+            this.app.xr.input.off('add', onInputAdd);
+            this.app.xr.input.off('remove', onInputRemove);
+            this.app.off('xr:menu:active', onMenuActive);
+            if (this._resetEventName) {
+                this.app.off(this._resetEventName, this.reset, this);
+            }
+            this._inputSources.clear();
+            this._endGrab();
+        });
+    }
+
+    /**
+     * Restores the target to the transform it had when the script (or a newly assigned
+     * target) was first seen. Also fired by the {@link XrManipulation#resetEvent} app event.
+     */
+    reset() {
+        this._endGrab();
+        const target = this._baselineTarget;
+        if (!target) return;
+        target.setPosition(this._initPosition);
+        target.setRotation(this._initRotation);
+        target.setLocalScale(this._initScale);
+    }
+
+    /**
+     * Captures the baseline transform of a newly seen target, used by {@link XrManipulation#reset}
+     * and as the reference for the {@link XrManipulation#minScale}/{@link XrManipulation#maxScale}
+     * bounds.
+     *
+     * @param {Entity | null} target - The target entity, or null.
+     * @private
+     */
+    _captureBaseline(target) {
+        this._baselineTarget = target;
+        if (!target) return;
+        this._initPosition.copy(target.getPosition());
+        this._initRotation.copy(target.getRotation());
+        this._initScale.copy(target.getLocalScale());
+    }
+
+    /**
+     * Whether an input source currently provides a usable position for grabbing: a grip pose
+     * for controllers, or a tracked wrist joint for hands.
+     *
+     * @param {XrInputSource} inputSource - The input source to check.
+     * @returns {boolean} True when the input source can be grabbed with.
+     * @private
+     */
+    _hasUsablePose(inputSource) {
+        return inputSource.grip || !!(inputSource.hand && inputSource.hand.tracking && inputSource.hand.wrist);
+    }
+
+    /**
+     * Whether a grabbed input source is still valid to keep grabbing with. Tracking quality is
+     * deliberately not checked here (only at grab start), so transient hand tracking loss
+     * holds the grab on frozen poses instead of dropping it.
+     *
+     * @param {XrInputSource | null} inputSource - The grabbed input source.
+     * @returns {boolean} True when the grab can continue with this input source.
+     * @private
+     */
+    _canContinueGrab(inputSource) {
+        return !!inputSource && this._inputSources.has(inputSource) && inputSource.squeezing &&
+            (inputSource.grip || !!inputSource.hand);
+    }
+
+    /**
+     * Writes the rig-space position of an input source into `out`. Controllers expose this
+     * directly via their grip pose. Tracked hands only expose world space joint positions, so
+     * the wrist position is converted to rig space by inverting the rig's current translation
+     * + yaw + uniform scale (the transform the suite maintains on the rig).
+     *
+     * @param {XrInputSource} inputSource - The input source to read.
+     * @param {Vec3} out - The vector to write the rig-space position into.
+     * @returns {Vec3} The rig-space position (same object as `out`).
+     * @private
+     */
+    _getRigSpacePosition(inputSource, out) {
+        if (inputSource.grip) {
+            out.copy(inputSource.getLocalPosition());
+        } else {
+            out.copy(inputSource.hand.wrist.getPosition());
+            const rig = this.app.xr.camera?.parent;
+            if (rig) {
+                const rigPos = rig.getPosition();
+                const forward = rig.forward;
+                const yaw = Math.atan2(-forward.x, -forward.z);
+                const scale = rig.getLocalScale().x || 1;
+                out.sub(rigPos);
+                rotateY$1(out, -yaw);
+                out.mulScalar(1 / scale);
+            }
+        }
+        return out;
+    }
+
+    /**
+     * Captures the grab frame from the camera rig's current transform. Rig-space hand
+     * positions are mapped to world space through this frame.
+     *
+     * @private
+     */
+    _captureFrame() {
+        const rig = this.app.xr.camera?.parent;
+        if (rig) {
+            this._framePos.copy(rig.getPosition());
+            const forward = rig.forward;
+            this._frameYaw = Math.atan2(-forward.x, -forward.z);
+            this._frameScale = rig.getLocalScale().x || 1;
+        } else {
+            this._framePos.set(0, 0, 0);
+            this._frameYaw = 0;
+            this._frameScale = 1;
+        }
+    }
+
+    /**
+     * Whether the camera rig has moved since the grab frame was captured (e.g. an XrNavigation
+     * teleport or snap turn happened mid-grab).
+     *
+     * @returns {boolean} True when the rig transform no longer matches the grab frame.
+     * @private
+     */
+    _frameStale() {
+        const rig = this.app.xr.camera?.parent;
+        if (!rig) return false;
+        const forward = rig.forward;
+        const yaw = Math.atan2(-forward.x, -forward.z);
+        // squared distance avoids a per-frame sqrt (1e-12 is the squared 1e-6 threshold)
+        const rigPos = rig.getPosition();
+        const dx = rigPos.x - this._framePos.x;
+        const dy = rigPos.y - this._framePos.y;
+        const dz = rigPos.z - this._framePos.z;
+        return dx * dx + dy * dy + dz * dz > 1e-12 || Math.abs(wrapPi$1(yaw - this._frameYaw)) > 1e-6;
+    }
+
+    /**
+     * Maps a rig-space position to world space through the grab frame, in place.
+     *
+     * @param {Vec3} v - The rig-space position to map in place.
+     * @returns {Vec3} The world-space position (same object as `v`).
+     * @private
+     */
+    _frameToWorld(v) {
+        rotateY$1(v, this._frameYaw);
+        v.mulScalar(this._frameScale).add(this._framePos);
+        return v;
+    }
+
+    /**
+     * Captures the grab reference state: the target's current transform and the hand pair's
+     * rig-space midpoint, separation and heading. The solve maps this reference onto the
+     * current hand pair each frame. Recaptured whenever the applied transform deviated from
+     * the raw solve (scale clamped, or a component held due to degeneracy or rig motion),
+     * which prevents rubber-banding and heals degenerate headings.
+     *
+     * @param {Vec3} handLeft - The rig-space position of the first hand.
+     * @param {Vec3} handRight - The rig-space position of the second hand.
+     * @private
+     */
+    _captureGrabState(handLeft, handRight) {
+        const target = this._grabTarget;
+        this._targetPos0.copy(target.getPosition());
+        this._targetRot0.copy(target.getRotation());
+        this._targetScale0.copy(target.getLocalScale());
+
+        this._midPose0.add2(handLeft, handRight).mulScalar(0.5);
+        tmpScratch.sub2(handRight, handLeft);
+        this._grabDist = tmpScratch.length();
+        const xz = Math.sqrt(tmpScratch.x * tmpScratch.x + tmpScratch.z * tmpScratch.z);
+        this._grabHeading = xz > EPS_XZ$1 ? Math.atan2(tmpScratch.x, tmpScratch.z) : null;
+    }
+
+    /**
+     * Starts a two-handed grab with the given pair of input sources.
+     *
+     * @param {Entity} target - The target entity being manipulated.
+     * @param {XrInputSource} left - The first input source (left hand when available).
+     * @param {XrInputSource} right - The second input source (right hand when available).
+     * @private
+     */
+    _startGrab(target, left, right) {
+        this._grabTarget = target;
+        this._leftSource = left;
+        this._rightSource = right;
+
+        this._captureFrame();
+        this._getRigSpacePosition(left, this._prevLeft);
+        this._getRigSpacePosition(right, this._prevRight);
+        this._captureGrabState(this._prevLeft, this._prevRight);
+        this._prevTranslateEnabled = this.enableTranslate;
+
+        this._grabbing = true;
+        this.app.fire('xr:manipulation:active', true);
+    }
+
+    /**
+     * Ends the active grab, if any. The target keeps its last applied transform.
+     *
+     * @private
+     */
+    _endGrab() {
+        if (!this._grabbing) return;
+        this._leftSource = null;
+        this._rightSource = null;
+        this._grabTarget = null;
+        this._grabbing = false;
+        this.app.fire('xr:manipulation:active', false);
+    }
+
+    /**
+     * Applies the scale activation dead zone to a raw separation ratio: ratios within
+     * {@link XrManipulation#scaleThreshold} of 1 map to exactly 1, and ratios beyond the band
+     * are remapped relative to the band's edge so scaling engages without a jump.
+     *
+     * @param {number} ratio - The raw current/grab-start separation ratio.
+     * @returns {number} The dead-zoned scale ratio.
+     * @private
+     */
+    _applyScaleDeadZone(ratio) {
+        const t = math.clamp(this.scaleThreshold, 0, 0.9);
+        if (t <= 0) return ratio;
+        if (ratio > 1 + t) return ratio / (1 + t);
+        if (ratio < 1 - t) return ratio / (1 - t);
+        return 1;
+    }
+
+    /**
+     * Clamps the relative scale factor so the target's total scale stays within
+     * {@link XrManipulation#minScale}/{@link XrManipulation#maxScale} of its baseline scale.
+     *
+     * @param {number} factor - The proposed relative scale factor.
+     * @param {number} currentScale - The target's current local X scale.
+     * @returns {number} The clamped relative factor.
+     * @private
+     */
+    _clampScaleFactor(factor, currentScale) {
+        const base = this._initScale.x || 1;
+        const total = math.clamp((currentScale * factor) / base, this.minScale, this.maxScale);
+        return currentScale > 0 ? (total * base) / currentScale : 1;
+    }
+
+    /**
+     * @param {number} dt - The delta time in seconds.
+     */
+    update(dt) {
+        // Track runtime target swaps regardless of XR state, so reset() always has a baseline
+        const target = this.target;
+        if (target !== this._baselineTarget) {
+            this._captureBaseline(target);
+        }
+
+        if (!this.app.xr?.active) {
+            this._endGrab();
+            return;
+        }
+
+        if (!target || this._menuActive || (!this.enableTranslate && !this.enableRotate && !this.enableScale)) {
+            this._endGrab();
+            return;
+        }
+
+        // Grab pair maintenance: the pair is fixed until broken; extra squeezing sources are
+        // ignored. squeezing is polled - the engine updates it before script update runs. A
+        // runtime target swap also ends the grab (the grab state belongs to the old target)
+        if (this._grabbing && (target !== this._grabTarget ||
+            !this._canContinueGrab(this._leftSource) || !this._canContinueGrab(this._rightSource))) {
+            this._endGrab();
+        }
+
+        if (!this._grabbing) {
+            let left = null;
+            let right = null;
+            let first = null;
+            let second = null;
+            for (const inputSource of this._inputSources) {
+                if (!inputSource.squeezing || !this._hasUsablePose(inputSource)) continue;
+                if (inputSource.handedness === 'left' && !left) {
+                    left = inputSource;
+                } else if (inputSource.handedness === 'right' && !right) {
+                    right = inputSource;
+                }
+                if (!first) {
+                    first = inputSource;
+                } else if (!second) {
+                    second = inputSource;
+                }
+            }
+            if (left && right) {
+                this._startGrab(target, left, right);
+            } else if (first && second) {
+                // Rare devices report 'none' handedness - fall back to the first two sources
+                this._startGrab(target, first, second);
+            }
+            // The first solve would reproduce the grab-start transform exactly - skip it
+            return;
+        }
+
+        this._getRigSpacePosition(this._leftSource, tmpHandLeft);
+        this._getRigSpacePosition(this._rightSource, tmpHandRight);
+
+        tmpHandMid.add2(tmpHandLeft, tmpHandRight).mulScalar(0.5);
+        tmpHandDelta.sub2(tmpHandRight, tmpHandLeft);
+        const sep = tmpHandDelta.length();
+        const sepXz = Math.sqrt(tmpHandDelta.x * tmpHandDelta.x + tmpHandDelta.z * tmpHandDelta.z);
+        const heading = sepXz > EPS_XZ$1 ? Math.atan2(tmpHandDelta.x, tmpHandDelta.z) : null;
+
+        // If the rig moved mid-grab (teleport, snap turn, smooth locomotion), re-anchor
+        // against the new rig transform instead of dragging the world along with the rig
+        if (this._frameStale()) {
+            this._captureFrame();
+            this._captureGrabState(tmpHandLeft, tmpHandRight);
+        }
+
+        // A mid-grab translate toggle flip switches solve modes - re-anchor so the new mode
+        // continues from the applied transform seamlessly
+        if (this.enableTranslate !== this._prevTranslateEnabled) {
+            this._captureGrabState(tmpHandLeft, tmpHandRight);
+            this._prevTranslateEnabled = this.enableTranslate;
+        }
+
+        if (this.enableTranslate) {
+            this._solveAnchored(sep, heading);
+        } else {
+            this._solveIncremental(sep, sepXz);
+        }
+
+        this._prevLeft.copy(tmpHandLeft);
+        this._prevRight.copy(tmpHandRight);
+    }
+
+    /**
+     * Anchor solve: applies the world-space similarity that maps the grab-start hand pair
+     * onto the current hand pair to the target's grab-start transform. Drift-free - the
+     * grabbed content sticks to the hands exactly while unconstrained. Used while
+     * {@link XrManipulation#enableTranslate} is on. Reads the current hand poses from the
+     * module-scope temporaries filled by {@link XrManipulation#update}.
+     *
+     * @param {number} sep - Current 3D hand separation in rig space (meters).
+     * @param {number | null} heading - Current XZ heading of the hand pair, or null when
+     * degenerate (hands stacked vertically).
+     * @private
+     */
+    _solveAnchored(sep, heading) {
+        let deltaYaw = 0;
+        let yawHeld = false;
+        if (this.enableRotate) {
+            if (heading !== null && this._grabHeading !== null) {
+                deltaYaw = wrapPi$1(heading - this._grabHeading);
+            } else {
+                yawHeld = true;
+            }
+        }
+
+        let scaleRel = 1;
+        let scaleHeld = false;
+        let scaleClamped = false;
+        if (this.enableScale) {
+            if (sep > EPS_SEPARATION$1 && this._grabDist > EPS_SEPARATION$1) {
+                // Spreading the hands grows the world (pinch-zoom semantics). The dead
+                // zone keeps incidental separation drift during push/pull from zooming;
+                // in-band frames leave the grab reference untouched so a slow deliberate
+                // pinch can still accumulate its way out of the band
+                const effective = this._applyScaleDeadZone(sep / this._grabDist);
+                scaleRel = this._clampScaleFactor(effective, this._targetScale0.x);
+                scaleClamped = scaleRel !== effective;
+            } else {
+                scaleHeld = true;
+            }
+        }
+
+        // World-space grab points through the (frozen) grab frame
+        tmpMidWorld.copy(this._midPose0);
+        this._frameToWorld(tmpMidWorld);
+        tmpScratch.copy(tmpHandMid);
+        this._frameToWorld(tmpScratch);
+
+        // newPos = curMid + scaleRel * R(deltaYaw) * (targetPos0 - grabMid)
+        tmpSolvedPos.sub2(this._targetPos0, tmpMidWorld);
+        rotateY$1(tmpSolvedPos, deltaYaw);
+        tmpSolvedPos.mulScalar(scaleRel).add(tmpScratch);
+
+        // Feet pivot: pin the scale's vertical pivot to the user's floor level (the rig
+        // origin Y, i.e. the physical floor in local-floor space) so whatever is at the
+        // feet stays there while scaling. Vertical drag still passes through, and with
+        // scaleRel = 1 this is identical to the hands pivot
+        if (this.scalePivot !== 'hands') {
+            const feetY = this._framePos.y;
+            tmpSolvedPos.y = feetY + scaleRel * (this._targetPos0.y - feetY) + (tmpScratch.y - tmpMidWorld.y);
+        }
+
+        tmpQuat.setFromEulerAngles(0, deltaYaw * math.RAD_TO_DEG, 0);
+        tmpQuatB.mul2(tmpQuat, this._targetRot0);
+
+        this._grabTarget.setPosition(tmpSolvedPos);
+        this._grabTarget.setRotation(tmpQuatB);
+        this._grabTarget.setLocalScale(
+            this._targetScale0.x * scaleRel,
+            this._targetScale0.y * scaleRel,
+            this._targetScale0.z * scaleRel
+        );
+
+        // Whenever the applied transform deviated from the raw solve, rebase the grab
+        // reference on it: releasing a clamp responds immediately and degenerate headings
+        // self-heal once the hands regain XZ separation
+        if (yawHeld || scaleHeld || scaleClamped) {
+            this._captureGrabState(tmpHandLeft, tmpHandRight);
+        }
+    }
+
+    /**
+     * Incremental pivot solve: without the translation degree of freedom there is no fixed
+     * anchor - applies each frame's delta rotation/scale about the current world hand
+     * midpoint, so zoom and rotation pivot on the hands without dragging. Used while
+     * {@link XrManipulation#enableTranslate} is off. Reads the current hand poses from the
+     * module-scope temporaries filled by {@link XrManipulation#update}.
+     *
+     * @param {number} sep - Current 3D hand separation in rig space (meters).
+     * @param {number} sepXz - XZ-plane projection of the hand separation (meters).
+     * @private
+     */
+    _solveIncremental(sep, sepXz) {
+        const curScale = this._grabTarget.getLocalScale();
+
+        tmpPrevDelta.sub2(this._prevRight, this._prevLeft);
+        const sepPrevXz = Math.sqrt(tmpPrevDelta.x * tmpPrevDelta.x + tmpPrevDelta.z * tmpPrevDelta.z);
+
+        let deltaYaw = 0;
+        if (this.enableRotate && sepXz > EPS_XZ$1 && sepPrevXz > EPS_XZ$1) {
+            deltaYaw = wrapPi$1(Math.atan2(tmpHandDelta.x, tmpHandDelta.z) - Math.atan2(tmpPrevDelta.x, tmpPrevDelta.z));
+        }
+
+        // Scale is solved absolutely against the grab-start separation (so the dead zone
+        // has a stable reference), then converted to a per-frame ratio for the pivot math
+        let scaleRatio = 1;
+        if (this.enableScale && sep > EPS_SEPARATION$1 && this._grabDist > EPS_SEPARATION$1 && curScale.x > 0) {
+            const effective = this._applyScaleDeadZone(sep / this._grabDist);
+            const desired = this._clampScaleFactor(effective, this._targetScale0.x) * this._targetScale0.x;
+            scaleRatio = desired / curScale.x;
+        }
+
+        // Pivot: the current hand midpoint in world space through the grab frame. With
+        // the feet pivot, the vertical component moves to the user's floor level so
+        // scaling never lifts or sinks the floor underfoot
+        tmpMidWorld.copy(tmpHandMid);
+        this._frameToWorld(tmpMidWorld);
+        if (this.scalePivot !== 'hands') {
+            tmpMidWorld.y = this._framePos.y;
+        }
+
+        tmpSolvedPos.sub2(this._grabTarget.getPosition(), tmpMidWorld);
+        rotateY$1(tmpSolvedPos, deltaYaw);
+        tmpSolvedPos.mulScalar(scaleRatio).add(tmpMidWorld);
+
+        tmpQuat.setFromEulerAngles(0, deltaYaw * math.RAD_TO_DEG, 0);
+        tmpQuatB.mul2(tmpQuat, this._grabTarget.getRotation());
+
+        this._grabTarget.setPosition(tmpSolvedPos);
+        this._grabTarget.setRotation(tmpQuatB);
+        this._grabTarget.setLocalScale(
+            curScale.x * scaleRatio,
+            curScale.y * scaleRatio,
+            curScale.z * scaleRatio
+        );
+    }
+}
+
+/** @import { XrInputSource } from 'playcanvas' */
+
+// Gravitational acceleration (m/s^2) used for the ballistic teleport arc
+const ARC_GRAVITY$1 = 9.81;
+
+const tmpVec2A = new Vec2();
+const tmpVec2B = new Vec2();
+const tmpVec3A = new Vec3();
+const tmpSegDir = new Vec3();
+const tmpToCam = new Vec3();
+const tmpSide = new Vec3();
+const tmpAimOrigin = new Vec3();
+const tmpAimDir = new Vec3();
+const tmpAimPoint = new Vec3();
+const tmpPalm = new Vec3();
+const tmpToHead = new Vec3();
+
+// Milliseconds after the session regains focus during which a select that starts belongs to the
+// system UI being closed rather than the app. On Meta Quest these were seen up to 0.6 s after
+// focus returned, with the palm in any direction
+const FOCUS_SELECT_MS = 1000;
+
+const arcVertexGLSL = /* glsl */ `
+    attribute vec3 vertex_position;
+    attribute vec2 aUv0;
+
+    uniform mat4 matrix_model;
+    uniform mat4 matrix_viewProjection;
+
+    varying vec2 uv0;
+
+    void main(void) {
+        gl_Position = matrix_viewProjection * matrix_model * vec4(vertex_position, 1.0);
+        uv0 = aUv0;
+    }
+`;
+
+const arcFragmentGLSL = /* glsl */ `
+    uniform vec4 uColor;
+
+    varying vec2 uv0;
+
+    void main(void) {
+        float edge = 1.0 - abs(uv0.y * 2.0 - 1.0);
+        edge *= edge;
+        float ends = smoothstep(0.0, 0.1, uv0.x) * (1.0 - smoothstep(0.9, 1.0, uv0.x));
+        gl_FragColor = vec4(uColor.rgb, uColor.a * edge * ends);
+    }
+`;
+
+const arcVertexWGSL = /* wgsl */ `
+    attribute vertex_position: vec3f;
+    attribute aUv0: vec2f;
+
+    uniform matrix_model: mat4x4f;
+    uniform matrix_viewProjection: mat4x4f;
+
+    varying uv0: vec2f;
+
+    @vertex
+    fn vertexMain(input: VertexInput) -> VertexOutput {
+        var output: VertexOutput;
+        output.position = uniform.matrix_viewProjection * uniform.matrix_model * vec4f(input.vertex_position, 1.0);
+        output.uv0 = input.aUv0;
+        return output;
+    }
+`;
+
+const arcFragmentWGSL = /* wgsl */ `
+    uniform uColor: vec4f;
+
+    varying uv0: vec2f;
+
+    @fragment
+    fn fragmentMain(input: FragmentInput) -> FragmentOutput {
+        var output: FragmentOutput;
+        let edgeBase = 1.0 - abs(input.uv0.y * 2.0 - 1.0);
+        let edge = edgeBase * edgeBase;
+        let ends = smoothstep(0.0, 0.1, input.uv0.x) * (1.0 - smoothstep(0.9, 1.0, input.uv0.x));
+        output.color = vec4f(uniform.uColor.rgb, uniform.uColor.a * edge * ends);
+        return output;
+    }
+`;
+
+const ringFragmentGLSL = /* glsl */ `
+    uniform vec4 uColor;
+
+    varying vec2 uv0;
+
+    void main(void) {
+        float d = length(uv0 * 2.0 - 1.0);
+        float ring = smoothstep(0.55, 0.75, d) * (1.0 - smoothstep(0.85, 1.0, d));
+        float fill = (1.0 - smoothstep(0.0, 0.85, d)) * 0.15;
+        gl_FragColor = vec4(uColor.rgb, uColor.a * (ring + fill));
+    }
+`;
+
+const ringFragmentWGSL = /* wgsl */ `
+    uniform uColor: vec4f;
+
+    varying uv0: vec2f;
+
+    @fragment
+    fn fragmentMain(input: FragmentInput) -> FragmentOutput {
+        var output: FragmentOutput;
+        let d = length(input.uv0 * 2.0 - 1.0);
+        let ring = smoothstep(0.55, 0.75, d) * (1.0 - smoothstep(0.85, 1.0, d));
+        let fill = (1.0 - smoothstep(0.0, 0.85, d)) * 0.15;
+        output.color = vec4f(uniform.uColor.rgb, uniform.uColor.a * (ring + fill));
+        return output;
+    }
+`;
+
+/**
+ * Handles VR navigation with support for teleportation, smooth locomotion, snap or smooth
+ * turning, and snap vertical movement. All methods can be enabled simultaneously, allowing
+ * users to choose their preferred navigation method on the fly.
+ *
+ * Teleportation: Point and teleport using trigger/pinch gestures. The aim is visualized as a
+ * ballistic arc rendered as a glowing ribbon, landing on a flat navigation plane at
+ * {@link XrNavigation#groundHeight}. Apps with physics or custom picking can override ground
+ * detection by assigning {@link XrNavigation#castRay}. Selects that belong to the system do not
+ * teleport: a hand pinch made with the palm facing the head, which is how the system menu is
+ * opened on Meta Quest, and a select that starts within a second of the session regaining focus
+ * from the system UI.
+ * Smooth Locomotion: Use left thumbstick for XZ movement
+ * Turning: Right thumbstick X-axis — snap turn (default) or continuous smooth turn, selected
+ *   via {@link XrNavigation#turnMode}
+ * Snap Vertical: Use right thumbstick Y-axis to snap up/down (right grip for larger jumps)
+ *
+ * This script should be attached to a parent entity of the camera entity used for the XR
+ * session. The entity hierarchy should be: XrNavigationEntity > CameraEntity for proper
+ * locomotion handling. Use it in conjunction with the `XrControllers` script.
+ * @category XR
+ */
+class XrNavigation extends Script {
+    static scriptName = 'xrNavigation';
+
+    /**
+     * Enable teleportation navigation using trigger/pinch gestures.
+     * @attribute
+     */
+    enableTeleport = true;
+
+    /**
+     * Enable smooth locomotion using thumbsticks.
+     * @attribute
+     */
+    enableMove = true;
+
+    /**
+     * Speed of smooth locomotion movement in meters per second.
+     * @attribute
+     * @range [0.1, 10]
+     * @enabledif {enableMove}
+     */
+    movementSpeed = 1.5;
+
+    /**
+     * Selects the right-thumbstick turn behavior. One of:
+     * - `'snap'`: discrete rotation of {@link XrNavigation#rotateSpeed} degrees per gesture
+     *   (default; existing behavior).
+     * - `'smooth'`: continuous rotation at {@link XrNavigation#smoothTurnSpeed} degrees/second
+     *   while the thumbstick is past {@link XrNavigation#smoothTurnThreshold}.
+     * - `'none'`: thumbstick X is ignored.
+     * @attribute
+     * @enabledif {enableMove}
+     */
+    turnMode = 'snap';
+
+    /**
+     * Angle in degrees for each snap turn. Used when {@link XrNavigation#turnMode} is `'snap'`.
+     * @attribute
+     * @range [15, 180]
+     * @enabledif {enableMove}
+     */
+    rotateSpeed = 45;
+
+    /**
+     * Thumbstick deadzone threshold for movement.
+     * @attribute
+     * @range [0, 0.5]
+     * @precision 0.01
+     * @enabledif {enableMove}
+     */
+    movementThreshold = 0.1;
+
+    /**
+     * Thumbstick threshold to trigger snap turning.
+     * @attribute
+     * @range [0.1, 1]
+     * @precision 0.01
+     * @enabledif {enableMove}
+     */
+    rotateThreshold = 0.5;
+
+    /**
+     * Thumbstick threshold to reset snap turn state.
+     * @attribute
+     * @range [0.05, 0.5]
+     * @precision 0.01
+     * @enabledif {enableMove}
+     */
+    rotateResetThreshold = 0.25;
+
+    /**
+     * Rotation speed in degrees per second when {@link XrNavigation#turnMode} is `'smooth'`.
+     * @attribute
+     * @range [30, 360]
+     * @enabledif {enableMove}
+     */
+    smoothTurnSpeed = 90;
+
+    /**
+     * Deadzone for the right-thumbstick X-axis when {@link XrNavigation#turnMode} is `'smooth'`.
+     * Below this magnitude the stick is treated as centered.
+     * @attribute
+     * @range [0, 0.5]
+     * @precision 0.01
+     * @enabledif {enableMove}
+     */
+    smoothTurnThreshold = 0.15;
+
+    /**
+     * Maximum distance for teleportation in meters.
+     * @attribute
+     * @range [1, 50]
+     * @enabledif {enableTeleport}
+     */
+    maxTeleportDistance = 10;
+
+    /**
+     * Height in meters of the flat navigation plane used for teleport ground detection.
+     * @attribute
+     * @enabledif {enableTeleport}
+     */
+    groundHeight = 0;
+
+    /**
+     * Initial speed of the ballistic teleport arc in meters per second. Higher values increase
+     * the teleport reach.
+     * @attribute
+     * @range [2, 20]
+     * @precision 0.1
+     * @enabledif {enableTeleport}
+     */
+    teleportArcSpeed = 8;
+
+    /**
+     * Width in meters of the teleport arc ribbon.
+     * @attribute
+     * @range [0.01, 0.3]
+     * @precision 0.01
+     * @enabledif {enableTeleport}
+     */
+    arcWidth = 0.05;
+
+    /**
+     * Number of segments used to tessellate the teleport arc. Read once when the script
+     * initializes; runtime changes have no effect.
+     * @attribute
+     * @range [8, 64]
+     * @enabledif {enableTeleport}
+     */
+    arcSegments = 32;
+
+    /**
+     * Radius of the teleport target indicator ring.
+     * @attribute
+     * @range [0.1, 2]
+     * @precision 0.1
+     * @enabledif {enableTeleport}
+     */
+    teleportIndicatorRadius = 0.2;
+
+    /**
+     * Color for valid teleportation areas. Defaults to a soft cyan-white in the same family as
+     * the `XrMenu` hover color, so pointer feedback reads as one visual system.
+     * @attribute
+     * @enabledif {enableTeleport}
+     */
+    validTeleportColor = new Color(0.5, 0.8, 0.95);
+
+    /**
+     * Color for invalid teleportation areas.
+     * @attribute
+     * @enabledif {enableTeleport}
+     */
+    invalidTeleportColor = new Color(0.9, 0.4, 0.35);
+
+    /**
+     * Enable snap vertical movement using right thumbstick Y (controllers only).
+     * @attribute
+     */
+    enableSnapVertical = true;
+
+    /**
+     * Height in meters for each vertical snap.
+     * @attribute
+     * @range [0.1, 2]
+     * @precision 0.1
+     * @enabledif {enableSnapVertical}
+     */
+    snapVerticalHeight = 0.5;
+
+    /**
+     * Height in meters for each vertical snap when holding right grip (boost).
+     * @attribute
+     * @range [0.5, 10]
+     * @precision 0.5
+     * @enabledif {enableSnapVertical}
+     */
+    snapVerticalBoostHeight = 2.0;
+
+    /**
+     * Thumbstick Y threshold to trigger vertical snap.
+     * @attribute
+     * @range [0.1, 1]
+     * @precision 0.01
+     * @enabledif {enableSnapVertical}
+     */
+    snapVerticalThreshold = 0.5;
+
+    /**
+     * Thumbstick Y threshold to reset vertical snap state.
+     * @attribute
+     * @range [0.05, 0.5]
+     * @precision 0.01
+     * @enabledif {enableSnapVertical}
+     */
+    snapVerticalResetThreshold = 0.25;
+
+    /**
+     * Optional custom ground detection for teleportation. When set, it fully replaces the flat
+     * plane at {@link XrNavigation#groundHeight}: the teleport arc is tested segment by segment
+     * against this callback and only its hits are valid landing points. The callback receives
+     * the world-space start and end of an arc segment and returns the hit point, or null if the
+     * segment hits nothing. Not a script attribute (functions are not serializable) — assign it
+     * from code, e.g. wrap `rigidbody.raycastFirst` or a custom picker.
+     *
+     * @type {((start: Vec3, end: Vec3) => Vec3 | null) | null}
+     */
+    castRay = null;
+
+    /** @type {Set<XrInputSource>} */
+    _inputSources = new Set();
+
+    /** @type {Map<XrInputSource, boolean>} */
+    _activePointers = new Map();
+
+    /** @type {Map<XrInputSource, { handleSelectStart: Function, handleSelectEnd: Function }>} */
+    _inputHandlers = new Map();
+
+    // Hysteresis state for snap turning
+    _rotateSnap = { last: 0 };
+
+    // Hysteresis state for snap vertical movement
+    _verticalSnap = { last: 0 };
+
+    // Camera reference for movement calculations
+    /** @type {import('playcanvas').Entity | null} */
+    _cameraEntity = null;
+
+    // Arc visualization state (created in initialize/lazily per input source)
+
+    /** @type {ShaderMaterial | null} */
+    _arcMaterial = null;
+
+    /** @type {ShaderMaterial | null} */
+    _ringMaterial = null;
+
+    /** @type {Mesh | null} */
+    _ringMesh = null;
+
+    /** @type {Map<XrInputSource, { entity: Entity, meshInstance: MeshInstance, mesh: Mesh, positions: Float32Array, colorParam: Float32Array, ringEntity: Entity }>} */
+    _arcVisuals = new Map();
+
+    /** @type {Map<XrInputSource, { point: Vec3, valid: boolean }>} */
+    _arcHits = new Map();
+
+    /** @type {Vec3[]} */
+    _arcPoints = [];
+
+    // Y of the ground surface the rig currently stands on (groundHeight or last castRay hit)
+    _currentGroundY = 0;
+
+    // Time the session was last seen without focus, such as behind the system menu
+    _unfocusedTime = -Infinity;
+
+    initialize() {
+        if (!this.app.xr) {
+            console.error('XrNavigation script requires XR to be enabled on the application');
+            return;
+        }
+
+        if (!this.enableTeleport && !this.enableMove && !this.enableSnapVertical) {
+            console.warn('XrNavigation: All navigation methods are disabled. Navigation will not work.');
+        }
+
+        // Pre-allocate arc sample points (arcSegments is read once at initialization)
+        for (let i = 0; i <= this.arcSegments; i++) {
+            this._arcPoints.push(new Vec3());
+        }
+
+        this._currentGroundY = this.groundHeight;
+
+        this._arcMaterial = new ShaderMaterial({
+            uniqueName: 'xr-navigation-arc',
+            vertexGLSL: arcVertexGLSL,
+            fragmentGLSL: arcFragmentGLSL,
+            vertexWGSL: arcVertexWGSL,
+            fragmentWGSL: arcFragmentWGSL,
+            attributes: {
+                vertex_position: SEMANTIC_POSITION,
+                aUv0: SEMANTIC_TEXCOORD0
+            }
+        });
+        this._arcMaterial.blendType = BLEND_NORMAL;
+        this._arcMaterial.cull = CULLFACE_NONE;
+        this._arcMaterial.depthWrite = false;
+        this._arcMaterial.update();
+
+        this._ringMaterial = new ShaderMaterial({
+            uniqueName: 'xr-navigation-ring',
+            vertexGLSL: arcVertexGLSL,
+            fragmentGLSL: ringFragmentGLSL,
+            vertexWGSL: arcVertexWGSL,
+            fragmentWGSL: ringFragmentWGSL,
+            attributes: {
+                vertex_position: SEMANTIC_POSITION,
+                aUv0: SEMANTIC_TEXCOORD0
+            }
+        });
+        this._ringMaterial.blendType = BLEND_NORMAL;
+        this._ringMaterial.cull = CULLFACE_NONE;
+        this._ringMaterial.depthWrite = false;
+        this._ringMaterial.update();
+
+        // Unit quad in XZ, shared by all ring mesh instances. Hold an extra reference so
+        // destroying a ring MeshInstance (input sources are transient on some platforms -
+        // e.g. one per pinch on Apple Vision Pro) cannot drop the refcount to zero and
+        // destroy the shared mesh
+        this._ringMesh = Mesh.fromGeometry(this.app.graphicsDevice, new PlaneGeometry());
+        this._ringMesh.incRefCount();
+
+        const onXrEnd = () => {
+            this._destroyAllArcVisuals();
+        };
+        this.app.xr.on('end', onXrEnd);
+
+        // Find camera entity - should be a descendant of this entity
+        this._cameraEntity = this.entity.findComponent('camera')?.entity ?? null;
+        if (!this._cameraEntity) {
+            console.error('XrNavigation: No camera entity found. Movement calculations may not work correctly.');
+        }
+
+        const onInputAdd = (inputSource) => {
+            const handleSelectStart = () => {
+                // a select that belongs to the system neither aims nor teleports
+                if (this._isSystemSelect(inputSource)) return;
+
+                this._activePointers.set(inputSource, true);
+                // Invalidate any hit cached from a previous aim session, so a select that
+                // starts and ends before the next update cannot teleport to a stale target.
+                // tryTeleport recomputes when no cached hit exists; otherwise it commits the
+                // last visualized hit, which is immune to the ray flicking on pinch release
+                this._arcHits.delete(inputSource);
+            };
+
+            const handleSelectEnd = () => {
+                // only a select whose start was accepted teleports
+                if (!this._activePointers.get(inputSource)) return;
+
+                this._activePointers.set(inputSource, false);
+                // Only teleport when teleportation is enabled. Otherwise a select/pinch gesture
+                // (e.g. used to click a UI element) would still snap the rig to the floor point
+                // under the ray.
+                if (this.enableTeleport) {
+                    this.tryTeleport(inputSource);
+                }
+            };
+
+            // Attach the handlers
+            inputSource.on('selectstart', handleSelectStart);
+            inputSource.on('selectend', handleSelectEnd);
+
+            // Store the handlers in the map
+            this._inputHandlers.set(inputSource, { handleSelectStart, handleSelectEnd });
+            this._inputSources.add(inputSource);
+        };
+        this.app.xr.input.on('add', onInputAdd);
+
+        const onInputRemove = (inputSource) => {
+            const handlers = this._inputHandlers.get(inputSource);
+            if (handlers) {
+                inputSource.off('selectstart', handlers.handleSelectStart);
+                inputSource.off('selectend', handlers.handleSelectEnd);
+                this._inputHandlers.delete(inputSource);
+            }
+            this._activePointers.delete(inputSource);
+            this._inputSources.delete(inputSource);
+            this._destroyArcVisual(inputSource);
+        };
+        this.app.xr.input.on('remove', onInputRemove);
+
+        this.once('destroy', () => {
+            this.app.xr.off('end', onXrEnd);
+            this.app.xr.input.off('add', onInputAdd);
+            this.app.xr.input.off('remove', onInputRemove);
+
+            // Detach per-source select handlers
+            for (const [inputSource, handlers] of this._inputHandlers) {
+                inputSource.off('selectstart', handlers.handleSelectStart);
+                inputSource.off('selectend', handlers.handleSelectEnd);
+            }
+            this._inputHandlers.clear();
+            this._activePointers.clear();
+            this._inputSources.clear();
+
+            this._destroyAllArcVisuals();
+            if (this._arcMaterial) {
+                this._arcMaterial.destroy();
+                this._arcMaterial = null;
+            }
+            if (this._ringMaterial) {
+                this._ringMaterial.destroy();
+                this._ringMaterial = null;
+            }
+            if (this._ringMesh) {
+                this._ringMesh.destroy();
+                this._ringMesh = null;
+            }
+        });
+    }
+
+    /**
+     * Computes the world-space aim ray for an input source, writing it into tmpAimOrigin and
+     * tmpAimDir. The arc launches from the handheld grip position when the input source has
+     * one, because the target ray origin sits at the head for gaze/pinch-style input (e.g.
+     * Apple Vision Pro transient pointers). The direction is then re-aimed from the grip
+     * toward the point the target ray indicates - using the raw target ray direction from the
+     * hand would offset the trajectory by the hand-to-head parallax, making the landing depend
+     * on where the hand happened to be when the pinch registered. For tracked-pointer
+     * controllers the grip and ray origin coincide, so this reduces to the target ray itself.
+     *
+     * @param {XrInputSource} inputSource - The aiming input source.
+     * @private
+     */
+    _getAimRay(inputSource) {
+        // Copy immediately: getOrigin()/getDirection()/getPosition() return references to the
+        // input source's internal vectors, which the engine reuses as scratch space on
+        // subsequent calls
+        tmpAimDir.copy(inputSource.getDirection());
+        tmpAimOrigin.copy(inputSource.getOrigin());
+
+        const grip = inputSource.grip ? inputSource.getPosition() : null;
+        if (!grip) return;
+
+        // Aim point: where the target ray meets the navigation plane, or a far point along
+        // the ray when it never descends to it. When castRay replaces plane detection, the
+        // plane is meaningless for aiming, so always use the far point
+        let t = this.maxTeleportDistance;
+        if (!this.castRay && tmpAimDir.y < -1e-3) {
+            const tPlane = (tmpAimOrigin.y - this.groundHeight) / -tmpAimDir.y;
+            if (tPlane > 0 && tPlane < this.maxTeleportDistance * 2) {
+                t = tPlane;
+            }
+        }
+        tmpAimPoint.copy(tmpAimDir).mulScalar(t).add(tmpAimOrigin);
+
+        tmpAimOrigin.copy(grip);
+        tmpAimDir.sub2(tmpAimPoint, tmpAimOrigin).normalize();
+    }
+
+    /**
+     * Computes the ballistic teleport arc for the given aim ray, filling {@link _arcPoints}
+     * with world-space samples and writing the landing result into rec. The landing point is
+     * the arc's intersection with the plane at {@link XrNavigation#groundHeight}, or the first
+     * segment hit reported by {@link XrNavigation#castRay} when that is assigned.
+     *
+     * @param {Vec3} origin - World-space start of the aim ray.
+     * @param {Vec3} direction - Normalized aim direction.
+     * @param {{ point: Vec3, valid: boolean }} rec - Receives the landing point and validity.
+     * @private
+     */
+    _computeArcHit(origin, direction, rec) {
+        const segments = this._arcPoints.length - 1;
+        const g = ARC_GRAVITY$1;
+        const vx = direction.x * this.teleportArcSpeed;
+        const vy = direction.y * this.teleportArcSpeed;
+        const vz = direction.z * this.teleportArcSpeed;
+
+        rec.valid = false;
+
+        let tFlight;
+        let planeHit = false;
+        if (this.castRay) {
+            // castRay replaces plane detection, so the sampling window must not stop at the
+            // plane (hits below groundHeight would be unreachable). Fly until the arc reaches
+            // the deepest point that could still pass the distance check - that check measures
+            // from the rig position, which sits below the aim origin (the grip), so descend
+            // maxTeleportDistance below the rig, not below the origin
+            const fallDepth = this.maxTeleportDistance +
+                Math.max(0, origin.y - this.entity.getPosition().y);
+            tFlight = (vy + Math.sqrt(vy * vy + 2 * g * fallDepth)) / g;
+        } else {
+            // Closed-form flight time to the navigation plane: larger root of
+            // origin.y + vy*t - 0.5*g*t^2 = groundHeight
+            const disc = vy * vy + 2 * g * (origin.y - this.groundHeight);
+            tFlight = disc >= 0 ? (vy + Math.sqrt(disc)) / g : 0;
+            planeHit = tFlight > 0.001;
+            if (!planeHit) {
+                // Origin below the plane aiming down - draw a plausible full arc instead
+                tFlight = (2 * this.teleportArcSpeed) / g;
+            }
+        }
+
+        for (let i = 0; i <= segments; i++) {
+            const t = (tFlight * i) / segments;
+            this._arcPoints[i].set(
+                origin.x + vx * t,
+                origin.y + vy * t - 0.5 * g * t * t,
+                origin.z + vz * t
+            );
+        }
+
+        if (this.castRay) {
+            // Custom ground detection: the first segment hit wins and truncates the arc there.
+            // Remaining samples collapse onto the hit so the ribbon's quads become degenerate.
+            for (let i = 0; i < segments; i++) {
+                const hit = this.castRay(this._arcPoints[i], this._arcPoints[i + 1]);
+                if (hit) {
+                    rec.point.copy(hit);
+                    for (let j = i + 1; j <= segments; j++) {
+                        this._arcPoints[j].copy(rec.point);
+                    }
+                    rec.valid = this.isValidTeleportDistance(rec.point);
+                    return;
+                }
+            }
+        } else if (planeHit) {
+            rec.point.copy(this._arcPoints[segments]);
+            rec.point.y = this.groundHeight;
+            rec.valid = this.isValidTeleportDistance(rec.point);
+        }
+    }
+
+    /**
+     * Returns the cached arc-hit record for an input source, creating it on first use.
+     *
+     * @param {XrInputSource} inputSource - The aiming input source.
+     * @returns {{ point: Vec3, valid: boolean }} The hit record.
+     * @private
+     */
+    _getOrCreateHit(inputSource) {
+        let rec = this._arcHits.get(inputSource);
+        if (!rec) {
+            rec = { point: new Vec3(), valid: false };
+            this._arcHits.set(inputSource, rec);
+        }
+        return rec;
+    }
+
+    tryTeleport(inputSource) {
+        let rec = this._arcHits.get(inputSource);
+        if (!rec) {
+            rec = this._getOrCreateHit(inputSource);
+            this._getAimRay(inputSource);
+            this._computeArcHit(tmpAimOrigin, tmpAimDir, rec);
+        }
+        if (!rec.valid) return;
+
+        const target = tmpVec3A.copy(rec.point);
+
+        const rigPos = this.entity.getPosition();
+
+        // Adjust for the camera's world-space XZ offset from the rig origin so the user's
+        // head (not the rig origin) ends up at the target - correct under rig yaw, unlike
+        // the raw local offset, which would misplace teleports after any snap/smooth turn
+        if (this._cameraEntity) {
+            const cameraPos = this._cameraEntity.getPosition();
+            target.x -= cameraPos.x - rigPos.x;
+            target.z -= cameraPos.z - rigPos.z;
+        }
+
+        // Preserve the rig's height offset above the ground it currently stands on, so castRay
+        // hits on elevated surfaces step the rig up/down while snap vertical offsets carry over
+        target.y = rigPos.y + (rec.point.y - this._currentGroundY);
+        this._currentGroundY = rec.point.y;
+        this.entity.setPosition(target);
+    }
+
+    update(dt) {
+        // frames keep running while the system menu covers the session, so this stays current
+        if (this.app.xr?.active && this.app.xr.visibilityState !== 'visible') {
+            this._unfocusedTime = now();
+        }
+
+        // Left thumbstick drives movement; right drives turning and vertical snaps
+        for (const inputSource of this._inputSources) {
+            if (!this._hasThumbsticks(inputSource)) continue;
+
+            if (inputSource.handedness === 'left') {
+                if (this.enableMove && this._cameraEntity) {
+                    this._handleMovement(inputSource, dt);
+                }
+            } else if (inputSource.handedness === 'right') {
+                if (this.enableMove && this._cameraEntity) {
+                    if (this.turnMode === 'smooth') {
+                        this._handleSmoothTurning(inputSource, dt);
+                    } else if (this.turnMode === 'snap') {
+                        this._handleSnapTurning(inputSource);
+                    }
+                    // 'none' → thumbstick X is ignored
+                }
+                if (this.enableSnapVertical) {
+                    this._handleSnapVertical(inputSource);
+                }
+            }
+        }
+
+        // Handle teleportation
+        if (this.enableTeleport) {
+            this._handleTeleportation();
+        }
+    }
+
+    /**
+     * Whether a select belongs to the system rather than the app. Browsers report selects made
+     * with the system UI, so such a select would otherwise aim and teleport: the pinch that opens
+     * the Meta Quest system menu, made with the palm facing the head, is reported before the
+     * session loses focus, and selects made while closing it are reported as, or shortly after,
+     * the session regains focus.
+     *
+     * @param {XrInputSource} inputSource - The input source starting the select.
+     * @returns {boolean} True if the select belongs to the system.
+     * @private
+     */
+    _isSystemSelect(inputSource) {
+        if (this.app.xr.visibilityState !== 'visible' || now() - this._unfocusedTime < FOCUS_SELECT_MS) {
+            return true;
+        }
+
+        // the -Y axis of the wrist joint points out of the palm
+        const hand = inputSource.hand;
+        const wrist = hand?.tracking ? hand.wrist : null;
+        if (wrist && this._cameraEntity) {
+            wrist.getRotation().transformVector(tmpPalm.set(0, -1, 0), tmpPalm);
+            tmpToHead.sub2(this._cameraEntity.getPosition(), wrist.getPosition()).normalize();
+            if (tmpPalm.dot(tmpToHead) > 0) return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Whether an input source has a gamepad with thumbstick axes (axes[2]/[3]). Hand-tracking
+     * sources (e.g. Apple Vision Pro) report a gamepad with no axes, which would read as NaN.
+     *
+     * @param {XrInputSource} inputSource - The input source to check.
+     * @returns {boolean} True when thumbstick axes can be read.
+     * @private
+     */
+    _hasThumbsticks(inputSource) {
+        return !!inputSource.gamepad && inputSource.gamepad.axes.length >= 4;
+    }
+
+    /**
+     * Edge-detects a snap gesture on a thumbstick axis with hysteresis, so one deflection
+     * fires exactly once: fires when the axis crosses `threshold` from neutral, and re-arms
+     * only once it returns within `resetThreshold`.
+     *
+     * @param {{ last: number }} state - Persistent hysteresis state for this axis.
+     * @param {number} value - Current axis value.
+     * @param {number} threshold - Deflection magnitude that fires the snap.
+     * @param {number} resetThreshold - Magnitude the axis must return within to re-arm.
+     * @returns {number} The snap direction (-1 or 1), or 0 when nothing fired.
+     * @private
+     */
+    _snapTrigger(state, value, threshold, resetThreshold) {
+        if (state.last > 0 && value < resetThreshold) {
+            state.last = 0;
+        } else if (state.last < 0 && value > -resetThreshold) {
+            state.last = 0;
+        }
+
+        if (state.last === 0 && Math.abs(value) > threshold) {
+            state.last = Math.sign(value);
+            return state.last;
+        }
+        return 0;
+    }
+
+    /**
+     * Yaw-rotates the rig around the camera's local position, so the view pivots in place
+     * rather than orbiting the rig origin.
+     *
+     * @param {number} degrees - The rotation angle in degrees.
+     * @private
+     */
+    _rotateRigAroundCamera(degrees) {
+        tmpVec3A.copy(this._cameraEntity.getLocalPosition());
+        this.entity.translateLocal(tmpVec3A);
+        this.entity.rotateLocal(0, degrees, 0);
+        this.entity.translateLocal(tmpVec3A.mulScalar(-1));
+    }
+
+    /**
+     * Smooth locomotion: translates the rig in the camera-relative direction of the left
+     * thumbstick at {@link XrNavigation#movementSpeed}.
+     *
+     * @param {XrInputSource} inputSource - The left-hand input source.
+     * @param {number} dt - Frame delta time in seconds.
+     * @private
+     */
+    _handleMovement(inputSource, dt) {
+        // Get thumbstick input (axes[2] = X, axes[3] = Y)
+        tmpVec2A.set(inputSource.gamepad.axes[2], inputSource.gamepad.axes[3]);
+
+        // Check if input exceeds deadzone
+        if (tmpVec2A.length() <= this.movementThreshold) return;
+
+        tmpVec2A.normalize();
+
+        // Calculate camera-relative movement direction
+        const forward = this._cameraEntity.forward;
+        tmpVec2B.x = forward.x;
+        tmpVec2B.y = forward.z;
+        tmpVec2B.normalize();
+
+        // Calculate rotation angle based on camera yaw
+        const rad = Math.atan2(tmpVec2B.x, tmpVec2B.y) - Math.PI / 2;
+
+        // Apply rotation to movement vector
+        const t = tmpVec2A.x * Math.sin(rad) - tmpVec2A.y * Math.cos(rad);
+        tmpVec2A.y = tmpVec2A.y * Math.sin(rad) + tmpVec2A.x * Math.cos(rad);
+        tmpVec2A.x = t;
+
+        // Scale by movement speed and delta time
+        tmpVec2A.mulScalar(this.movementSpeed * dt);
+
+        // Apply movement to camera parent (this entity)
+        this.entity.translate(tmpVec2A.x, 0, tmpVec2A.y);
+    }
+
+    /**
+     * Discrete turn of {@link XrNavigation#rotateSpeed} degrees per right-thumbstick gesture,
+     * with hysteresis so one deflection fires exactly once.
+     *
+     * @param {XrInputSource} inputSource - The right-hand input source.
+     * @private
+     */
+    _handleSnapTurning(inputSource) {
+        // Get rotation input from right thumbstick X-axis
+        const rotate = -inputSource.gamepad.axes[2];
+
+        const dir = this._snapTrigger(this._rotateSnap, rotate, this.rotateThreshold, this.rotateResetThreshold);
+        if (dir) {
+            this._rotateRigAroundCamera(dir * this.rotateSpeed);
+        }
+    }
+
+    /**
+     * Continuous turn at {@link XrNavigation#smoothTurnSpeed} degrees per second while the
+     * right thumbstick X-axis is held past {@link XrNavigation#smoothTurnThreshold}.
+     *
+     * @param {XrInputSource} inputSource - The right-hand input source.
+     * @param {number} dt - Frame delta time in seconds.
+     * @private
+     */
+    _handleSmoothTurning(inputSource, dt) {
+        const turn = -inputSource.gamepad.axes[2];
+        if (Math.abs(turn) <= this.smoothTurnThreshold) return;
+
+        this._rotateRigAroundCamera(turn * this.smoothTurnSpeed * dt);
+    }
+
+    /**
+     * Snap vertical movement on right thumbstick Y, with hysteresis so one deflection fires
+     * exactly once. Hold right grip for the larger {@link XrNavigation#snapVerticalBoostHeight}.
+     *
+     * @param {XrInputSource} inputSource - The right-hand input source.
+     * @private
+     */
+    _handleSnapVertical(inputSource) {
+        // Get vertical input from right thumbstick Y axis (negative = up on stick)
+        const vertical = -inputSource.gamepad.axes[3];
+
+        const dir = this._snapTrigger(this._verticalSnap, vertical, this.snapVerticalThreshold, this.snapVerticalResetThreshold);
+        if (dir) {
+            // Check if right grip is held for boost (positive = up, negative = down)
+            const boost = inputSource.gamepad.buttons[1]?.pressed;
+            this.entity.translate(0, dir * (boost ? this.snapVerticalBoostHeight : this.snapVerticalHeight), 0);
+        }
+    }
+
+    /** @private */
+    _handleTeleportation() {
+        for (const inputSource of this._inputSources) {
+            // Only show the teleport arc while trigger/select is pressed
+            if (!this._activePointers.get(inputSource)) {
+                const visual = this._arcVisuals.get(inputSource);
+                if (visual) {
+                    visual.entity.enabled = false;
+                    visual.ringEntity.enabled = false;
+                }
+                continue;
+            }
+
+            const rec = this._getOrCreateHit(inputSource);
+            this._getAimRay(inputSource);
+            this._computeArcHit(tmpAimOrigin, tmpAimDir, rec);
+
+            const visual = this._getArcVisual(inputSource);
+            visual.entity.enabled = true;
+            this._updateArcVisual(visual, rec.valid);
+
+            visual.ringEntity.enabled = rec.valid;
+            if (rec.valid) {
+                // Slightly above ground to avoid z-fighting
+                visual.ringEntity.setPosition(rec.point.x, rec.point.y + 0.01, rec.point.z);
+                const diameter = this.teleportIndicatorRadius * 2;
+                visual.ringEntity.setLocalScale(diameter, 1, diameter);
+            }
+        }
+    }
+
+    /**
+     * Returns the arc ribbon visual for an input source, creating it on first use.
+     *
+     * @param {XrInputSource} inputSource - The aiming input source.
+     * @returns {{ entity: Entity, meshInstance: MeshInstance, mesh: Mesh, positions: Float32Array, colorParam: Float32Array }} The visual.
+     * @private
+     */
+    _getArcVisual(inputSource) {
+        let visual = this._arcVisuals.get(inputSource);
+        if (visual) return visual;
+
+        const segments = this._arcPoints.length - 1;
+        const vertexCount = (segments + 1) * 2;
+
+        // Positions change per frame; UVs (x along the arc, y across the ribbon) and the
+        // quad-strip index list are static
+        const positions = new Float32Array(vertexCount * 3);
+        const uvs = new Float32Array(vertexCount * 2);
+        const indices = new Uint16Array(segments * 6);
+
+        for (let i = 0; i <= segments; i++) {
+            const u = i / segments;
+            uvs[i * 4 + 0] = u;
+            uvs[i * 4 + 1] = 0;
+            uvs[i * 4 + 2] = u;
+            uvs[i * 4 + 3] = 1;
+        }
+        for (let i = 0; i < segments; i++) {
+            const v = i * 2;
+            indices[i * 6 + 0] = v;
+            indices[i * 6 + 1] = v + 1;
+            indices[i * 6 + 2] = v + 2;
+            indices[i * 6 + 3] = v + 1;
+            indices[i * 6 + 4] = v + 3;
+            indices[i * 6 + 5] = v + 2;
+        }
+
+        const mesh = new Mesh(this.app.graphicsDevice);
+        mesh.clear(true, false);
+        mesh.setPositions(positions);
+        mesh.setUvs(0, uvs);
+        mesh.setIndices(indices);
+        mesh.update(PRIMITIVE_TRIANGLES);
+
+        const meshInstance = new MeshInstance(mesh, this._arcMaterial);
+        meshInstance.pick = false;
+
+        const entity = new Entity('XrNavigationArc');
+        entity.addComponent('render', { castShadows: false });
+        entity.render.meshInstances = [meshInstance];
+        this.app.root.addChild(entity);
+
+        const colorParam = new Float32Array(4);
+
+        // Target indicator: a flat quad whose shader draws a soft glowing ring. Shares the
+        // arc's color parameter array - it is only visible on valid (green) landings anyway
+        const ringMeshInstance = new MeshInstance(this._ringMesh, this._ringMaterial);
+        ringMeshInstance.pick = false;
+        ringMeshInstance.setParameter('uColor', colorParam);
+
+        const ringEntity = new Entity('XrNavigationRing');
+        ringEntity.addComponent('render', { castShadows: false });
+        ringEntity.render.meshInstances = [ringMeshInstance];
+        ringEntity.enabled = false;
+        this.app.root.addChild(ringEntity);
+
+        visual = { entity, meshInstance, mesh, positions, colorParam, ringEntity };
+        this._arcVisuals.set(inputSource, visual);
+        return visual;
+    }
+
+    /**
+     * Rebuilds the ribbon vertices from the current {@link _arcPoints} samples and applies the
+     * valid/invalid color. Each arc point becomes a vertex pair offset sideways, with the
+     * ribbon billboarded toward the camera.
+     *
+     * @param {{ entity: Entity, meshInstance: MeshInstance, mesh: Mesh, positions: Float32Array, colorParam: Float32Array }} visual - The arc visual.
+     * @param {boolean} valid - Whether the current landing point is a valid teleport target.
+     * @private
+     */
+    _updateArcVisual(visual, valid) {
+        const points = this._arcPoints;
+        const segments = points.length - 1;
+        const positions = visual.positions;
+        const camPos = this._cameraEntity ? this._cameraEntity.getPosition() : this.entity.getPosition();
+        const halfWidth = this.arcWidth * 0.5;
+
+        for (let i = 0; i <= segments; i++) {
+            const point = points[i];
+
+            // Segment direction (backward difference at the last point)
+            if (i < segments) {
+                tmpSegDir.sub2(points[i + 1], point);
+            } else {
+                tmpSegDir.sub2(point, points[i - 1]);
+            }
+
+            tmpToCam.sub2(camPos, point);
+            tmpSide.cross(tmpSegDir, tmpToCam);
+            const len = tmpSide.length();
+            if (len > 1e-6) {
+                tmpSide.mulScalar(halfWidth / len);
+            } else {
+                // Degenerate (collapsed samples past a castRay hit) - direction is irrelevant
+                tmpSide.set(halfWidth, 0, 0);
+            }
+
+            const base = i * 6;
+            positions[base + 0] = point.x - tmpSide.x;
+            positions[base + 1] = point.y - tmpSide.y;
+            positions[base + 2] = point.z - tmpSide.z;
+            positions[base + 3] = point.x + tmpSide.x;
+            positions[base + 4] = point.y + tmpSide.y;
+            positions[base + 5] = point.z + tmpSide.z;
+        }
+
+        visual.mesh.setPositions(positions);
+        visual.mesh.update(PRIMITIVE_TRIANGLES);
+
+        // Read the color attributes directly so runtime changes take effect
+        const color = valid ? this.validTeleportColor : this.invalidTeleportColor;
+        visual.colorParam[0] = color.r;
+        visual.colorParam[1] = color.g;
+        visual.colorParam[2] = color.b;
+        visual.colorParam[3] = color.a;
+        visual.meshInstance.setParameter('uColor', visual.colorParam);
+    }
+
+    /**
+     * Destroys the arc visual associated with an input source, if any.
+     *
+     * @param {XrInputSource} inputSource - The input source.
+     * @private
+     */
+    _destroyArcVisual(inputSource) {
+        const visual = this._arcVisuals.get(inputSource);
+        if (!visual) return;
+
+        visual.entity.destroy();
+        visual.ringEntity.destroy();
+        this._arcVisuals.delete(inputSource);
+        this._arcHits.delete(inputSource);
+    }
+
+    /** @private */
+    _destroyAllArcVisuals() {
+        for (const inputSource of this._arcVisuals.keys()) {
+            this._destroyArcVisual(inputSource);
+        }
+    }
+
+    isValidTeleportDistance(hitPoint) {
+        const distance = hitPoint.distance(this.entity.getPosition());
+        return distance <= this.maxTeleportDistance;
+    }
+}
+
+// The draw bucket of what XR draws over the scene (the arc, its ring, the floor grid, the menu).
+// The World layer draws its transparent instances by bucket, then back to front by their centres,
+// and the sorted renderer's splats are one transparent instance, whose centre can lie nearer than
+// the arc: it would then draw over it. A bucket below theirs (127) draws after them
+const XR_OVERLAY_DRAW_BUCKET = 0;
+// the engine's gravity for the arc
+const ARC_GRAVITY = 9.81;
+// For the look aim, how far the arc rises above the line from the hand to the target at its
+// middle, as a share of that line's length
+const ARC_LIFT = 0.15;
+/**
+ * Replaces the teleport's arc. Its ballistic arc ends at what it hits, where the released engine's
+ * collapses its samples past the hit onto it, which twists the ribbon's end. And a pinch whose
+ * ray follows the eyes (a transient pointer: Apple Vision Pro's look and pinch) teleports where
+ * that ray first meets the ground, the arc drawn from the hand to it.
+ * visionOS reveals the eyes' direction only as the pinch starts; the hand then moves the ray.
+ * Controllers keep the ballistic arc. The arc and its ring draw after the splats. The ballistic
+ * arc is TEMPORARY (see `ballistic` below); the look aim and the draw order stay.
+ *
+ * @param navigation - The XrNavigation script.
+ */
+const replaceTeleportArc = (navigation) => {
+    const points = navigation._arcPoints;
+    const segments = points.length - 1;
+    // the input source the navigation is aiming, which its arc is not given
+    let source = null;
+    const getAimRay = navigation._getAimRay.bind(navigation);
+    navigation._getAimRay = (inputSource) => {
+        source = inputSource;
+        getAimRay(inputSource);
+    };
+    // the arc and ring the navigation makes for an input source, on its first aim
+    const getArcVisual = navigation._getArcVisual.bind(navigation);
+    navigation._getArcVisual = (inputSource) => {
+        const visual = getArcVisual(inputSource);
+        if (visual.meshInstance.drawBucket !== XR_OVERLAY_DRAW_BUCKET) {
+            visual.meshInstance.drawBucket = XR_OVERLAY_DRAW_BUCKET;
+            for (const meshInstance of visual.ringEntity.render.meshInstances) {
+                meshInstance.drawBucket = XR_OVERLAY_DRAW_BUCKET;
+            }
+        }
+        return visual;
+    };
+    // the arc's positions at even steps over its first duration seconds
+    const sample = (origin, vx, vy, vz, duration) => {
+        for (let i = 0; i <= segments; i++) {
+            const t = (duration * i) / segments;
+            points[i].set(origin.x + vx * t, origin.y + vy * t - 0.5 * ARC_GRAVITY * t * t, origin.z + vz * t);
+        }
+    };
+    // The engine's ballistic arc, to the navigation's plane or the first segment castRay hits, and
+    // sampled again to end at the hit, so the ribbon keeps all its segments and fades out there.
+    // TEMPORARY: the engine's _computeArcHit does the same with playcanvas/engine#9750. Once the
+    // viewer requires an engine with it, bind that before replacing it and call it in place of this
+    // validate false lands the arc without testing the landing (the test also publishes the landing
+    // to the floor grid, xr.ts), for an arc that may not teleport
+    const ballistic = (origin, direction, rec, validate = true) => {
+        const speed = navigation.teleportArcSpeed;
+        const vx = direction.x * speed;
+        const vy = direction.y * speed;
+        const vz = direction.z * speed;
+        rec.valid = false;
+        let flight;
+        let planeHit = false;
+        if (navigation.castRay) {
+            // down to the deepest point that could still pass the distance check, which measures
+            // from the rig, below the hand
+            const fallDepth = navigation.maxTeleportDistance + Math.max(0, origin.y - navigation.entity.getPosition().y);
+            flight = (vy + Math.sqrt(vy * vy + 2 * ARC_GRAVITY * fallDepth)) / ARC_GRAVITY;
+        }
+        else {
+            const disc = vy * vy + 2 * ARC_GRAVITY * (origin.y - navigation.groundHeight);
+            flight = disc >= 0 ? (vy + Math.sqrt(disc)) / ARC_GRAVITY : 0;
+            planeHit = flight > 0.001;
+            if (!planeHit)
+                flight = (2 * speed) / ARC_GRAVITY;
+        }
+        sample(origin, vx, vy, vz, flight);
+        if (navigation.castRay) {
+            for (let i = 0; i < segments; i++) {
+                const start = points[i];
+                const end = points[i + 1];
+                const hit = navigation.castRay(start, end);
+                if (hit) {
+                    rec.point.copy(hit);
+                    // the hit's flight time, from where it lies along the segment
+                    const length = start.distance(end);
+                    const along = length > 1e-6 ? Math.min(start.distance(rec.point) / length, 1) : 0;
+                    sample(origin, vx, vy, vz, (flight * (i + along)) / segments);
+                    points[segments].copy(rec.point);
+                    rec.valid = validate && navigation.isValidTeleportDistance(rec.point);
+                    return;
+                }
+            }
+        }
+        else if (planeHit) {
+            rec.point.copy(points[segments]);
+            rec.point.y = navigation.groundHeight;
+            rec.valid = validate && navigation.isValidTeleportDistance(rec.point);
+        }
+    };
+    // The look aim: the target where the input source's ray first meets the ground, and the arc a
+    // parabola from the hand through it, its middle ARC_LIFT of the distance above the line between
+    // them (g * duration^2 / 8). False where the ray meets nothing
+    const rayOrigin = new Vec3();
+    const rayDirection = new Vec3();
+    const rayEnd = new Vec3();
+    const hand = new Vec3();
+    const look = (inputSource, rec) => {
+        // copy at once: the input source reuses these vectors
+        rayOrigin.copy(inputSource.getOrigin());
+        rayDirection.copy(inputSource.getDirection());
+        hand.copy(inputSource.grip ? inputSource.getPosition() : rayOrigin);
+        const reach = navigation.maxTeleportDistance * 2;
+        let hit = null;
+        if (navigation.castRay) {
+            rayEnd.copy(rayDirection).mulScalar(reach).add(rayOrigin);
+            hit = navigation.castRay(rayOrigin, rayEnd);
+        }
+        else if (rayDirection.y < -1e-3) {
+            const t = (rayOrigin.y - navigation.groundHeight) / -rayDirection.y;
+            if (t > 0 && t < reach)
+                hit = rayEnd.copy(rayDirection).mulScalar(t).add(rayOrigin);
+        }
+        if (!hit)
+            return false;
+        rec.point.copy(hit);
+        rec.valid = navigation.isValidTeleportDistance(rec.point);
+        const dx = rec.point.x - hand.x;
+        const dy = rec.point.y - hand.y;
+        const dz = rec.point.z - hand.z;
+        const length = Math.sqrt(dx * dx + dy * dy + dz * dz);
+        const duration = Math.max(Math.sqrt((8 * ARC_LIFT * length) / ARC_GRAVITY), 0.01);
+        sample(hand, dx / duration, dy / duration + 0.5 * ARC_GRAVITY * duration, dz / duration, duration);
+        points[segments].copy(rec.point);
+        return true;
+    };
+    navigation._computeArcHit = (origin, direction, rec) => {
+        if (source?.targetRayMode === 'transient-pointer') {
+            if (look(source, rec))
+                return;
+            // nothing where the eyes are: the hand's arc, landing nowhere
+            ballistic(origin, direction, rec, false);
+            return;
+        }
+        ballistic(origin, direction, rec);
+    };
+};
+
+// The floor around an XR teleport target, drawn as a grid of its voxels' tops: the floor joined to
+// the target's across steps of a voxel at most, within FLOOR_DRIFT of its height and with
+// FLOOR_HEADROOM clear above (so not under a pew or a table), fading out from the target. Ripples
+// run out through it from the target like a drop in water, and it grows from the target when it
+// first appears. The grid is built around the target on the cpu and rebuilt only once it moves
+// REBUILD_DISTANCE from where it was built; the fade follows the live target, so the grid reaches
+// RADIUS + REBUILD_DISTANCE. The sizes here are for a user at real size and scale with them, the
+// grid up to GRID_SCALE_MAX (its squares are the voxels', which stay put, and it would rebuild far
+// more of them).
+const RADIUS = 0.8;
+const REBUILD_DISTANCE = 0.4;
+const REVEAL_TIME = 0.3;
+const FLOOR_DRIFT = 0.15;
+const FLOOR_HEADROOM = 0.5;
+// just above the floor, below the navigation's target ring
+const FLOOR_LIFT = 0.005;
+const GRID_SCALE_MAX = 2;
+// A drop every DROP_PERIOD seconds sends a ring of ripples out from the target at DROP_SPEED, dying
+// away as it goes. The crests brighten the lines a little
+const vertexGLSL$1 = /* glsl */ `
+    attribute vec3 vertex_position;
+    attribute vec2 aUv0;
+
+    uniform mat4 matrix_model;
+    uniform mat4 matrix_viewProjection;
+    uniform vec3 uTarget;
+    uniform float uTime;
+    uniform float uScale;
+
+    varying vec2 uv0;
+    varying float dist;
+    varying float crest;
+
+    const float DROP_PERIOD = 1.6;
+    const float DROP_SPEED = 0.6;
+    const float RIPPLE_LENGTH = 0.12;
+    const float RIPPLE_WIDTH = 0.1;
+    const float RIPPLE_HEIGHT = 0.012;
+
+    void main(void) {
+        vec4 world = matrix_model * vec4(vertex_position, 1.0);
+        float r = distance(world.xz, uTarget.xz) / uScale;
+        float age = fract(uTime / DROP_PERIOD) * DROP_PERIOD;
+        float x = r - age * DROP_SPEED;
+        float envelope = exp(-(x * x) / (RIPPLE_WIDTH * RIPPLE_WIDTH)) * (1.0 - age / DROP_PERIOD);
+        float wave = cos(6.2831853 * x / RIPPLE_LENGTH) * envelope;
+        world.y += RIPPLE_HEIGHT * uScale * wave;
+        gl_Position = matrix_viewProjection * world;
+        uv0 = aUv0;
+        dist = r;
+        crest = max(wave, 0.0);
+    }
+`;
+const vertexWGSL$1 = /* wgsl */ `
+    attribute vertex_position: vec3f;
+    attribute aUv0: vec2f;
+
+    uniform matrix_model: mat4x4f;
+    uniform matrix_viewProjection: mat4x4f;
+    uniform uTarget: vec3f;
+    uniform uTime: f32;
+    uniform uScale: f32;
+
+    varying uv0: vec2f;
+    varying dist: f32;
+    varying crest: f32;
+
+    const DROP_PERIOD: f32 = 1.6;
+    const DROP_SPEED: f32 = 0.6;
+    const RIPPLE_LENGTH: f32 = 0.12;
+    const RIPPLE_WIDTH: f32 = 0.1;
+    const RIPPLE_HEIGHT: f32 = 0.012;
+
+    @vertex
+    fn vertexMain(input: VertexInput) -> VertexOutput {
+        var output: VertexOutput;
+        var world = uniform.matrix_model * vec4f(input.vertex_position, 1.0);
+        let r = distance(world.xz, uniform.uTarget.xz) / uniform.uScale;
+        let age = fract(uniform.uTime / DROP_PERIOD) * DROP_PERIOD;
+        let x = r - age * DROP_SPEED;
+        let envelope = exp(-(x * x) / (RIPPLE_WIDTH * RIPPLE_WIDTH)) * (1.0 - age / DROP_PERIOD);
+        let wave = cos(6.2831853 * x / RIPPLE_LENGTH) * envelope;
+        world.y += RIPPLE_HEIGHT * uniform.uScale * wave;
+        output.position = uniform.matrix_viewProjection * world;
+        output.uv0 = input.aUv0;
+        output.dist = r;
+        output.crest = max(wave, 0.0);
+        return output;
+    }
+`;
+// Each square draws half of its edges' width, so where two meet the line is whole. uRadius is the
+// reveal's radius
+const fragmentGLSL$1 = /* glsl */ `
+    uniform vec4 uColor;
+    uniform float uRadius;
+
+    varying vec2 uv0;
+    varying float dist;
+    varying float crest;
+
+    // half a line's width in pixels
+    const float LINE_HALF = 0.75;
+
+    void main(void) {
+        float fade = 1.0 - smoothstep(uRadius * 0.3, uRadius, dist);
+        vec2 edge = min(uv0, 1.0 - uv0) / max(fwidth(uv0), vec2(1e-6));
+        float line = 1.0 - smoothstep(LINE_HALF - 0.5, LINE_HALF + 0.5, min(edge.x, edge.y));
+        gl_FragColor = vec4(uColor.rgb, uColor.a * fade * (line * (0.55 + 0.3 * crest) + 0.04));
+    }
+`;
+const fragmentWGSL$1 = /* wgsl */ `
+    uniform uColor: vec4f;
+    uniform uRadius: f32;
+
+    varying uv0: vec2f;
+    varying dist: f32;
+    varying crest: f32;
+
+    const LINE_HALF: f32 = 0.75;
+
+    @fragment
+    fn fragmentMain(input: FragmentInput) -> FragmentOutput {
+        var output: FragmentOutput;
+        let fade = 1.0 - smoothstep(uniform.uRadius * 0.3, uniform.uRadius, input.dist);
+        let edge = min(input.uv0, vec2f(1.0) - input.uv0) / max(fwidth(input.uv0), vec2f(1e-6));
+        let line = 1.0 - smoothstep(LINE_HALF - 0.5, LINE_HALF + 0.5, min(edge.x, edge.y));
+        output.color = vec4f(uniform.uColor.rgb, uniform.uColor.a * fade * (line * (0.55 + 0.3 * input.crest) + 0.04));
+        return output;
+    }
+`;
+const blockMask = new Uint32Array(2);
+/**
+ * The floor around a world-space point on it (the top of a voxel): a square per floor column within
+ * a radius, uvs 0 to 1 across it. Empty where the point is not on a floor.
+ *
+ * @param collision - The scene's voxel collision.
+ * @param x - World X of the point.
+ * @param y - World Y of the point.
+ * @param z - World Z of the point.
+ * @param radius - Distance from the point in meters.
+ * @param scale - The user's scale, which the floor's drift and headroom scale with.
+ * @returns The squares' positions, uvs and triangle indices.
+ */
+const buildFloorPatch = (collision, x, y, z, radius, scale) => {
+    const { voxelResolution: res, leafSize, gridMinX, gridMinY, gridMinZ, flipXY } = collision;
+    // The voxels here are indexed along the world's axes from a world origin: legacy data is
+    // stored with x and y negated (FlippedVoxelCollision), where world voxel w is stored voxel
+    // -w - 1, and stored voxel s world voxel -s - 1
+    const flip = flipXY ? -1 : 1;
+    const mirror = (i) => (flip > 0 ? i : -i - 1);
+    const originX = flip * gridMinX;
+    const originY = flip * gridMinY;
+    const n = Math.ceil(radius / res);
+    const drift = Math.ceil((FLOOR_DRIFT * scale) / res);
+    const headroom = Math.ceil((FLOOR_HEADROOM * scale) / res);
+    // the point is on the top of the voxel below the boundary nearest it
+    const floorY = Math.round((y - originY) / res) - 1;
+    // the columns around the point, and the voxels from below the lowest floor to above the
+    // highest floor's headroom
+    const size = 2 * n + 1;
+    const height = 2 * drift + headroom + 1;
+    const x0 = Math.floor((x - originX) / res) - n;
+    const y0 = floorY - drift;
+    const z0 = Math.floor((z - gridMinZ) / res) - n;
+    const solid = new Uint8Array(size * height * size);
+    const index = (lx, ly, lz) => (lz * height + ly) * size + lx;
+    // read them a block at a time, in stored coordinates
+    const storedX = [mirror(x0), mirror(x0 + size - 1)];
+    const storedY = [mirror(y0), mirror(y0 + height - 1)];
+    const bx0 = Math.floor(Math.min(storedX[0], storedX[1]) / leafSize);
+    const bx1 = Math.floor(Math.max(storedX[0], storedX[1]) / leafSize);
+    const by0 = Math.floor(Math.min(storedY[0], storedY[1]) / leafSize);
+    const by1 = Math.floor(Math.max(storedY[0], storedY[1]) / leafSize);
+    const bz0 = Math.floor(z0 / leafSize);
+    const bz1 = Math.floor((z0 + size - 1) / leafSize);
+    for (let bz = bz0; bz <= bz1; bz++) {
+        for (let by = by0; by <= by1; by++) {
+            for (let bx = bx0; bx <= bx1; bx++) {
+                collision.readBlock(bx, by, bz, blockMask);
+                if (blockMask[0] === 0 && blockMask[1] === 0)
+                    continue;
+                for (let bit = 0; bit < 64; bit++) {
+                    if (((blockMask[bit >> 5] >>> (bit & 31)) & 1) === 0)
+                        continue;
+                    const lx = mirror(bx * leafSize + (bit & 3)) - x0;
+                    const ly = mirror(by * leafSize + ((bit >> 2) & 3)) - y0;
+                    const lz = bz * leafSize + (bit >> 4) - z0;
+                    if (lx >= 0 && ly >= 0 && lz >= 0 && lx < size && ly < height && lz < size) {
+                        solid[index(lx, ly, lz)] = 1;
+                    }
+                }
+            }
+        }
+    }
+    // each column's floor: its highest solid voxel within the drift with the headroom clear above
+    // (beyond the region's top counts as clear), or -1
+    const floors = new Int16Array(size * size).fill(-1);
+    for (let lz = 0; lz < size; lz++) {
+        for (let lx = 0; lx < size; lx++) {
+            for (let ly = 2 * drift; ly >= 0; ly--) {
+                if (!solid[index(lx, ly, lz)])
+                    continue;
+                let clear = true;
+                for (let h = ly + 1; h <= ly + headroom && h < height && clear; h++) {
+                    clear = !solid[index(lx, h, lz)];
+                }
+                if (clear)
+                    floors[lz * size + lx] = ly;
+                break;
+            }
+        }
+    }
+    // the floor joined to the point's column, within the radius, across steps of a voxel
+    const joined = new Uint8Array(size * size);
+    const queue = [];
+    const start = n * size + n;
+    if (floors[start] >= 0 && Math.abs(floors[start] - drift) <= 1) {
+        joined[start] = 1;
+        queue.push(start);
+    }
+    const limit = (n + 0.5) * (n + 0.5);
+    while (queue.length) {
+        const column = queue.pop();
+        const cx = column % size;
+        const cz = (column - cx) / size;
+        for (let i = 0; i < 4; i++) {
+            const nx = cx + (i === 0 ? 1 : i === 1 ? -1 : 0);
+            const nz = cz + (i === 2 ? 1 : i === 3 ? -1 : 0);
+            if (nx < 0 || nz < 0 || nx >= size || nz >= size)
+                continue;
+            if ((nx - n) * (nx - n) + (nz - n) * (nz - n) > limit)
+                continue;
+            const next = nz * size + nx;
+            if (joined[next] || floors[next] < 0 || Math.abs(floors[next] - floors[column]) > 1)
+                continue;
+            joined[next] = 1;
+            queue.push(next);
+        }
+    }
+    // the floor's height at each corner of the columns, the mean of the joined columns around it, so
+    // the grid runs smoothly over a voxel's step rather than breaking at it
+    const corners = size + 1;
+    const cornerSum = new Float32Array(corners * corners);
+    const cornerCount = new Uint8Array(corners * corners);
+    for (let lz = 0; lz < size; lz++) {
+        for (let lx = 0; lx < size; lx++) {
+            const column = lz * size + lx;
+            if (!joined[column])
+                continue;
+            for (let i = 0; i < 4; i++) {
+                const corner = (lz + (i >> 1)) * corners + lx + (i & 1);
+                cornerSum[corner] += floors[column] + 1;
+                cornerCount[corner]++;
+            }
+        }
+    }
+    // a square on top of each joined column, wound counter-clockwise seen from above
+    const positions = [];
+    const uvs = [];
+    const indices = [];
+    for (let lz = 0; lz < size; lz++) {
+        for (let lx = 0; lx < size; lx++) {
+            if (!joined[lz * size + lx])
+                continue;
+            const base = positions.length / 3;
+            for (let i = 0; i < 4; i++) {
+                const a = i & 1;
+                const b = i >> 1;
+                const corner = (lz + a) * corners + lx + b;
+                const top = originY + (y0 + cornerSum[corner] / cornerCount[corner]) * res + FLOOR_LIFT;
+                positions.push(originX + (x0 + lx + b) * res, top, gridMinZ + (z0 + lz + a) * res);
+                uvs.push(a, b);
+            }
+            indices.push(base, base + 1, base + 3, base, base + 3, base + 2);
+        }
+    }
+    return {
+        positions: new Float32Array(positions),
+        uvs: new Float32Array(uvs),
+        indices: new Uint32Array(indices)
+    };
+};
+/**
+ * Shows the floor around a teleport target while one is aimed at.
+ */
+class TeleportTarget {
+    app;
+    collision;
+    material;
+    entity;
+    centre = new Vec3();
+    built = false;
+    // the scale the grid was built at
+    scale = 1;
+    time = 0;
+    color = new Float32Array(4);
+    target = new Float32Array(3);
+    constructor(app, collision) {
+        this.app = app;
+        this.collision = collision;
+        this.material = new ShaderMaterial({
+            uniqueName: 'sse-teleport-target',
+            vertexGLSL: vertexGLSL$1,
+            fragmentGLSL: fragmentGLSL$1,
+            vertexWGSL: vertexWGSL$1,
+            fragmentWGSL: fragmentWGSL$1,
+            attributes: {
+                vertex_position: SEMANTIC_POSITION,
+                aUv0: SEMANTIC_TEXCOORD0
+            }
+        });
+        this.material.blendType = BLEND_NORMAL;
+        this.material.cull = CULLFACE_BACK;
+        // drawn over everything: the floor's splats would otherwise hide it in patches
+        this.material.depthTest = false;
+        this.material.depthWrite = false;
+        this.material.update();
+        this.entity = new Entity('TeleportTarget', app);
+        this.entity.addComponent('render', { castShadows: false });
+        this.entity.enabled = false;
+        app.root.addChild(this.entity);
+    }
+    /**
+     * Shows the floor around a target this frame.
+     *
+     * @param point - The target in world space.
+     * @param color - The color to draw it in.
+     * @param dt - Seconds since the last frame.
+     * @param scale - The user's scale.
+     */
+    show(point, color, dt, scale) {
+        if (!this.entity.enabled) {
+            this.entity.enabled = true;
+            this.time = 0;
+        }
+        else {
+            this.time += dt;
+        }
+        const gridScale = Math.min(scale, GRID_SCALE_MAX);
+        if (!this.built || gridScale !== this.scale || this.centre.distance(point) > REBUILD_DISTANCE * gridScale) {
+            this.scale = gridScale;
+            this.build(point);
+        }
+        const reveal = Math.min(this.time / REVEAL_TIME, 1);
+        this.target[0] = point.x;
+        this.target[1] = point.y;
+        this.target[2] = point.z;
+        this.color[0] = color.r;
+        this.color[1] = color.g;
+        this.color[2] = color.b;
+        this.color[3] = color.a;
+        this.material.setParameter('uTarget', this.target);
+        this.material.setParameter('uTime', this.time);
+        this.material.setParameter('uColor', this.color);
+        this.material.setParameter('uScale', gridScale);
+        this.material.setParameter('uRadius', RADIUS * (1 - (1 - reveal) * (1 - reveal)));
+    }
+    hide() {
+        this.entity.enabled = false;
+    }
+    destroy() {
+        this.entity.destroy();
+        this.material.destroy();
+    }
+    build(point) {
+        this.centre.copy(point);
+        this.built = true;
+        const { positions, uvs, indices } = buildFloorPatch(this.collision, point.x, point.y, point.z, (RADIUS + REBUILD_DISTANCE) * this.scale, this.scale);
+        // the render component destroys the previous instance, and with it the previous mesh
+        if (indices.length === 0) {
+            this.entity.render.meshInstances = [];
+            return;
+        }
+        const mesh = new Mesh(this.app.graphicsDevice);
+        mesh.setPositions(positions);
+        mesh.setUvs(0, uvs);
+        mesh.setIndices(indices);
+        mesh.update(PRIMITIVE_TRIANGLES);
+        const meshInstance = new MeshInstance(mesh, this.material);
+        meshInstance.drawBucket = XR_OVERLAY_DRAW_BUCKET;
+        this.entity.render.meshInstances = [meshInstance];
+    }
+}
+
+/**
+ * Clears each eye's depth texture of a WebGPU XR session to the far plane every frame, ahead of the
+ * engine's frame.
+ *
+ * @param app - The application, on a WebGPU device.
+ * @returns The handle of the frame listener, to turn it off with.
+ */
+const initXrDepthClear = (app) => {
+    const { xr } = app;
+    const engineXr = xr;
+    const device = app.graphicsDevice;
+    return xr.on('update', (frame) => {
+        const binding = xr.graphicsBinding;
+        const layer = engineXr.xrBridge?.presentationLayer;
+        const space = engineXr._referenceSpace;
+        if (!binding || !layer || !space)
+            return;
+        const views = frame.getViewerPose(space)?.views;
+        if (!views)
+            return;
+        for (const view of views) {
+            // Safari throws while the layer's first frame is not ready, which the engine's frame
+            // reports right after this
+            let texture;
+            let baseArrayLayer;
+            try {
+                const sub = binding.getViewSubImage(layer, view);
+                texture = sub.depthStencilTexture;
+                if (!texture)
+                    continue;
+                // the eye's own array layer, as for its colour
+                baseArrayLayer = sub.getViewDescriptor?.()?.baseArrayLayer ?? 0;
+            }
+            catch {
+                return;
+            }
+            const attachment = {
+                view: texture.createView({
+                    dimension: '2d',
+                    baseMipLevel: 0,
+                    mipLevelCount: 1,
+                    baseArrayLayer,
+                    arrayLayerCount: 1
+                }),
+                depthClearValue: 1,
+                depthLoadOp: 'clear',
+                depthStoreOp: 'store'
+            };
+            if (texture.format.includes('stencil')) {
+                attachment.stencilLoadOp = 'clear';
+                attachment.stencilStoreOp = 'store';
+            }
+            device
+                .getCommandEncoder()
+                .beginRenderPass({ colorAttachments: [], depthStencilAttachment: attachment })
+                .end();
+        }
+    });
+};
+
+// Below these the hand pair's separation, and its length across the floor (the hands stacked
+// vertically), give no spread or heading, which are then held
+const EPS_SEPARATION = 1e-3;
+const EPS_XZ = 1e-4;
+// Changes in the hands' height within HEIGHT_DEAD_ZONE of the grab's (meters), and in their
+// separation within SPREAD_DEAD_ZONE of its share (as the engine's XrManipulation), do not scale,
+// so the hands drifting while they drag does not, and scaling starts from the bands' edges. Heights
+// below MIN_HEIGHT count as it, as the scale divides by them
+const HEIGHT_DEAD_ZONE = 0.05;
+const SPREAD_DEAD_ZONE = 0.15;
+const MIN_HEIGHT = 0.1;
+// how small and large the scene can look, which the user's scale is the inverse of
+const MIN_SCENE_SCALE = 0.25;
+const MAX_SCENE_SCALE = 4;
+const left = new Vec3();
+const right$3 = new Vec3();
+const mid = new Vec3();
+const delta = new Vec3();
+const grabbed = new Vec3();
+const position$1 = new Vec3();
+const rigInverse = new Mat4();
+// v rotated about the world's Y axis by angle, in place, as an entity yawed by angle rotates it
+const rotateY = (v, angle) => {
+    const c = Math.cos(angle);
+    const s = Math.sin(angle);
+    const x = v.x * c + v.z * s;
+    v.z = -v.x * s + v.z * c;
+    v.x = x;
+    return v;
+};
+const wrapPi = (angle) => {
+    angle %= Math.PI * 2;
+    if (angle > Math.PI)
+        return angle - Math.PI * 2;
+    if (angle <= -Math.PI)
+        return angle + Math.PI * 2;
+    return angle;
+};
+const yawOf = (entity) => {
+    const { forward } = entity;
+    return Math.atan2(-forward.x, -forward.z);
+};
+const usable = (source) => source.grip || !!(source.hand?.tracking && source.hand.wrist);
+/**
+ * Grabbing a scene with both hands (squeezing both controllers' grips, or two fists) moves the user
+ * through it rather than moving it, so it stays on its collision. The point between the hands stays
+ * in them while the user's feet stay on the floor: dragging moves the user across the floor and
+ * swinging the hands turns them. Raising the hands lifts the scene with them, which with the floor
+ * underfoot grows it around the user, shrinking them, and spreading the hands grows it too, as the
+ * engine's XrManipulation scales objects (lowering or closing the hands grows the user).
+ */
+class XrGrabMove {
+    /** The user's scale, the rig's, relative to real size. */
+    scale = 1;
+    app;
+    rig;
+    onScale;
+    first = null;
+    second = null;
+    // the grab's start, or the last rebase: the rig's transform, and in its space the hands'
+    // midpoint, whose height is above the floor, their heading across it (null when degenerate) and
+    // their separation
+    rigPosition = new Vec3();
+    rigYaw = 0;
+    rigScale = 1;
+    grabMid = new Vec3();
+    grabHeading = null;
+    grabDistance = 0;
+    // the rig's transform as last set, to notice a teleport or turn during the grab
+    setPosition = new Vec3();
+    setYaw = 0;
+    updating;
+    /**
+     * @param app - The application.
+     * @param rig - The camera's parent, which the session's poses are relative to.
+     * @param onScale - Called when the user's scale changes.
+     */
+    constructor(app, rig, onScale) {
+        this.app = app;
+        this.rig = rig;
+        this.onScale = onScale;
+        // as each frame's poses arrive, before the scripts update: the engine's XrControllers
+        // poses the hand and controller models in the world in its update, from the rig as it is
+        // then, so moving the rig after it would leave them a frame behind the eyes
+        this.updating = app.xr?.on('update', () => this.update()) ?? null;
+    }
+    /** Ends the grab, if any. */
+    end() {
+        this.first = null;
+        this.second = null;
+    }
+    /** Ends the grab, if any, and puts the user back to real size. */
+    reset() {
+        this.end();
+        if (this.scale !== 1) {
+            this.rig.setLocalScale(1, 1, 1);
+            this.scale = 1;
+            this.onScale(1);
+        }
+    }
+    destroy() {
+        this.updating?.off();
+        this.end();
+    }
+    // a hand's position in the rig's space: the grip's pose is already, a tracked hand's wrist is in
+    // the world
+    handPosition(source, out) {
+        if (source.grip)
+            return out.copy(source.getLocalPosition());
+        return rigInverse.transformPoint(source.hand.wrist.getPosition(), out);
+    }
+    rebase() {
+        const { rig } = this;
+        this.rigPosition.copy(rig.getPosition());
+        this.rigYaw = yawOf(rig);
+        this.rigScale = this.scale;
+        this.setPosition.copy(this.rigPosition);
+        this.setYaw = this.rigYaw;
+        this.grabMid.add2(left, right$3).mulScalar(0.5);
+        delta.sub2(right$3, left);
+        this.grabDistance = delta.length();
+        this.grabHeading = Math.hypot(delta.x, delta.z) > EPS_XZ ? Math.atan2(delta.x, delta.z) : null;
+    }
+    update() {
+        const { xr } = this.app;
+        if (!xr?.active) {
+            this.end();
+            return;
+        }
+        const sources = xr.input.inputSources;
+        const holding = (source) => sources.includes(source) && source.squeezing;
+        if (this.first && !(holding(this.first) && holding(this.second))) {
+            this.end();
+        }
+        rigInverse.copy(this.rig.getWorldTransform()).invert();
+        if (!this.first) {
+            let leftHand = null;
+            let rightHand = null;
+            let any = null;
+            let other = null;
+            for (const source of sources) {
+                if (!source.squeezing || !usable(source))
+                    continue;
+                if (source.handedness === 'left' && !leftHand)
+                    leftHand = source;
+                else if (source.handedness === 'right' && !rightHand)
+                    rightHand = source;
+                if (!any)
+                    any = source;
+                else if (!other)
+                    other = source;
+            }
+            // a pair of 'none' handedness, which some devices report, falls back to the first two
+            [this.first, this.second] = leftHand && rightHand ? [leftHand, rightHand] : [any, other];
+            if (this.first && this.second) {
+                this.handPosition(this.first, left);
+                this.handPosition(this.second, right$3);
+                this.rebase();
+            }
+            else {
+                this.end();
+            }
+            return;
+        }
+        this.handPosition(this.first, left);
+        this.handPosition(this.second, right$3);
+        // moved by something else (a teleport, a turn): carry on from where the rig is now
+        const { rig } = this;
+        if (!rig.getPosition().equals(this.setPosition) || yawOf(rig) !== this.setYaw) {
+            this.rebase();
+        }
+        mid.add2(left, right$3).mulScalar(0.5);
+        delta.sub2(right$3, left);
+        const separation = delta.length();
+        const heading = Math.hypot(delta.x, delta.z) > EPS_XZ ? Math.atan2(delta.x, delta.z) : null;
+        // Turning the hands turns the scene with them, so the rig the other way. A held turn or
+        // scale (a degenerate heading, or the scale at its limit) rebases the grab on what was
+        // applied, so the hands take over again at once
+        let held = false;
+        let yaw = this.rigYaw;
+        if (heading !== null && this.grabHeading !== null) {
+            yaw -= wrapPi(heading - this.grabHeading);
+        }
+        else {
+            held = true;
+        }
+        // Raising the hands keeps the grabbed point's height above the floor in them (the scale
+        // times the height stays), and spreading them grows the scene by the spread
+        const rise = mid.y - this.grabMid.y;
+        const lift = Math.sign(rise) * Math.max(Math.abs(rise) - HEIGHT_DEAD_ZONE, 0);
+        const height = Math.max(this.grabMid.y, MIN_HEIGHT);
+        let spread = 1;
+        if (separation > EPS_SEPARATION && this.grabDistance > EPS_SEPARATION) {
+            spread = separation / this.grabDistance;
+            if (spread > 1 + SPREAD_DEAD_ZONE)
+                spread /= 1 + SPREAD_DEAD_ZONE;
+            else if (spread < 1 - SPREAD_DEAD_ZONE)
+                spread /= 1 - SPREAD_DEAD_ZONE;
+            else
+                spread = 1;
+        }
+        else {
+            held = true;
+        }
+        const wanted = (this.rigScale * height) / (Math.max(height + lift, MIN_HEIGHT) * spread);
+        const scale = math.clamp(wanted, 1 / MAX_SCENE_SCALE, 1 / MIN_SCENE_SCALE);
+        held ||= scale !== wanted;
+        // the world point between the hands at the grab's start stays between them across the
+        // floor, and the rig, which stands on the floor, keeps its height
+        grabbed.copy(this.grabMid);
+        rotateY(grabbed, this.rigYaw).mulScalar(this.rigScale).add(this.rigPosition);
+        position$1.copy(mid);
+        rotateY(position$1, yaw).mulScalar(scale);
+        position$1.sub2(grabbed, position$1);
+        position$1.y = this.rigPosition.y;
+        rig.setPosition(position$1);
+        rig.setEulerAngles(0, yaw * math.RAD_TO_DEG, 0);
+        rig.setLocalScale(scale, scale, scale);
+        // read back, as the world transform rounds them to single precision
+        this.setPosition.copy(rig.getPosition());
+        this.setYaw = yawOf(rig);
+        if (scale !== this.scale) {
+            this.scale = scale;
+            this.onScale(scale);
+        }
+        // the hands' rig-space positions are the same in the moved rig
+        if (held)
+            this.rebase();
+    }
+}
+
+// The glitter is laid out in the model's rest pose (its vertices before the bones bend them), in
+// metres, so it is continuous over the whole hand, uv seams or not, and stays on the skin as the
+// fingers bend. The input profiles' generic hand (the model every headset gets: the Oculus hand
+// profile has none) is 21 cm along its y axis, fingers included.
+// The glitter's lattice: a flake in a random GLITTER_SHARE of its cells, so it shows no rows, a
+// ball of the given radius as a share of the cell; its facing strays from the skin's by up to
+// GLITTER_TILT, and it lights up as it turns to the eye by the power GLITTER_SHARPNESS, out again
+// some 12 degrees away. The two eyes see a hand at arm's length some 9 degrees apart, so they catch
+// flakes of their own too, as with real glitter.
+// The cells are GLITTER_CELL (0.55 mm) where the pixels are small enough, and coarsen by powers of
+// two until a cell spans GLITTER_CELL_PIXELS pixels, so a flake stays about a pixel across at any
+// distance and on any headset (the Quest's pixels are twice the Vision Pro's); the next coarser
+// level fades in over the last GLITTER_BLEND of each step, so nothing pops
+const GLITTER_CELL = 0.00055;
+const GLITTER_CELL_PIXELS = 2.5;
+const GLITTER_BLEND = 0.3;
+const GLITTER_SHARE = 0.75;
+const GLITTER_RADIUS = 0.17;
+const GLITTER_TILT = 0.8;
+const GLITTER_SHARPNESS = 32;
+// The glitter shows only where the skin faces the eye: all of it within 4 degrees of facing, fading
+// to none by 25 degrees, as cosines
+const GLITTER_FULL = Math.cos((4 * Math.PI) / 180).toFixed(4);
+const GLITTER_GONE = Math.cos((25 * Math.PI) / 180).toFixed(4);
+// The hand fades out between these heights of the rest pose, from the heel of the palm to the
+// model's end, 2 cm past the wrist joint (at 0.056), so it does not end in a cut
+const WRIST_FADE_START = 0.025;
+const WRIST_FADE_END = 0.075;
+const COLOR = [0.3, 0.85, 1.0];
+const OPACITY = 0.45;
+// The vertex shader passes the rest pose's position on
+const declarationVSWGSL = /* wgsl */ `
+varying vRestPosition: vec3f;
+`;
+const mainEndVSWGSL = /* wgsl */ `
+    output.vRestPosition = vertex_position.xyz;
+`;
+const declarationVSGLSL = /* glsl */ `
+varying vec3 vRestPosition;
+`;
+const mainEndVSGLSL = /* glsl */ `
+    vRestPosition = vertex_position.xyz;
+`;
+// The rim and the glitter are worked out in the opacity chunk, which every pass includes first,
+// and the emissive chunk, forward pass only, reuses them. They need the world normal and view
+// direction, which only a lit forward pass computes (LIT_NEEDS_NORMAL). The glitter
+// is projected not at all: each flake is a ball at a random place in the middle of its cell of a 3d
+// lattice, so the skin shows the flakes it passes through, larger the nearer their centres,
+// anti-aliased over a pixel. A flake's tilt is random in world space rather than the hand's, which
+// glitter cannot show. The derivatives are taken up front, so the second level can be skipped
+// where it has no weight
+const opacityWGSL = /* wgsl */ `
+uniform material_opacity: f32;
+uniform material_alphaDitherScale: f32;
+
+var<private> sseRim: f32;
+var<private> sseSparkle: f32;
+
+// three random numbers in [0, 1) for a cell (pcg3d)
+fn sseHash(cell: vec3i) -> vec3f {
+    var v = vec3u(cell) * 1664525u + 1013904223u;
+    v.x += v.y * v.z;
+    v.y += v.z * v.x;
+    v.z += v.x * v.y;
+    v = v ^ (v >> vec3u(16u));
+    v.x += v.y * v.z;
+    v.y += v.z * v.x;
+    v.z += v.x * v.y;
+    return vec3f(v >> vec3u(8u)) * (1.0 / 16777216.0);
+}
+
+#if defined(FORWARD_PASS) && defined(LIT_NEEDS_NORMAL)
+// The flake of p's cell in a lattice of cells of the given size, px a pixel's size in metres and
+// seed the lattice's level: a crisp disc where the skin cuts its ball, so every flake is as bright,
+// faint until it faces the eye
+fn sseFlake(p: vec3f, size: f32, px: f32, seed: i32) -> f32 {
+    let q = p / size;
+    let base = floor(q);
+    let cell = vec3i(base) + vec3i(seed * 7919, seed * 104729, seed * 1299709);
+    let centre = base + 0.25 + 0.5 * sseHash(cell);
+    let tilt = sseHash(cell + vec3i(4096)) * 2.0 - 1.0;
+    let shown = step(sseHash(cell + vec3i(8192)).x, ${GLITTER_SHARE});
+    let w = 0.5 * px / size;
+    let flake = 1.0 - smoothstep(${GLITTER_RADIUS} - w, ${GLITTER_RADIUS} + w, distance(q, centre));
+    let facing = saturate(dot(normalize(dVertexNormalW + ${GLITTER_TILT} * tilt), dViewDirW));
+    return shown * flake * (0.3 + 3.7 * pow(facing, ${GLITTER_SHARPNESS}.0));
+}
+
+// the lattice at the level whose cells span GLITTER_CELL_PIXELS, and the next coarser near its step
+fn sseGlitter(p: vec3f, px: f32) -> f32 {
+    let level = max(0.0, log2(px * ${GLITTER_CELL_PIXELS.toFixed(1)} / ${GLITTER_CELL}));
+    let l0 = floor(level);
+    let size = ${GLITTER_CELL} * exp2(l0);
+    let next = smoothstep(${1 - GLITTER_BLEND}, 1.0, level - l0);
+    var sparkle = sseFlake(p, size, px, i32(l0)) * (1.0 - next);
+    if (next > 0.0) {
+        sparkle += sseFlake(p, size * 2.0, px, i32(l0) + 1) * next;
+    }
+    return sparkle;
+}
+#endif
+
+fn getOpacity() {
+    sseRim = 0.0;
+    sseSparkle = 0.0;
+    var alpha = uniform.material_opacity;
+    var wrist = 1.0;
+    #ifdef FORWARD_PASS
+        wrist = 1.0 - smoothstep(${WRIST_FADE_START}, ${WRIST_FADE_END}, vRestPosition.y);
+        #ifdef LIT_NEEDS_NORMAL
+            let facing = saturate(abs(dot(dVertexNormalW, dViewDirW)));
+            sseRim = pow(1.0 - facing, 2.5);
+            alpha = alpha * (0.4 + 1.6 * sseRim);
+            let p = vRestPosition;
+            let px = length(fwidth(p));
+            sseSparkle = sseGlitter(p, px) * smoothstep(${GLITTER_GONE}, ${GLITTER_FULL}, facing);
+        #endif
+    #endif
+    dAlpha = saturate((alpha + 0.4 * sseSparkle) * wrist);
+}
+`;
+const emissiveWGSL = /* wgsl */ `
+uniform material_emissive: vec3f;
+uniform material_emissiveIntensity: f32;
+
+fn getEmission() {
+    dEmission = uniform.material_emissive * uniform.material_emissiveIntensity * (0.5 + 1.5 * sseRim + 1.3 * sseSparkle);
+}
+`;
+const opacityGLSL = /* glsl */ `
+uniform float material_opacity;
+uniform float material_alphaDitherScale;
+
+float sseRim;
+float sseSparkle;
+
+vec3 sseHash(ivec3 cell) {
+    uvec3 v = uvec3(cell) * 1664525u + 1013904223u;
+    v.x += v.y * v.z;
+    v.y += v.z * v.x;
+    v.z += v.x * v.y;
+    v ^= v >> 16u;
+    v.x += v.y * v.z;
+    v.y += v.z * v.x;
+    v.z += v.x * v.y;
+    return vec3(v >> 8u) * (1.0 / 16777216.0);
+}
+
+#if defined(FORWARD_PASS) && defined(LIT_NEEDS_NORMAL)
+float sseFlake(vec3 p, float size, float px, int seed) {
+    vec3 q = p / size;
+    vec3 base = floor(q);
+    ivec3 cell = ivec3(base) + ivec3(seed * 7919, seed * 104729, seed * 1299709);
+    vec3 centre = base + 0.25 + 0.5 * sseHash(cell);
+    vec3 tilt = sseHash(cell + ivec3(4096)) * 2.0 - 1.0;
+    float shown = step(sseHash(cell + ivec3(8192)).x, ${GLITTER_SHARE});
+    float w = 0.5 * px / size;
+    float flake = 1.0 - smoothstep(${GLITTER_RADIUS} - w, ${GLITTER_RADIUS} + w, distance(q, centre));
+    float facing = saturate(dot(normalize(dVertexNormalW + ${GLITTER_TILT} * tilt), dViewDirW));
+    return shown * flake * (0.3 + 3.7 * pow(facing, ${GLITTER_SHARPNESS}.0));
+}
+
+float sseGlitter(vec3 p, float px) {
+    float level = max(0.0, log2(px * ${GLITTER_CELL_PIXELS.toFixed(1)} / ${GLITTER_CELL}));
+    float l0 = floor(level);
+    float size = ${GLITTER_CELL} * exp2(l0);
+    float next = smoothstep(${1 - GLITTER_BLEND}, 1.0, level - l0);
+    float sparkle = sseFlake(p, size, px, int(l0)) * (1.0 - next);
+    if (next > 0.0) {
+        sparkle += sseFlake(p, size * 2.0, px, int(l0) + 1) * next;
+    }
+    return sparkle;
+}
+#endif
+
+void getOpacity() {
+    sseRim = 0.0;
+    sseSparkle = 0.0;
+    float alpha = material_opacity;
+    float wrist = 1.0;
+    #ifdef FORWARD_PASS
+        wrist = 1.0 - smoothstep(${WRIST_FADE_START}, ${WRIST_FADE_END}, vRestPosition.y);
+        #ifdef LIT_NEEDS_NORMAL
+            float facing = saturate(abs(dot(dVertexNormalW, dViewDirW)));
+            sseRim = pow(1.0 - facing, 2.5);
+            alpha *= 0.4 + 1.6 * sseRim;
+            vec3 p = vRestPosition;
+            float px = length(fwidth(p));
+            sseSparkle = sseGlitter(p, px) * smoothstep(${GLITTER_GONE}, ${GLITTER_FULL}, facing);
+        #endif
+    #endif
+    dAlpha = saturate((alpha + 0.4 * sseSparkle) * wrist);
+}
+`;
+const emissiveGLSL = /* glsl */ `
+uniform vec3 material_emissive;
+uniform float material_emissiveIntensity;
+
+void getEmission() {
+    dEmission = material_emissive * material_emissiveIntensity * (0.5 + 1.5 * sseRim + 1.3 * sseSparkle);
+}
+`;
+/**
+ * The material every hand model draws with: faint, unlit in effect, over the splats like the rest
+ * of XR's overlays, with a fresnel rim, glitter where the skin faces the eye, and a fade at the
+ * wrist. It is lit only so that the forward pass computes the normal and view
+ * direction the rim and glitter need; with black diffuse and specular, and no sky, lighting adds
+ * nothing. Controllers keep their own models' materials.
+ */
+class XrHandStyle {
+    material = new StandardMaterial();
+    constructor() {
+        const { material } = this;
+        material.useSkybox = false;
+        material.useFog = false;
+        material.useTonemap = false;
+        material.diffuse.set(0, 0, 0);
+        material.specular.set(0, 0, 0);
+        material.emissive.set(COLOR[0], COLOR[1], COLOR[2]);
+        material.opacity = OPACITY;
+        material.blendType = BLEND_NORMAL;
+        material.depthWrite = false;
+        const wgsl = material.getShaderChunks(SHADERLANGUAGE_WGSL);
+        wgsl.set('litUserDeclarationVS', declarationVSWGSL);
+        wgsl.set('litUserMainEndVS', mainEndVSWGSL);
+        wgsl.set('litUserDeclarationPS', declarationVSWGSL);
+        wgsl.set('opacityPS', opacityWGSL);
+        wgsl.set('emissivePS', emissiveWGSL);
+        const glsl = material.getShaderChunks(SHADERLANGUAGE_GLSL);
+        glsl.set('litUserDeclarationVS', declarationVSGLSL);
+        glsl.set('litUserMainEndVS', mainEndVSGLSL);
+        glsl.set('litUserDeclarationPS', declarationVSGLSL);
+        glsl.set('opacityPS', opacityGLSL);
+        glsl.set('emissivePS', emissiveGLSL);
+        material.shaderChunksVersion = '2.23';
+        material.update();
+    }
+    /** Give a hand model this material, drawn after the splats. */
+    apply(entity) {
+        for (const render of entity.findComponents('render')) {
+            for (const meshInstance of render.meshInstances) {
+                meshInstance.material = this.material;
+                meshInstance.drawBucket = XR_OVERLAY_DRAW_BUCKET;
+            }
+        }
+    }
+    destroy() {
+        this.material.destroy();
+    }
+}
+
+// The burger icon, in the camera's space (meters): low and to the left of the view, a metre away,
+// out of the scene's middle but a glance from it. Eye targeting on Apple Vision Pro is good to a
+// degree or two, so its hit area is ICON_HIT times its drawn size, about 4.6 degrees across
+const ICON_POSITION = new Vec3(-0.28, -0.22, -1);
+const ICON_SIZE = 0.05;
+const ICON_HIT = 1.6;
+// The open menu's rows, a column centred on MENU_CENTER (just below the middle of the view) a metre
+// away, however many rows it shows, each ROW_HEIGHT tall (4 degrees, for the eyes too) and drawn at
+// PIXELS per meter
+const MENU_CENTER = -0.05;
+const ROW_WIDTH = 0.34;
+const ROW_HEIGHT = 0.07;
+const ROW_GAP = 0.012;
+const PIXELS = 1600;
+// The rows fade and drop in over ROW_TIME seconds each, STAGGER apart down the column, from DROP
+// above and at ROW_GROW of their size; closing plays it back from the bottom row. The icon's bars
+// turn into a cross over MORPH_TIME, and a switch's knob slides over KNOB_TIME. A pressed quad
+// shrinks to PRESS_SCALE while the select stays on it
+const ROW_TIME = 0.12;
+const STAGGER = 0.04;
+const DROP = 0.012;
+const ROW_GROW = 0.96;
+const MORPH_TIME = 0.15;
+const KNOB_TIME = 0.15;
+const PRESS_SCALE = 0.95;
+// the pointing cursor: a dot where a ray meets the menu's plane, shown within CURSOR_REACH of the
+// column while the menu is open, or near the icon
+const CURSOR_SIZE = 0.01;
+const CURSOR_REACH = 0.45;
+// A press clicks, a short falling tone, and pulses a controller's haptic actuator
+const CLICK_PITCH = 1500;
+const CLICK_DROP = 700;
+const CLICK_TIME = 0.05;
+const CLICK_GAIN = 0.08;
+const PULSE_STRENGTH = 0.4;
+const PULSE_MS = 25;
+const GLASS = 'rgba(20, 22, 28, 0.86)';
+// the icon is always in view, so it is fainter than the menu
+const ICON_GLASS = 'rgba(20, 22, 28, 0.55)';
+const ICON_BARS = 'rgba(255, 255, 255, 0.7)';
+const GLASS_HOVER = 'rgba(58, 62, 72, 0.92)';
+const GLASS_PRESS = 'rgba(88, 94, 108, 0.96)';
+const ON = '#4cc38a';
+const OFF = 'rgba(255, 255, 255, 0.28)';
+const rayOrigin = new Vec3();
+const rayDirection = new Vec3();
+const localOrigin = new Vec3();
+const localDirection = new Vec3();
+const inverse$1 = new Mat4();
+const rate = new Vec3();
+// Hands' rays jitter by a fraction of a degree, which the menu's distance turns into a wandering
+// cursor and a flickering hover. A one-euro filter (Casiez, Roussel and Vogel, 2012) smooths each
+// hand's ray: a low-pass whose cutoff rises with the ray's speed, so a still hand holds and a quick
+// move to a row follows without lag. Controllers' poses are steady and stay unfiltered
+const EURO_MIN_CUTOFF = 1; // Hz, at rest
+const EURO_BETA = 0.8; // cutoff gain per unit of speed (metres, or direction, a second)
+const EURO_SPEED_CUTOFF = 1; // Hz, smoothing the speed estimate itself
+const euroAlpha = (cutoff, dt) => 1 / (1 + 1 / (2 * Math.PI * cutoff * dt));
+// a one-euro filter over a vector
+class EuroFilter {
+    value = new Vec3();
+    speed = new Vec3();
+    primed = false;
+    filter(sample, dt, out) {
+        if (!this.primed || dt <= 0) {
+            this.value.copy(sample);
+            this.speed.set(0, 0, 0);
+            this.primed = true;
+            return out.copy(sample);
+        }
+        rate.sub2(sample, this.value).mulScalar(1 / dt);
+        this.speed.lerp(this.speed, rate, euroAlpha(EURO_SPEED_CUTOFF, dt));
+        const cutoff = EURO_MIN_CUTOFF + EURO_BETA * this.speed.length();
+        this.value.lerp(this.value, sample, euroAlpha(cutoff, dt));
+        return out.copy(this.value);
+    }
+}
+const roundRect = (ctx, x, y, w, h, r) => {
+    ctx.beginPath();
+    ctx.roundRect(x, y, w, h, r);
+    ctx.fill();
+};
+const ease = (t) => t * t * (3 - 2 * t);
+const lerp = (a, b, t) => a + (b - a) * t;
+// moves value toward goal by step
+const approach$1 = (value, goal, step) => value < goal ? Math.min(goal, value + step) : Math.max(goal, value - step);
+/**
+ * A head-locked menu for XR sessions: a burger icon low in the view, which opens a column of
+ * rows in front of the eyes. A select (a pinch, a trigger) presses the icon or a row it starts on,
+ * which runs when the select ends still on it, as a button does: sliding off before letting go
+ * cancels it. A select anywhere else while the menu is open closes it. A press clicks, pulses a
+ * controller, and shows on the quad while the select stays on it; the rows fade in and out, the
+ * icon turns into a cross and the switches slide. A stepper's halves are buttons of their own, and
+ * one that cannot step is greyed out and takes no press. The viewer hands the menu every select before
+ * the navigation aims with it ({@link XrHeadMenu#select}), so the selects it takes do not
+ * teleport. It follows the camera, so it also scales with a scaled rig, staying the same size in
+ * view. Controllers' rays highlight what they point at and show a dot where they meet the menu,
+ * and so do hands' rays where they point (`pointingHands`, a standalone headset), smoothed by a
+ * one-euro filter against hand tracking's jitter; Apple Vision Pro
+ * shows the eyes' direction only as a pinch starts, so nothing highlights there before a press.
+ */
+class XrHeadMenu {
+    app;
+    camera;
+    items;
+    // whether hands' rays point where they select, so they hover and show a cursor
+    pointingHands;
+    // a dot per pointing ray, where it meets the menu's plane
+    cursors;
+    icon;
+    rows;
+    open = false;
+    // how far the column is through opening (0 closed, 1 open), the icon's morph into a cross, each
+    // switch's knob (0 off, 1 on), and each row's opacity as last set
+    openness = 0;
+    morph = 0;
+    knobs;
+    shown;
+    // the hovered quad, highlighted, its half where it is a stepper's, and the press, if any
+    hovered = null;
+    hoveredSide = 0;
+    // across the quad, -0.5 to 0.5 left to right, where the last ray to hit one met it
+    hitX = 0;
+    // the filtered ray of each pointing hand
+    filteredRays = new Map();
+    press = null;
+    // made on the first press
+    audio = null;
+    handles;
+    /**
+     * @param app - The application.
+     * @param camera - The XR camera's entity, which the menu follows.
+     * @param items - The menu's rows, top to bottom.
+     * @param options - `pointingHands`: hands' rays point where they select (a standalone headset),
+     * so they highlight what they point at and show a cursor, as controllers' do.
+     */
+    constructor(app, camera, items, options = {}) {
+        this.app = app;
+        this.camera = camera;
+        this.items = items;
+        this.pointingHands = options.pointingHands ?? false;
+        this.icon = this.createQuad(camera, ICON_SIZE, ICON_SIZE);
+        this.icon.entity.setLocalPosition(ICON_POSITION);
+        this.rows = items.map(() => this.createQuad(camera, ROW_WIDTH, ROW_HEIGHT));
+        this.knobs = items.map((item) => (item.checked?.() ? 1 : 0));
+        this.shown = items.map(() => 0);
+        this.cursors = [0, 1].map(() => this.createQuad(camera, CURSOR_SIZE, CURSOR_SIZE));
+        for (const cursor of this.cursors) {
+            this.drawCursor(cursor);
+            cursor.entity.enabled = false;
+        }
+        const { xr } = app;
+        this.handles = [
+            xr.on('start', () => this.show(true)),
+            xr.on('end', () => this.show(false)),
+            app.on('update', (dt) => this.update(dt))
+        ];
+        this.show(xr.active);
+    }
+    /**
+     * Takes a select that starts on the menu, pressing what it starts on, and one anywhere while
+     * the menu is open, closing it.
+     *
+     * @param source - The input source whose select starts.
+     * @returns True when the menu took the select.
+     */
+    select(source) {
+        if (!this.icon.entity.enabled)
+            return false;
+        const quad = this.pointedAt(source);
+        if (!quad) {
+            if (!this.open)
+                return false;
+            this.setOpen(false);
+            return true;
+        }
+        // a second select while one is held is taken, and does nothing, as is one on a stepper's
+        // greyed half
+        const side = this.sideOf(quad);
+        const stepper = this.itemOf(quad)?.stepper;
+        if (!this.press && !(stepper && !stepper.can(side)))
+            this.startPress(source, quad, side);
+        return true;
+    }
+    destroy() {
+        this.cancelPress();
+        for (const handle of this.handles)
+            handle.off();
+        for (const quad of [this.icon, ...this.rows, ...this.cursors]) {
+            quad.entity.destroy();
+            quad.material.destroy();
+            quad.texture.destroy();
+        }
+        void this.audio?.close().catch(() => {
+            /* already closed */
+        });
+        this.audio = null;
+    }
+    createQuad(camera, width, height) {
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.round(width * PIXELS);
+        canvas.height = Math.round(height * PIXELS);
+        // the canvas holds srgb colours, which a linear texture would brighten on the way out
+        const texture = new Texture(this.app.graphicsDevice, {
+            name: 'sse-xr-head-menu',
+            width: canvas.width,
+            height: canvas.height,
+            format: PIXELFORMAT_SRGBA8,
+            mipmaps: false,
+            addressU: ADDRESS_CLAMP_TO_EDGE,
+            addressV: ADDRESS_CLAMP_TO_EDGE
+        });
+        const material = new StandardMaterial();
+        // drawn as painted: no light, sky, fog or the scene's tonemapping
+        material.useLighting = false;
+        material.useSkybox = false;
+        material.useFog = false;
+        material.useTonemap = false;
+        material.diffuse.set(0, 0, 0);
+        material.emissive.set(1, 1, 1);
+        material.emissiveMap = texture;
+        material.opacityMap = texture;
+        material.opacityMapChannel = 'a';
+        material.blendType = BLEND_NORMAL;
+        // its depth goes to the compositor where it is drawn, so the background is not
+        // reprojected through it, and it draws over the scene
+        material.alphaTest = 0.1;
+        material.depthTest = false;
+        material.update();
+        const entity = new Entity('XrHeadMenu', this.app);
+        entity.addComponent('render', { type: 'plane', castShadows: false, receiveShadows: false });
+        entity.render.material = material;
+        for (const meshInstance of entity.render.meshInstances)
+            meshInstance.drawBucket = XR_OVERLAY_DRAW_BUCKET;
+        // the plane lies flat facing up; stood up, it faces the eyes
+        entity.setLocalEulerAngles(90, 0, 0);
+        entity.setLocalScale(width, 1, height);
+        camera.addChild(entity);
+        return { entity, canvas, texture, material };
+    }
+    // whether the ray meets a quad, its size times margin, from its front
+    hits(quad, margin) {
+        inverse$1.copy(quad.entity.getWorldTransform()).invert();
+        const origin = inverse$1.transformPoint(rayOrigin, localOrigin);
+        const direction = inverse$1.transformVector(rayDirection, localDirection);
+        if (origin.y <= 0 || direction.y >= 0)
+            return false;
+        const t = -origin.y / direction.y;
+        const half = 0.5 * margin;
+        const x = origin.x + direction.x * t;
+        if (Math.abs(x) > half || Math.abs(origin.z + direction.z * t) > half)
+            return false;
+        this.hitX = x;
+        return true;
+    }
+    // the row's item, or null for the icon
+    itemOf(quad) {
+        const index = this.rows.indexOf(quad);
+        return index >= 0 ? this.items[index] : null;
+    }
+    // the half of a stepper's row the last hit was on, just after pointedAt found the quad
+    sideOf(quad) {
+        if (!this.itemOf(quad)?.stepper)
+            return 0;
+        return this.hitX < 0 ? -1 : 1;
+    }
+    // the icon, or a row of the open menu, the input source's ray points at
+    pointedAt(source) {
+        this.ray(source);
+        if (this.hits(this.icon, ICON_HIT))
+            return this.icon;
+        if (!this.open)
+            return null;
+        return this.rows.find((row) => row.entity.enabled && this.hits(row, 1)) ?? null;
+    }
+    show(visible) {
+        this.icon.entity.enabled = visible;
+        this.setOpen(false);
+        // a session starts with the menu closed, not closing
+        this.openness = 0;
+        this.morph = 0;
+        this.drawIcon();
+        for (const row of this.rows)
+            row.entity.enabled = false;
+        for (const cursor of this.cursors)
+            cursor.entity.enabled = false;
+    }
+    setOpen(open) {
+        this.cancelPress();
+        this.open = open;
+        this.hovered = null;
+        this.hoveredSide = 0;
+        this.drawIcon();
+        if (open)
+            this.items.forEach((item, i) => this.drawRow(i));
+    }
+    startPress(source, quad, side) {
+        const release = () => this.endPress();
+        source.once('selectend', release);
+        this.press = { source, quad, side, over: true, release };
+        this.feedback(source);
+        this.drawQuad(quad);
+    }
+    // a select ending: runs what it pressed if it ended there. The ray flicks as a pinch lets go,
+    // so where it was on the last frame decides
+    endPress() {
+        const { press } = this;
+        if (!press)
+            return;
+        this.press = null;
+        press.source.off('selectend', press.release);
+        this.drawQuad(press.quad);
+        if (!press.over)
+            return;
+        if (press.quad === this.icon) {
+            this.setOpen(!this.open);
+            return;
+        }
+        const index = this.rows.indexOf(press.quad);
+        const item = this.items[index];
+        if (item.stepper) {
+            item.stepper.step(press.side);
+        }
+        else {
+            item.action?.();
+        }
+        // a switch stays open, its knob sliding to its new state, and a stepper for the next step;
+        // the label is redrawn at once, as the action can change it without moving the knob (the
+        // sharpen cycle)
+        if (item.checked || item.stepper)
+            this.drawRow(index);
+        else
+            this.setOpen(false);
+    }
+    cancelPress() {
+        if (this.press)
+            this.press.over = false;
+        this.endPress();
+    }
+    // a click, and a pulse of a controller's haptics
+    feedback(source) {
+        const actuator = source.gamepad?.hapticActuators?.[0];
+        actuator?.pulse(PULSE_STRENGTH, PULSE_MS).catch(() => {
+            /* no haptics */
+        });
+        try {
+            this.audio ??= new AudioContext();
+        }
+        catch {
+            return;
+        }
+        const { audio } = this;
+        if (audio.state === 'suspended') {
+            audio.resume().catch(() => {
+                /* not allowed yet */
+            });
+        }
+        const t = audio.currentTime;
+        const tone = audio.createOscillator();
+        tone.frequency.setValueAtTime(CLICK_PITCH, t);
+        tone.frequency.exponentialRampToValueAtTime(CLICK_DROP, t + CLICK_TIME);
+        const gain = audio.createGain();
+        gain.gain.setValueAtTime(CLICK_GAIN, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + CLICK_TIME);
+        tone.connect(gain).connect(audio.destination);
+        tone.start(t);
+        tone.stop(t + CLICK_TIME);
+    }
+    update(dt) {
+        if (!this.icon.entity.enabled)
+            return;
+        this.filterRays(dt);
+        this.updateHover();
+        this.updateCursors();
+        this.updatePress();
+        this.animate(dt);
+    }
+    // whether a source's ray points where it selects: a controller's, or a hand's on a headset
+    // whose hands point (on Apple Vision Pro a hand's ray runs along the hand while the eyes select)
+    pointing(source) {
+        return source.targetRayMode === 'tracked-pointer' && (!source.hand || this.pointingHands);
+    }
+    // smooths every pointing hand's ray for this frame, and forgets hands that have gone
+    filterRays(dt) {
+        const { inputSources } = this.app.xr.input;
+        for (const source of this.filteredRays.keys()) {
+            if (!inputSources.includes(source))
+                this.filteredRays.delete(source);
+        }
+        for (const source of inputSources) {
+            if (!source.hand || !this.pointing(source))
+                continue;
+            let ray = this.filteredRays.get(source);
+            if (!ray) {
+                ray = { origin: new EuroFilter(), direction: new EuroFilter(), o: new Vec3(), d: new Vec3() };
+                this.filteredRays.set(source, ray);
+            }
+            ray.origin.filter(source.getOrigin(), dt, ray.o);
+            ray.direction.filter(source.getDirection(), dt, ray.d).normalize();
+        }
+    }
+    // the source's ray into rayOrigin and rayDirection: a hand's as filtered, a controller's as is
+    ray(source) {
+        const filtered = this.filteredRays.get(source);
+        if (filtered) {
+            rayOrigin.copy(filtered.o);
+            rayDirection.copy(filtered.d);
+        }
+        else {
+            rayOrigin.copy(source.getOrigin());
+            rayDirection.copy(source.getDirection());
+        }
+    }
+    // pointing rays highlight what they point at, a stepper's half
+    updateHover() {
+        let hovered = null;
+        let side = 0;
+        for (const source of this.app.xr.input.inputSources) {
+            if (!this.pointing(source))
+                continue;
+            const quad = this.pointedAt(source);
+            if (quad) {
+                hovered = quad;
+                side = this.sideOf(quad);
+            }
+        }
+        if (hovered !== this.hovered || side !== this.hoveredSide) {
+            const previous = this.hovered;
+            this.hovered = hovered;
+            this.hoveredSide = side;
+            if (previous && previous !== hovered)
+                this.drawQuad(previous);
+            if (hovered)
+                this.drawQuad(hovered);
+        }
+    }
+    // a dot where each pointing ray meets the menu's plane, while the menu is open or the ray is
+    // near the icon: without it a hand's ray gives no sign of where it points
+    updateCursors() {
+        let used = 0;
+        inverse$1.copy(this.camera.getWorldTransform()).invert();
+        for (const source of this.app.xr.input.inputSources) {
+            if (used >= this.cursors.length)
+                break;
+            if (!this.pointing(source))
+                continue;
+            this.ray(source);
+            const origin = inverse$1.transformPoint(rayOrigin, localOrigin);
+            const direction = inverse$1.transformVector(rayDirection, localDirection);
+            if (direction.z >= 0)
+                continue;
+            const t = (-1 - origin.z) / direction.z;
+            if (t <= 0)
+                continue;
+            const x = origin.x + direction.x * t;
+            const y = origin.y + direction.y * t;
+            const nearIcon = Math.hypot(x - ICON_POSITION.x, y - ICON_POSITION.y) < ICON_SIZE * ICON_HIT;
+            if (!nearIcon && !(this.open && Math.hypot(x, y - MENU_CENTER) < CURSOR_REACH))
+                continue;
+            const cursor = this.cursors[used++];
+            cursor.entity.enabled = true;
+            // a touch in front of the quads
+            cursor.entity.setLocalPosition(x, y, -1 + 0.002);
+        }
+        for (let i = used; i < this.cursors.length; i++)
+            this.cursors[i].entity.enabled = false;
+    }
+    // whether the press is still on its quad; a source gone without ending its select cancels it
+    updatePress() {
+        const { press } = this;
+        if (!press)
+            return;
+        if (!this.app.xr.input.inputSources.includes(press.source)) {
+            this.cancelPress();
+            return;
+        }
+        const over = this.pointedAt(press.source) === press.quad && this.sideOf(press.quad) === press.side;
+        if (over !== press.over) {
+            press.over = over;
+            this.drawQuad(press.quad);
+        }
+    }
+    animate(dt) {
+        // the icon's bars and cross, and its press
+        const morph = approach$1(this.morph, this.open ? 1 : 0, dt / MORPH_TIME);
+        if (morph !== this.morph) {
+            this.morph = morph;
+            this.drawIcon();
+        }
+        const iconSize = ICON_SIZE * this.pressScale(this.icon);
+        this.icon.entity.setLocalScale(iconSize, 1, iconSize);
+        // the column: each shown row ROW_TIME after the one above it starts, closing from the bottom
+        const shown = this.items.filter((item) => item.visible?.() ?? true).length;
+        const total = ROW_TIME + STAGGER * Math.max(shown - 1, 0);
+        this.openness = approach$1(this.openness, this.open ? 1 : 0, dt / total);
+        let k = 0;
+        let y = MENU_CENTER + 0.5 * (shown * ROW_HEIGHT + Math.max(shown - 1, 0) * ROW_GAP);
+        this.items.forEach((item, i) => {
+            const row = this.rows[i];
+            const visible = item.visible?.() ?? true;
+            const t = visible ? Math.min(Math.max((this.openness * total - k * STAGGER) / ROW_TIME, 0), 1) : 0;
+            const e = ease(t);
+            row.entity.enabled = t > 0;
+            // a switch's knob, set at once while the row is hidden
+            if (item.checked) {
+                const goal = item.checked() ? 1 : 0;
+                const knob = row.entity.enabled ? approach$1(this.knobs[i], goal, dt / KNOB_TIME) : goal;
+                if (knob !== this.knobs[i]) {
+                    this.knobs[i] = knob;
+                    if (row.entity.enabled)
+                        this.drawRow(i);
+                }
+            }
+            if (visible) {
+                if (row.entity.enabled) {
+                    row.entity.setLocalPosition(0, y - ROW_HEIGHT * 0.5 + (1 - e) * DROP, -1);
+                    const s = lerp(ROW_GROW, 1, e) * this.pressScale(row);
+                    row.entity.setLocalScale(ROW_WIDTH * s, 1, ROW_HEIGHT * s);
+                    if (e !== this.shown[i]) {
+                        this.shown[i] = e;
+                        row.material.opacity = e;
+                        row.material.update();
+                    }
+                }
+                y -= ROW_HEIGHT + ROW_GAP;
+                k++;
+            }
+        });
+    }
+    pressScale(quad) {
+        return this.press?.quad === quad && this.press.over ? PRESS_SCALE : 1;
+    }
+    fill(quad, normal) {
+        if (this.press?.quad === quad && this.press.over)
+            return GLASS_PRESS;
+        return this.hovered === quad ? GLASS_HOVER : normal;
+    }
+    drawQuad(quad) {
+        if (quad === this.icon) {
+            this.drawIcon();
+        }
+        else {
+            this.drawRow(this.rows.indexOf(quad));
+        }
+    }
+    // three bars, the top and bottom turning into a cross and the middle fading as the menu opens
+    drawIcon() {
+        const { canvas } = this.icon;
+        const ctx = canvas.getContext('2d');
+        const s = canvas.width;
+        const m = ease(this.morph);
+        ctx.clearRect(0, 0, s, s);
+        ctx.fillStyle = this.fill(this.icon, ICON_GLASS);
+        ctx.beginPath();
+        ctx.arc(s / 2, s / 2, s / 2 - 1, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = ICON_BARS;
+        ctx.lineWidth = s * 0.07;
+        ctx.lineCap = 'round';
+        const d = 0.17;
+        const line = (x0, y0, x1, y1) => {
+            ctx.moveTo(s * x0, s * y0);
+            ctx.lineTo(s * x1, s * y1);
+        };
+        ctx.beginPath();
+        line(lerp(0.32, 0.5 - d, m), lerp(0.35, 0.5 - d, m), lerp(0.68, 0.5 + d, m), lerp(0.35, 0.5 + d, m));
+        line(lerp(0.32, 0.5 - d, m), lerp(0.65, 0.5 + d, m), lerp(0.68, 0.5 + d, m), lerp(0.65, 0.5 - d, m));
+        ctx.stroke();
+        if (m < 1) {
+            ctx.globalAlpha = 1 - m;
+            ctx.beginPath();
+            line(lerp(0.32, 0.5, m), 0.5, lerp(0.68, 0.5, m), 0.5);
+            ctx.stroke();
+            ctx.globalAlpha = 1;
+        }
+        this.upload(this.icon);
+    }
+    drawRow(index) {
+        const row = this.rows[index];
+        const item = this.items[index];
+        if (item.stepper) {
+            this.drawStepper(row, item, item.stepper);
+            return;
+        }
+        const { canvas } = row;
+        const ctx = canvas.getContext('2d');
+        const { width, height } = canvas;
+        ctx.clearRect(0, 0, width, height);
+        ctx.fillStyle = this.fill(row, GLASS);
+        roundRect(ctx, 1, 1, width - 2, height - 2, height * 0.3);
+        // the label, made smaller where it would run into the switch or off the row
+        const w = height * 0.8;
+        const x = width - height * 0.3 - w;
+        const left = height * 0.36;
+        const room = item.checked ? x - height * 0.2 - left : width - 2 * left;
+        const label = item.label();
+        const font = (size) => `500 ${size}px -apple-system, system-ui, sans-serif`;
+        const size = Math.round(height * 0.36);
+        ctx.font = font(size);
+        const measured = ctx.measureText(label).width;
+        if (measured > room)
+            ctx.font = font(Math.floor((size * room) / measured));
+        ctx.fillStyle = '#ffffff';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(label, left, height / 2);
+        if (item.checked) {
+            // a switch at the end, its track blending to green as the knob slides across
+            const k = ease(this.knobs[index]);
+            const h = height * 0.44;
+            const y = (height - h) / 2;
+            ctx.fillStyle = OFF;
+            roundRect(ctx, x, y, w, h, h / 2);
+            ctx.globalAlpha = k;
+            ctx.fillStyle = ON;
+            roundRect(ctx, x, y, w, h, h / 2);
+            ctx.globalAlpha = 1;
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.arc(lerp(x + h / 2, x + w - h / 2, k), height / 2, h * 0.4, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        this.upload(row);
+    }
+    // the label centred between two arrows, the hovered or pressed half lit, an arrow that cannot
+    // step greyed out
+    drawStepper(row, item, stepper) {
+        const { canvas } = row;
+        const ctx = canvas.getContext('2d');
+        const { width, height } = canvas;
+        ctx.clearRect(0, 0, width, height);
+        ctx.fillStyle = GLASS;
+        roundRect(ctx, 1, 1, width - 2, height - 2, height * 0.3);
+        const pressed = this.press?.quad === row && this.press.over ? this.press.side : 0;
+        const lit = pressed || (this.hovered === row ? this.hoveredSide : 0);
+        if (lit && stepper.can(lit)) {
+            ctx.save();
+            ctx.beginPath();
+            ctx.roundRect(1, 1, width - 2, height - 2, height * 0.3);
+            ctx.clip();
+            ctx.fillStyle = pressed ? GLASS_PRESS : GLASS_HOVER;
+            ctx.fillRect(lit < 0 ? 0 : width / 2, 0, width / 2, height);
+            ctx.restore();
+        }
+        // the arrows, chevrons pointing out from the label
+        const inset = height * 0.45;
+        const reach = height * 0.09;
+        const rise = height * 0.15;
+        ctx.lineWidth = height * 0.06;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        for (const direction of [-1, 1]) {
+            const tip = direction < 0 ? inset : width - inset;
+            ctx.strokeStyle = stepper.can(direction) ? '#ffffff' : OFF;
+            ctx.beginPath();
+            ctx.moveTo(tip - direction * reach, height / 2 - rise);
+            ctx.lineTo(tip, height / 2);
+            ctx.lineTo(tip - direction * reach, height / 2 + rise);
+            ctx.stroke();
+        }
+        // the label, made smaller where it would run into the arrows
+        const room = width - 2 * (inset + height * 0.35);
+        const label = item.label();
+        const font = (size) => `500 ${size}px -apple-system, system-ui, sans-serif`;
+        const size = Math.round(height * 0.36);
+        ctx.font = font(size);
+        const measured = ctx.measureText(label).width;
+        if (measured > room)
+            ctx.font = font(Math.floor((size * room) / measured));
+        ctx.fillStyle = '#ffffff';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(label, width / 2, height / 2);
+        ctx.textAlign = 'start';
+        this.upload(row);
+    }
+    // a white dot with a dark rim
+    drawCursor(quad) {
+        const { canvas } = quad;
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const r = canvas.width * 0.5;
+        ctx.beginPath();
+        ctx.arc(r, r, r * 0.9, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(20, 22, 28, 0.9)';
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(r, r, r * 0.6, 0, Math.PI * 2);
+        ctx.fillStyle = '#fff';
+        ctx.fill();
+        this.upload(quad);
+    }
+    upload(quad) {
+        quad.texture.setSource(quad.canvas);
+        quad.texture.upload();
+    }
+}
+
+// Holding the splat on top of the left fist, where a cone's scoop would be: the world in miniature
+// (Stoakley, Conway and Pausch, CHI 1995). Closing the left hand, held upright and looked at, while
+// the right is open fills a ring on top of the fist over ARM_TIME seconds; then the splat pops
+// there, standing along the axis through the fist: a scene at SCENE_SCALE pinned where the user
+// stands, an object fitted to OBJECT_SIZE. Twisting the wrist turns it like a turntable and bending
+// it tips it.
+// Opening the hand, or losing it for LOST_TIME, puts it back where it was at once. The sizes are for
+// a user at real size and scale with them as the hold starts; a scene held keeps its size while the
+// two-hand grab scales the user, so the grab grows or shrinks it in the hand.
+//
+// A fist closes by the engine's test (all four fingers folded back, its emulated squeeze), and
+// then holds while HELD_FINGERS of them stay folded past a right angle: on Apple Vision Pro the
+// engine's test reads a closed fist's index finger open for half a second at a time. A left hand
+// open, and a right fist, count once they last FLICKER_TIME, as a relaxed right hand curls into the
+// engine's fist for a few frames now and then. And the left keeps its state while the right is a
+// fist (the two-hand grab) or within COVER_DISTANCE of it: a right hand over the left hides its
+// fingers, which visionOS then reports open.
+//
+// The ring fills while the fist is upright, where its top is in view: the axis through it within
+// UPRIGHT_START of straight up as it starts (the cosine, about 50 degrees) and UPRIGHT_KEEP once
+// filling (about 65); and while the user looks at it: its top within LOOK_START of the middle of
+// the view as it starts (about 25 degrees) and LOOK_KEEP once filling (about 40)
+const UPRIGHT_START = 0.65;
+const UPRIGHT_KEEP = 0.42;
+const LOOK_START = 0.9;
+const LOOK_KEEP = 0.77;
+const ARM_TIME = 2;
+const FLICKER_TIME = 0.2;
+const HELD_FINGERS = 3;
+const LOST_TIME = 1;
+const COVER_DISTANCE = 0.15;
+const SCENE_SCALE = 0.01;
+const OBJECT_SIZE = 0.15;
+// above the top of the fist along its axis: the splat's floor or bottom, and the ring
+const LIFT = 0.02;
+const RING_LIFT = 0.02;
+const RING_SIZE = 0.0625;
+// The ring's juice: its fill speeds up as it goes (FILL_LINEAR of it linear, the rest cubic), and
+// it grows from RING_GROW of its size and throbs faster as it fills, PULSE_START to PULSE_END times
+// a second. Full, it bursts out to BURST_SCALE times its size over BURST_TIME, fading, as the splat
+// pops onto the fist over POP_TIME, overshooting a little
+const FILL_LINEAR = 0.35;
+const RING_GROW = 0.8;
+const PULSE_START = 1.5;
+const PULSE_END = 6;
+const BURST_TIME = 0.35;
+const BURST_SCALE = 1.8;
+const POP_TIME = 0.4;
+// the fill's colours: PlayCanvas orange (#f60, the SuperSplat editor's highlight), which stands out
+// against the hands' cyan, a little deeper where the fill starts, and a warm white for its head
+const FILL_START = [0.85, 0.3, 0.0];
+const FILL_HEAD = [1.0, 0.4, 0.0];
+const FILL_CAP = [1.0, 0.85, 0.7];
+// the right hand's joint the cover test measures from
+const COVER_JOINT = 'middle-finger-metacarpal';
+// The ring fills clockwise from the top, a faint track ahead of it, its colour running from start to
+// head, brightest at the head, which is a round cap a little wider than the band
+const vertexGLSL = /* glsl */ `
+    attribute vec3 vertex_position;
+    attribute vec2 aUv0;
+
+    uniform mat4 matrix_model;
+    uniform mat4 matrix_viewProjection;
+
+    varying vec2 uv0;
+
+    void main(void) {
+        gl_Position = matrix_viewProjection * matrix_model * vec4(vertex_position, 1.0);
+        uv0 = aUv0;
+    }
+`;
+const vertexWGSL = /* wgsl */ `
+    attribute vertex_position: vec3f;
+    attribute aUv0: vec2f;
+
+    uniform matrix_model: mat4x4f;
+    uniform matrix_viewProjection: mat4x4f;
+
+    varying uv0: vec2f;
+
+    @vertex
+    fn vertexMain(input: VertexInput) -> VertexOutput {
+        var output: VertexOutput;
+        output.position = uniform.matrix_viewProjection * uniform.matrix_model * vec4f(input.vertex_position, 1.0);
+        output.uv0 = input.aUv0;
+        return output;
+    }
+`;
+const fragmentGLSL = /* glsl */ `
+    uniform float uProgress;
+    uniform float uPulse;
+    uniform float uBurst;
+
+    varying vec2 uv0;
+
+    // the ring's outer radius, a share of the quad's half width (the head's cap reaches past it),
+    // and its inner, a share of that
+    const float OUTER = 0.8;
+    const float INNER = OUTER * 0.72;
+    const vec3 START = vec3(${FILL_START.join(', ')});
+    const vec3 HEAD = vec3(${FILL_HEAD.join(', ')});
+    const vec3 CAP = vec3(${FILL_CAP.join(', ')});
+
+    void main(void) {
+        vec2 p = uv0 * 2.0 - 1.0;
+        float r = length(p);
+        float aa = fwidth(r);
+        float band = smoothstep(INNER - aa, INNER, r) * (1.0 - smoothstep(OUTER - aa, OUTER, r));
+        float angle = fract(atan(p.x, p.y) / 6.2831853 + 1.0);
+        float filled = step(angle, uProgress);
+        float tail = exp(-(uProgress - angle) * 10.0);
+        vec3 fill = mix(START, HEAD, angle / max(uProgress, 0.001)) * (1.0 + 0.5 * tail + 0.3 * uPulse);
+        vec3 rgb = mix(vec3(1.0), fill, filled);
+        float a = band * mix(0.2, 0.75 + 0.25 * tail, filled);
+        float headAngle = uProgress * 6.2831853;
+        vec2 head = vec2(sin(headAngle), cos(headAngle)) * 0.5 * (INNER + OUTER);
+        float capRadius = 0.5 * (OUTER - INNER) * (1.25 + 0.35 * uPulse);
+        float cap = (1.0 - smoothstep(capRadius - aa, capRadius + aa, length(p - head))) * step(0.001, uProgress);
+        rgb = mix(rgb, CAP, 0.7 * cap);
+        a = max(a, cap);
+        gl_FragColor = vec4(rgb, a * (1.0 - uBurst) * (1.0 - uBurst));
+    }
+`;
+const fragmentWGSL = /* wgsl */ `
+    uniform uProgress: f32;
+    uniform uPulse: f32;
+    uniform uBurst: f32;
+
+    varying uv0: vec2f;
+
+    const OUTER: f32 = 0.8;
+    const INNER: f32 = OUTER * 0.72;
+    const START = vec3f(${FILL_START.join(', ')});
+    const HEAD = vec3f(${FILL_HEAD.join(', ')});
+    const CAP = vec3f(${FILL_CAP.join(', ')});
+
+    @fragment
+    fn fragmentMain(input: FragmentInput) -> FragmentOutput {
+        var output: FragmentOutput;
+        let p = input.uv0 * 2.0 - vec2f(1.0);
+        let r = length(p);
+        let aa = fwidth(r);
+        let band = smoothstep(INNER - aa, INNER, r) * (1.0 - smoothstep(OUTER - aa, OUTER, r));
+        let angle = fract(atan2(p.x, p.y) / 6.2831853 + 1.0);
+        let progress = uniform.uProgress;
+        let filled = step(angle, progress);
+        let tail = exp(-(progress - angle) * 10.0);
+        let fill = mix(START, HEAD, angle / max(progress, 0.001)) * (1.0 + 0.5 * tail + 0.3 * uniform.uPulse);
+        var rgb = mix(vec3f(1.0), fill, filled);
+        var a = band * mix(0.2, 0.75 + 0.25 * tail, filled);
+        let headAngle = progress * 6.2831853;
+        let head = vec2f(sin(headAngle), cos(headAngle)) * 0.5 * (INNER + OUTER);
+        let capRadius = 0.5 * (OUTER - INNER) * (1.25 + 0.35 * uniform.uPulse);
+        let cap = (1.0 - smoothstep(capRadius - aa, capRadius + aa, length(p - head))) * step(0.001, progress);
+        rgb = mix(rgb, CAP, 0.7 * cap);
+        a = max(a, cap);
+        let fade = 1.0 - uniform.uBurst;
+        output.color = vec4f(rgb, a * fade * fade);
+        return output;
+    }
+`;
+const up$2 = new Vec3();
+const target = new Vec3();
+const offset$2 = new Vec3();
+const position = new Vec3();
+const rotation$2 = new Quat();
+const inverse = new Mat4();
+const turn = new Mat4();
+const toFist = new Vec3();
+// 0 to 1 over 0 to 1, past 1 by a tenth at about three quarters, then back
+const overshoot = (x) => {
+    const c = 1.70158;
+    const y = x - 1;
+    return 1 + (c + 1) * y * y * y + c * y * y;
+};
+const handOf = (sources, handedness) => sources.find((source) => source.hand && source.handedness === handedness) ?? null;
+// how many of the hand's four fingers fold past a right angle: the knuckle's bone against the
+// finger's last but one, as the engine's test measures them
+const boneA = new Vec3();
+const boneB = new Vec3();
+const foldedFingers = (hand) => {
+    let folded = 0;
+    for (let i = 1; i <= 4; i++) {
+        const { joints } = hand.fingers[i];
+        boneA.sub2(joints[0].getPosition(), joints[1].getPosition());
+        boneB.sub2(joints[2].getPosition(), joints[3].getPosition());
+        if (boneA.dot(boneB) < 0)
+            folded++;
+    }
+    return folded;
+};
+// The top of a fist, where a cone held in it would come out, and the fist's frame there: +Y along
+// the axis through the fist (the little finger's knuckle to the index finger's, which points out of
+// the top of a thumb-up fist), -Z the way the knuckles point from the wrist. The top is between the
+// index finger's knuckle and the thumb's last joint, the rim of the fist's opening. False where the
+// hand lacks a joint
+const axisX = new Vec3();
+const axisY = new Vec3();
+const axisZ = new Vec3();
+const frame = new Mat4();
+const measureFist = (hand, top, turned) => {
+    const pinky = hand.getJointById('pinky-finger-phalanx-proximal');
+    const index = hand.getJointById('index-finger-phalanx-proximal');
+    const middle = hand.getJointById('middle-finger-phalanx-proximal');
+    const thumb = hand.getJointById('thumb-phalanx-distal');
+    const wrist = hand.getJointById('wrist');
+    if (!pinky || !index || !middle || !thumb || !wrist)
+        return false;
+    axisY.sub2(index.getPosition(), pinky.getPosition()).normalize();
+    // back along the hand, square to the axis
+    axisZ.sub2(wrist.getPosition(), middle.getPosition());
+    axisX.copy(axisY).mulScalar(axisZ.dot(axisY));
+    axisZ.sub(axisX).normalize();
+    axisX.cross(axisY, axisZ);
+    const m = frame.data;
+    m[0] = axisX.x;
+    m[1] = axisX.y;
+    m[2] = axisX.z;
+    m[4] = axisY.x;
+    m[5] = axisY.y;
+    m[6] = axisY.z;
+    m[8] = axisZ.x;
+    m[9] = axisZ.y;
+    m[10] = axisZ.z;
+    turned.setFromMat4(frame);
+    top.add2(index.getPosition(), thumb.getPosition()).mulScalar(0.5);
+    return true;
+};
+/**
+ * Holds the loaded splat on top of the left fist, like an ice cream in its cone, while
+ * {@link XrIceCream#enabled} (the XR menu's Ice Cream). The two-hand grab carries on while it is
+ * held; the viewer pauses the teleport ({@link XrIceCream#holding}).
+ */
+class XrIceCream {
+    app;
+    entity;
+    scene;
+    rig;
+    camera;
+    userScale;
+    onHolding;
+    ring;
+    material;
+    on = false;
+    // seconds the left fist has been held with the right hand open, the left hand open (while
+    // tracked) and lost, and the right a fist
+    armed = 0;
+    openFor = FLICKER_TIME;
+    lostFor = 0;
+    rightFor = 0;
+    // the ring's throb, its phase in turns, and the seconds since the ring burst and the splat
+    // popped onto the fist (past BURST_TIME and POP_TIME when neither is under way)
+    pulse = 0;
+    burstFor = BURST_TIME;
+    popFor = POP_TIME;
+    // whether the splat is on the fist
+    hold = false;
+    // the top of the left fist and its frame (measureFist), as last tracked
+    handPosition = new Vec3();
+    handRotation = new Quat();
+    // where the splat was, the point that sits on the fist (in the splat's space), the splat's
+    // scale on the fist and the height of its bottom above that point
+    homePosition = new Vec3();
+    homeRotation = new Quat();
+    homeScale = new Vec3();
+    pinLocal = new Vec3();
+    holdScale = 1;
+    bottom = 0;
+    updating;
+    /**
+     * @param app - The application.
+     * @param entity - The splat's entity, a child of the root.
+     * @param scene - Whether it is a scene, held pinned where the user stands, or an object.
+     * @param rig - The camera's parent, where the user stands.
+     * @param camera - The camera, the user's eyes.
+     * @param userScale - The user's scale.
+     * @param onHolding - Called as the hold takes the splat and gives it back.
+     */
+    constructor(app, entity, scene, rig, camera, userScale, onHolding) {
+        this.app = app;
+        this.entity = entity;
+        this.scene = scene;
+        this.rig = rig;
+        this.camera = camera;
+        this.userScale = userScale;
+        this.onHolding = onHolding;
+        this.material = new ShaderMaterial({
+            uniqueName: 'sse-fist-hold-ring',
+            vertexGLSL,
+            fragmentGLSL,
+            vertexWGSL,
+            fragmentWGSL,
+            attributes: {
+                vertex_position: SEMANTIC_POSITION,
+                aUv0: SEMANTIC_TEXCOORD0
+            }
+        });
+        this.material.blendType = BLEND_NORMAL;
+        this.material.cull = CULLFACE_NONE;
+        // over the hand model, which would hide it in part
+        this.material.depthTest = false;
+        this.material.depthWrite = false;
+        this.material.update();
+        this.ring = new Entity('XrIceCreamRing', app);
+        this.ring.addComponent('render', { type: 'plane', castShadows: false, receiveShadows: false });
+        this.ring.render.material = this.material;
+        for (const meshInstance of this.ring.render.meshInstances)
+            meshInstance.drawBucket = XR_OVERLAY_DRAW_BUCKET;
+        this.ring.enabled = false;
+        app.root.addChild(this.ring);
+        // after the scripts and the grab have moved the rig, so the splat sits where the hand
+        // model is drawn
+        this.updating = app.on('update', (dt) => this.update(dt));
+    }
+    /** Whether a left fist summons the splat. Turning it off gives a held splat back. */
+    set enabled(value) {
+        this.on = value;
+        if (!value) {
+            this.armed = 0;
+            this.release();
+        }
+    }
+    get enabled() {
+        return this.on;
+    }
+    /** Whether the splat is on the fist. */
+    get holding() {
+        return this.hold;
+    }
+    /** Puts the splat back at once, as the session ends or the user is put back at the start. */
+    cancel() {
+        this.armed = 0;
+        this.openFor = FLICKER_TIME;
+        this.rightFor = 0;
+        this.burstFor = BURST_TIME;
+        this.popFor = POP_TIME;
+        this.ring.enabled = false;
+        this.release();
+    }
+    destroy() {
+        this.cancel();
+        this.updating.off();
+        this.ring.destroy();
+        this.material.destroy();
+    }
+    update(dt) {
+        const { xr } = this.app;
+        if (!xr?.active)
+            return;
+        const sources = xr.input.inputSources;
+        const left = handOf(sources, 'left');
+        const tracked = !!left?.hand.tracking && measureFist(left.hand, this.handPosition, this.handRotation);
+        if (tracked) {
+            this.lostFor = 0;
+        }
+        else {
+            this.lostFor += dt;
+        }
+        const right = handOf(sources, 'right');
+        const rightJoint = right?.hand.tracking ? right.hand.getJointById(COVER_JOINT) : null;
+        const covered = !!right?.squeezing ||
+            (tracked &&
+                !!rightJoint &&
+                rightJoint.getPosition().distance(this.handPosition) < COVER_DISTANCE * this.userScale());
+        // a hand out of sight, or covered, is neither open nor closed: losing it counts by LOST_TIME
+        if (tracked && left && !covered) {
+            const wasFist = this.openFor < FLICKER_TIME;
+            const closed = left.squeezing || (wasFist && foldedFingers(left.hand) >= HELD_FINGERS);
+            this.openFor = closed ? 0 : this.openFor + dt;
+        }
+        const fist = this.openFor < FLICKER_TIME;
+        this.rightFor = right?.squeezing ? this.rightFor + dt : 0;
+        const rightFist = this.rightFor >= FLICKER_TIME;
+        if (this.hold) {
+            if (!fist || this.lostFor > LOST_TIME || !this.on)
+                this.release();
+        }
+        else if (this.on && fist && !rightFist && this.lostFor < FLICKER_TIME && this.upright() && this.looking()) {
+            // a moment without the hand pauses the ring
+            if (tracked)
+                this.armed += dt;
+            if (this.armed >= ARM_TIME) {
+                this.armed = 0;
+                this.burstFor = 0;
+                this.popFor = 0;
+                this.take();
+            }
+        }
+        else {
+            this.armed = 0;
+        }
+        if (this.armed === 0)
+            this.pulse = 0;
+        this.ring.enabled = this.armed > 0 || this.burstFor < BURST_TIME;
+        if (this.ring.enabled)
+            this.placeRing(dt);
+        if (this.hold) {
+            this.popFor += dt;
+            this.place();
+        }
+    }
+    // whether the fist is upright, with its top in view
+    upright() {
+        this.handRotation.transformVector(Vec3.UP, up$2);
+        return up$2.y > (this.armed > 0 ? UPRIGHT_KEEP : UPRIGHT_START);
+    }
+    // whether the user looks at the top of the fist
+    looking() {
+        toFist.sub2(this.handPosition, this.camera.getPosition()).normalize();
+        return toFist.dot(this.camera.forward) > (this.armed > 0 ? LOOK_KEEP : LOOK_START);
+    }
+    // the ring on top of the fist: filling and throbbing, or full and bursting out
+    placeRing(dt) {
+        let progress = 1;
+        let pulse = 0;
+        let burst = 0;
+        let size;
+        if (this.burstFor < BURST_TIME) {
+            this.burstFor += dt;
+            burst = Math.min(this.burstFor / BURST_TIME, 1);
+            size = 1 + (BURST_SCALE - 1) * (1 - (1 - burst) * (1 - burst));
+        }
+        else {
+            const t = this.armed / ARM_TIME;
+            progress = t * (FILL_LINEAR + (1 - FILL_LINEAR) * t * t);
+            this.pulse += dt * (PULSE_START + (PULSE_END - PULSE_START) * t);
+            pulse = 0.5 + 0.5 * Math.sin(this.pulse * 2 * Math.PI);
+            size = RING_GROW + (1 - RING_GROW) * progress + 0.04 * pulse;
+        }
+        const s = this.userScale() * size;
+        this.handRotation.transformVector(Vec3.UP, up$2);
+        target
+            .copy(up$2)
+            .mulScalar(RING_LIFT * this.userScale())
+            .add(this.handPosition);
+        this.ring.setPosition(target);
+        this.ring.setRotation(this.handRotation);
+        this.ring.setLocalScale(RING_SIZE * s, 1, RING_SIZE * s);
+        this.material.setParameter('uProgress', progress);
+        this.material.setParameter('uPulse', pulse);
+        this.material.setParameter('uBurst', burst);
+    }
+    // records where the splat is and how it sits on the fist, and takes it
+    take() {
+        const { entity } = this;
+        this.homePosition.copy(entity.getLocalPosition());
+        this.homeRotation.copy(entity.getLocalRotation());
+        this.homeScale.copy(entity.getLocalScale());
+        const world = entity.getWorldTransform();
+        const s = this.userScale();
+        const aabb = entity.gsplat?.resource?.aabb;
+        if (this.scene || !aabb) {
+            // the floor where the user stands; the bounds of a scene reach its stray splats
+            inverse.copy(world).invert();
+            inverse.transformPoint(this.rig.getPosition(), this.pinLocal);
+            this.holdScale = SCENE_SCALE * s;
+            this.bottom = 0;
+        }
+        else {
+            // the bounds' middle, the bottom resting on the hand, as it stands upright now
+            const { halfExtents: h } = aabb;
+            this.pinLocal.copy(aabb.center);
+            this.holdScale = (OBJECT_SIZE * s) / (2 * Math.max(h.x, h.y, h.z, 1e-6));
+            turn.setTRS(Vec3.ZERO, entity.getRotation(), Vec3.ONE);
+            const m = turn.data;
+            this.bottom = this.holdScale * (Math.abs(m[1]) * h.x + Math.abs(m[5]) * h.y + Math.abs(m[9]) * h.z);
+        }
+        this.hold = true;
+        this.onHolding(true);
+    }
+    // the splat on the fist: its pinned point above the top, turned with the fist, popping up to its
+    // size from its pinned point as it arrives
+    place() {
+        const { entity } = this;
+        const pop = this.popFor < POP_TIME ? Math.max(overshoot(this.popFor / POP_TIME), 0.01) : 1;
+        const scale = this.holdScale * pop;
+        this.handRotation.transformVector(Vec3.UP, up$2);
+        target
+            .copy(up$2)
+            .mulScalar(LIFT * this.userScale() + this.bottom * pop)
+            .add(this.handPosition);
+        rotation$2.mul2(this.handRotation, this.homeRotation);
+        offset$2.copy(this.pinLocal).mulScalar(scale);
+        rotation$2.transformVector(offset$2, offset$2);
+        position.sub2(target, offset$2);
+        entity.setPosition(position);
+        entity.setRotation(rotation$2);
+        entity.setLocalScale(scale, scale, scale);
+    }
+    // puts a held splat back where it was
+    release() {
+        if (!this.hold)
+            return;
+        this.hold = false;
+        const { entity } = this;
+        entity.setLocalPosition(this.homePosition);
+        entity.setLocalRotation(this.homeRotation);
+        entity.setLocalScale(this.homeScale);
+        this.onHolding(false);
+    }
+}
+
+// Teleporting onto the scene's collision, when it has some: the navigation tests its arc against
+// it segment by segment, so walls and furniture stop the arc, and a hit is a target only where
+// someone could stand: the walk controller's capsule fits there (cameras/walk-controller.ts: 1.5 m
+// tall, 0.2 m radius, 0.2 m above the floor), and most of the ground within STAND_RADIUS is within
+// STAND_STEP of the hit's height (so a pew's rail or a fence top does not count). All of them
+// scale with the user (grabbing a scene scales them, xr-grab-move.ts). Without collision the arc
+// lands on the navigation's plane at the session's floor.
+const STAND_RADIUS = 0.3;
+const STAND_SHARE = 0.8;
+const STAND_STEP = 0.15;
+const CAPSULE_HEIGHT = 1.5;
+const CAPSULE_RADIUS = 0.2;
+const CAPSULE_HOVER = 0.2;
+// the device tests live with the quality decisions they drive (quality.ts); re-exported below
+// for the ui
+// The viewer reconfigures the camera (clear color, post effects) when state.xrMode changes
+const initXr = (global) => {
+    const { app, events, state, camera, renderer, root, localize, quality } = global;
+    const { xr } = app;
+    let destroyed = false;
+    let restoreFrame = null;
+    let rejectStart = null;
+    let rejectEnd = null;
+    const gone = () => new Error('the viewer has been destroyed');
+    // Engine availability is backend-aware (2.20+): under WebGPU a session is only
+    // reported available when it can start on the current device (browser exposes
+    // XRGPUBinding, e.g. Safari on Apple Vision Pro). A session the WebGPU device
+    // can't host may still run after reloading into WebGL, so keep the buttons
+    // visible then — the UI offers that reload when the session can't start directly.
+    let webglAR = false;
+    let webglVR = false;
+    const updateAvailable = () => {
+        if (destroyed)
+            return;
+        state.canStartAR = xr.isAvailable('immersive-ar');
+        state.canStartVR = xr.isAvailable('immersive-vr');
+        state.hasAR = state.canStartAR || webglAR;
+        state.hasVR = state.canStartVR || webglVR;
+    };
+    updateAvailable();
+    const availability = xr.on('available', updateAvailable);
+    // TEMPORARY, until the viewer requires an engine that clears Safari's XR depth
+    // (playcanvas/engine#9748): then delete this, its off() in destroy and xr-depth-clear.ts
+    const depthClear = renderer === 'webgpu' ? initXrDepthClear(app) : null;
+    if (renderer === 'webgpu') {
+        Promise.all([
+            XrManager.isDeviceSupported(DEVICETYPE_WEBGL2, 'immersive-ar'),
+            XrManager.isDeviceSupported(DEVICETYPE_WEBGL2, 'immersive-vr')
+        ]).then(([ar, vr]) => {
+            if (destroyed)
+                return;
+            webglAR = ar;
+            webglVR = vr;
+            updateAvailable();
+        });
+    }
+    const parent = camera.parent;
+    const parentPosition = new Vec3();
+    const parentRotation = new Quat();
+    const cameraPosition = new Vec3();
+    const cameraRotation = new Quat();
+    parent.addComponent('script');
+    // its models by input source (the script's own typing is Script)
+    const controllers = parent.script.create(XrControllers);
+    // the members of the navigation the viewer uses (the script's own typing is Script)
+    const navigation = parent.script.create(XrNavigation);
+    replaceTeleportArc(navigation);
+    // The user's scale, which grabbing a scene changes, and the navigation's distances and sizes
+    // with it: its arc's speed by the square root, so the arc's reach and height scale
+    let userScale = 1;
+    const unscaled = {
+        maxTeleportDistance: navigation.maxTeleportDistance,
+        movementSpeed: navigation.movementSpeed,
+        arcWidth: navigation.arcWidth,
+        teleportIndicatorRadius: navigation.teleportIndicatorRadius,
+        snapVerticalHeight: navigation.snapVerticalHeight,
+        snapVerticalBoostHeight: navigation.snapVerticalBoostHeight
+    };
+    const unscaledArcSpeed = navigation.teleportArcSpeed;
+    // The hand and controller models sit in the world, posed joint by joint in it, so they scale
+    // with the user too: otherwise a grown user's fingers spread out at real thickness
+    const scaleModel = (entity) => entity.setLocalScale(userScale, userScale, userScale);
+    // Hands drawn faint over the splats: the input profiles' generic hand, lit like the scene, looked
+    // heavy, and its steps at the scene's frame rate stood out (xr-hand-style.ts). Controllers keep
+    // their own models' materials
+    const handStyle = new XrHandStyle();
+    const modelAdded = app.on('xr:controller:add', (source, entity) => {
+        scaleModel(entity);
+        if (source.hand)
+            handStyle.apply(entity);
+    });
+    const setUserScale = (scale) => {
+        userScale = scale;
+        for (const key of Object.keys(unscaled)) {
+            navigation[key] = unscaled[key] * scale;
+        }
+        navigation.teleportArcSpeed = unscaledArcSpeed * Math.sqrt(scale);
+        for (const { entity } of controllers.controllers.values())
+            scaleModel(entity);
+    };
+    // The navigation turns the rig about the camera's local position, which is not where the
+    // camera is in a scaled rig: turn it about the camera's world position. TEMPORARY: the engine
+    // does the same with playcanvas/engine#9750. Once the viewer requires an engine with it, delete
+    // this and _rotateRigAroundCamera from the navigation's type
+    const turnPivot = new Vec3();
+    navigation._rotateRigAroundCamera = (degrees) => {
+        turnPivot.copy(camera.getPosition());
+        parent.rotateLocal(0, degrees, 0);
+        parent.translate(turnPivot.sub(camera.getPosition()));
+    };
+    // the scene's collision once it has loaded, for teleporting onto it (see STAND_SLOPE)
+    let collision = null;
+    const rayDir = new Vec3();
+    const rayHit = new Vec3();
+    const pushOut = { x: 0, y: 0, z: 0 };
+    // whether the arc's last hit is somewhere to stand, which the navigation checks right after
+    let hitStandable = false;
+    const canStand = (c, x, y, z) => {
+        const s = userScale;
+        const center = y + (CAPSULE_HOVER + CAPSULE_HEIGHT * 0.5) * s;
+        if (c.queryCapsule(x, center, z, (CAPSULE_HEIGHT * 0.5 - CAPSULE_RADIUS) * s, CAPSULE_RADIUS * s, pushOut)) {
+            return false;
+        }
+        // down-rays a voxel apart across the disc, or further apart for a grown user, so at most
+        // 13 across
+        const radius = STAND_RADIUS * s;
+        const standStep = STAND_STEP * s;
+        const step = Math.max(c.voxelResolution, radius / 6);
+        const cells = Math.floor(radius / step);
+        let rays = 0;
+        let ground = 0;
+        for (let i = -cells; i <= cells; i++) {
+            for (let j = -cells; j <= cells; j++) {
+                if (i * i + j * j > cells * cells)
+                    continue;
+                rays++;
+                if (c.queryRay(x + i * step, y + standStep, z + j * step, 0, -1, 0, 2 * standStep))
+                    ground++;
+            }
+        }
+        return ground >= rays * STAND_SHARE;
+    };
+    const castRay = (from, to) => {
+        if (!collision)
+            return null;
+        rayDir.sub2(to, from);
+        const length = rayDir.length();
+        if (length < 1e-6)
+            return null;
+        rayDir.mulScalar(1 / length);
+        const hit = collision.queryRay(from.x, from.y, from.z, rayDir.x, rayDir.y, rayDir.z, length);
+        if (!hit)
+            return null;
+        hitStandable = canStand(collision, hit.x, hit.y, hit.z);
+        return rayHit.set(hit.x, hit.y, hit.z);
+    };
+    const validDistance = navigation.isValidTeleportDistance.bind(navigation);
+    // The floor around where the arc lands, while it is aimed somewhere to stand (teleport-target.ts;
+    // elsewhere the floor joined to the hit is a fragment, if any). The navigation tests every
+    // landing it draws here, after its update and before the app's
+    const aimPoint = new Vec3();
+    let aimed = false;
+    let aimValid = false;
+    let target = null;
+    navigation.isValidTeleportDistance = (point) => {
+        const valid = validDistance(point) && (!collision || hitStandable);
+        aimPoint.copy(point);
+        aimed = true;
+        aimValid = valid;
+        return valid;
+    };
+    const updating = app.on('update', (dt) => {
+        if (target) {
+            if (aimed && aimValid && xr.active) {
+                target.show(aimPoint, navigation.validTeleportColor, dt, userScale);
+            }
+            else {
+                target.hide();
+            }
+        }
+        aimed = false;
+    });
+    // the floor under a point, from collision, or null without
+    const floorBelow = (point) => {
+        const hit = collision?.queryRay(point.x, point.y, point.z, 0, -1, 0, 1000);
+        return hit ? hit.y : null;
+    };
+    // Grabbing with both hands drags, turns and scales what was loaded, chosen once the splat
+    // entity has loaded, which is before XR can start: an object moves, scaling about the hands
+    // (the engine's XrManipulation, put back when the session ends, as the viewer's camera,
+    // collision and annotations assume the authored placement); in a scene the user moves instead
+    // (XrGrabMove), so the scene stays on its collision, and the user's feet on its floor.
+    let manipulation = null;
+    let grabMove = null;
+    // and holding it on top of the left fist like an ice cream (state.iceCream, a switch in the menu)
+    let iceCream = null;
+    const iceCreamChanged = events.on('iceCream:changed', (value) => {
+        if (iceCream)
+            iceCream.enabled = value;
+    });
+    // Where the session started, which the headset's recenter (holding the Meta button on Quest,
+    // the Digital Crown on Vision Pro) puts the user back to, at real size and with a grabbed
+    // object back in place: the browser moves the session's origin to where they stand, facing
+    // where they look, and fires reset on its reference space. Trackers that lose and regain the
+    // origin may fire it too.
+    const startPosition = new Vec3();
+    let startYaw = 0;
+    let startFloorY = 0;
+    let referenceSpace = null;
+    const placeAtStart = () => {
+        iceCream?.cancel();
+        grabMove?.reset();
+        manipulation?.reset();
+        parent.setPosition(startPosition);
+        parent.setEulerAngles(0, startYaw, 0);
+        // the navigation keeps the rig's height above the floor it stands on when it teleports,
+        // and has no setter for that floor. TEMPORARY: playcanvas/engine#9750 adds one; once the
+        // viewer requires an engine with it, set navigation.currentGroundHeight instead
+        navigation._currentGroundY = startFloorY;
+    };
+    const recentered = () => {
+        if (!destroyed && xr.active)
+            placeAtStart();
+    };
+    const forgetReferenceSpace = () => {
+        referenceSpace?.removeEventListener('reset', recentered);
+        referenceSpace = null;
+    };
+    const started = xr.on('start', () => {
+        if (destroyed)
+            return;
+        app.autoRender = true;
+        // cache original camera rig positions and rotations
+        parentPosition.copy(parent.getPosition());
+        parentRotation.copy(parent.getRotation());
+        cameraPosition.copy(camera.getPosition());
+        cameraRotation.copy(camera.getRotation());
+        // Start the session where the camera is, facing its heading with pitch and roll reset:
+        // where it looks across the ground, or where the top of its view points when it looks
+        // straight up or down. The yaw of getEulerAngles() only covers -90 to 90 degrees, so a
+        // camera facing further round would start the session facing the wrong way.
+        const { forward } = camera;
+        let x = forward.x;
+        let z = forward.z;
+        if (x * x + z * z < 1e-6) {
+            const { up } = camera;
+            const sign = forward.y < 0 ? 1 : -1;
+            x = up.x * sign;
+            z = up.z * sign;
+        }
+        // standing on the floor under the camera where collision has one, else at the plane
+        startFloorY = floorBelow(cameraPosition) ?? navigation.groundHeight;
+        startPosition.set(cameraPosition.x, startFloorY, cameraPosition.z);
+        startYaw = Math.atan2(-x, -z) * math.RAD_TO_DEG;
+        placeAtStart();
+        referenceSpace = xr._referenceSpace;
+        referenceSpace?.addEventListener('reset', recentered);
+        // the session's render parameters are the quality module's: fixed foveation and a frame
+        // rate target on standalone headsets
+        if (quality.xrFixedFoveation)
+            xr.fixedFoveation = 1;
+        const frameRate = quality.xrTargetFrameRate;
+        if (frameRate !== null && xr.supportedFrameRates?.includes(frameRate))
+            xr.updateTargetFrameRate(frameRate);
+        state.xrMode = xr.type === 'immersive-ar' ? 'ar' : 'vr';
+    });
+    const ended = xr.on('end', () => {
+        if (destroyed)
+            return;
+        app.autoRender = false;
+        forgetReferenceSpace();
+        // put a held splat back, and restore camera to pre-XR state, the rig to real size first, as
+        // the camera's position is set in the world
+        iceCream?.cancel();
+        grabMove?.reset();
+        parent.setPosition(parentPosition);
+        parent.setRotation(parentRotation);
+        camera.setPosition(cameraPosition);
+        camera.setRotation(cameraRotation);
+        manipulation?.reset();
+        state.xrMode = null;
+        // Restore the canvas to the correct position in the DOM after exiting XR. In
+        // some browsers (e.g. Chrome on Android) the canvas is moved to a new root
+        // during XR, and needs to be moved back on exit.
+        if (restoreFrame !== null)
+            cancelAnimationFrame(restoreFrame);
+        restoreFrame = requestAnimationFrame(() => {
+            restoreFrame = null;
+            if (destroyed)
+                return;
+            root.prepend(app.graphicsDevice.canvas);
+            app.renderNextFrame = true;
+        });
+    });
+    const start = async (mode) => {
+        if (destroyed)
+            throw gone();
+        if (mode !== 'ar' && mode !== 'vr')
+            throw new Error('startXR: mode must be ar or vr');
+        if (rejectStart || rejectEnd || xr.active)
+            throw new Error('startXR: a session is active or pending');
+        const type = mode === 'ar' ? 'immersive-ar' : 'immersive-vr';
+        if (!xr.isAvailable(type)) {
+            const offered = mode === 'ar' ? state.hasAR : state.hasVR;
+            throw new Error(offered ? 'startXR: reload with WebGL to start this session' : 'startXR: XR is not available');
+        }
+        const { nearClip, farClip } = camera.camera;
+        camera.camera.nearClip = 0.01;
+        camera.camera.farClip = 1000;
+        // while the browser's request is pending, for the hint about Safari's stalls (ui/xr-hint.ts)
+        events.fire('xrRequest:pending', true);
+        try {
+            await new Promise((resolve, reject) => {
+                rejectStart = reject;
+                xr.start(camera.camera, type, 'local-floor', {
+                    framebufferScaleFactor: quality.xrFramebufferScale,
+                    callback: (error) => {
+                        if (destroyed) {
+                            // Browser session requests cannot be cancelled. Close a late result.
+                            void xr.session?.end().catch(() => {
+                                /* already ended */
+                            });
+                            reject(gone());
+                        }
+                        else if (error) {
+                            reject(error);
+                        }
+                        else {
+                            resolve();
+                        }
+                    }
+                });
+            });
+            if (destroyed)
+                throw gone();
+        }
+        catch (error) {
+            if (!destroyed) {
+                camera.camera.nearClip = nearClip;
+                camera.camera.farClip = farClip;
+            }
+            throw error;
+        }
+        finally {
+            rejectStart = null;
+            if (!destroyed)
+                events.fire('xrRequest:pending', false);
+        }
+    };
+    const end = async () => {
+        if (destroyed)
+            throw gone();
+        if (rejectStart)
+            throw new Error('endXR: a session is still starting');
+        if (rejectEnd)
+            throw new Error('endXR: a session is already ending');
+        const { session } = xr;
+        if (!session)
+            return;
+        let onEnd;
+        try {
+            await new Promise((resolve, reject) => {
+                rejectEnd = reject;
+                onEnd = resolve;
+                xr.once('end', onEnd);
+                // Use the native promise too: XrManager.end's callback does not report a
+                // rejected session.end() promise. The engine handles browser-initiated ends.
+                session.end().catch(reject);
+            });
+            if (destroyed)
+                throw gone();
+        }
+        finally {
+            xr.off('end', onEnd);
+            rejectEnd = null;
+        }
+    };
+    // the Quality slider's position one step down (-1) or up (1) from the one in use among those
+    // the session can hold, or null at either end; a stored position the session cannot hold
+    // (Max in a standalone headset) is not in use, nor reachable, here
+    const qualityStep = (direction) => {
+        const available = state.qualityAvailable;
+        const index = available.indexOf(quality.level);
+        return index < 0 ? null : (available[index + direction] ?? null);
+    };
+    // The head-locked menu, which takes the selects that start on it (or anywhere while it is open)
+    // before the navigation aims with them
+    const menu = new XrHeadMenu(app, camera, [
+        { label: () => localize('tooltip.reset-camera'), action: placeAtStart },
+        {
+            label: () => `${localize('settings.quality')}: ${localize(`settings.quality-${quality.level}`)}`,
+            stepper: {
+                can: (direction) => qualityStep(direction) !== null,
+                step: (direction) => {
+                    const next = qualityStep(direction);
+                    if (next)
+                        state.quality = next;
+                }
+            }
+        },
+        {
+            label: () => localize('settings.stochastic'),
+            checked: () => state.stochastic,
+            visible: () => quality.stochasticAllowed,
+            action: () => {
+                state.stochastic = !state.stochastic;
+            }
+        },
+        {
+            label: () => localize('xr-menu.ice-cream'),
+            checked: () => state.iceCream,
+            // tracked hands only: a session without them has no fist
+            visible: () => !!iceCream && xr.input.inputSources.some((source) => !!source.hand),
+            action: () => {
+                state.iceCream = !state.iceCream;
+            }
+        },
+        {
+            label: () => localize(xr.type === 'immersive-ar' ? 'xr-menu.exit-ar' : 'xr-menu.exit-vr'),
+            action: () => {
+                void end().catch(() => {
+                    /* the browser may already be ending the session */
+                });
+            }
+        }
+    ], {
+        // a standalone headset's hands point where they select; the Vision Pro's eyes do
+        pointingHands: !visionPro
+    });
+    // and, while the splat is held, takes the rest: the world to teleport in is in the hand
+    const isSystemSelect = navigation._isSystemSelect.bind(navigation);
+    navigation._isSystemSelect = (source) => isSystemSelect(source) || menu.select(source) || !!iceCream?.holding;
+    const cancel = events.on('inputEvent', (event) => {
+        if (event === 'cancel' && xr.active) {
+            void end().catch(() => {
+                /* the browser may already be ending the session */
+            });
+        }
+    });
+    return {
+        start,
+        end,
+        setCollision: (value) => {
+            collision = value;
+            navigation.castRay = castRay;
+            target?.destroy();
+            target = value instanceof VoxelCollision ? new TeleportTarget(app, value) : null;
+        },
+        setGrabTarget: (entity, scene) => {
+            if (scene) {
+                grabMove = new XrGrabMove(app, parent, setUserScale);
+            }
+            else {
+                manipulation = parent.script.create(XrManipulation, {
+                    properties: { target: entity, scalePivot: 'hands', minScale: 0.25, maxScale: 4 }
+                });
+            }
+            // A held scene's grab scales the user, so the scene in the hand; an object's would
+            // move the object the hold places, so it waits (the event the engine's XrMenu pauses
+            // XrManipulation with)
+            iceCream = new XrIceCream(app, entity, scene, parent, camera, () => userScale, (holding) => {
+                if (manipulation)
+                    app.fire('xr:menu:active', holding);
+            });
+            iceCream.enabled = state.iceCream;
+        },
+        destroy: () => {
+            destroyed = true;
+            availability.off();
+            depthClear?.off();
+            started.off();
+            ended.off();
+            cancel.off();
+            updating.off();
+            modelAdded.off();
+            handStyle.destroy();
+            forgetReferenceSpace();
+            menu.destroy();
+            iceCreamChanged.off();
+            iceCream?.destroy();
+            iceCream = null;
+            grabMove?.destroy();
+            grabMove = null;
+            target?.destroy();
+            target = null;
+            if (restoreFrame !== null)
+                cancelAnimationFrame(restoreFrame);
+            rejectStart?.(gone());
+            rejectEnd?.(gone());
+            state.xrMode = null;
+        }
     };
 };
 
@@ -88061,9 +100054,12 @@ const initUI = (global, viewer, getPicker, getCameraProgress) => {
         'orbitCamera',
         'flyCamera',
         'fpsCamera',
-        'performanceModeRow',
-        'performanceModeCheck',
-        'performanceModeOption',
+        'qualityValue',
+        'qualityTrack',
+        'qualityRail',
+        'qualityThumb',
+        'stochasticRow',
+        'stochasticCheck',
         'gamingControlsRow',
         'gamingControlsCheck',
         'gamingControlsOption',
@@ -88088,8 +100084,8 @@ const initUI = (global, viewer, getPicker, getCameraProgress) => {
         return acc;
     }, {});
     // populate the info panel: versions, the renderer and the gpu it runs on
-    dom.appVersionLabel.textContent = version$1;
-    dom.engineVersionLabel.textContent = version$2;
+    dom.appVersionLabel.textContent = version;
+    dom.engineVersionLabel.textContent = version$1;
     dom.rendererName.textContent = global.renderer === 'webgpu' ? 'WebGPU' : 'WebGL 2';
     dom.gpuName.textContent = getGpuName(global.app.graphicsDevice);
     // Remove focus from buttons after click so keyboard input isn't captured by the UI
@@ -88135,15 +100131,55 @@ const initUI = (global, viewer, getPicker, getCameraProgress) => {
     on('loaded:changed', () => {
         dom.loadingWrap.classList.add('sse-hidden');
     });
-    // Performance mode toggle
-    dom.performanceModeRow.addEventListener('click', () => {
-        state.performanceMode = !state.performanceMode;
+    // The Quality slider: a stop per position, the ones the device cannot hold disabled. A press
+    // or drag on the track moves the thumb to the nearest available stop
+    const qualityStops = Array.from(dom.qualityRail.querySelectorAll('.sse-qualityStop'));
+    const stopLeft = (index) => `${(index / (QUALITY_LEVELS.length - 1)) * 100}%`;
+    qualityStops.forEach((stop, i) => {
+        stop.style.left = stopLeft(i);
     });
-    const updatePerformanceMode = () => {
-        dom.performanceModeCheck.classList.toggle('sse-active', state.performanceMode);
+    const pickQuality = (event) => {
+        const rail = dom.qualityRail.getBoundingClientRect();
+        const t = rail.width > 0 ? Math.min(1, Math.max(0, (event.clientX - rail.left) / rail.width)) : 0;
+        const at = t * (QUALITY_LEVELS.length - 1);
+        // the nearest available stop to the pointer
+        const nearest = state.qualityAvailable
+            .map((level) => ({ level, distance: Math.abs(QUALITY_LEVELS.indexOf(level) - at) }))
+            .sort((a, b) => a.distance - b.distance)[0];
+        if (nearest && nearest.level !== state.quality)
+            state.quality = nearest.level;
     };
-    on('performanceMode:changed', updatePerformanceMode);
-    updatePerformanceMode();
+    dom.qualityTrack.addEventListener('pointerdown', (event) => {
+        if (event.button !== 0)
+            return;
+        dom.qualityTrack.setPointerCapture(event.pointerId);
+        pickQuality(event);
+    });
+    dom.qualityTrack.addEventListener('pointermove', (event) => {
+        if (dom.qualityTrack.hasPointerCapture(event.pointerId))
+            pickQuality(event);
+    });
+    const updateQuality = () => {
+        dom.qualityThumb.style.left = stopLeft(QUALITY_LEVELS.indexOf(state.quality));
+        const budget = global.quality.levels().find((entry) => entry.level === state.quality)?.budget;
+        dom.qualityValue.textContent = `${localize(`settings.quality-${state.quality}`)}${budget == null ? '' : ` · ${budget}M`}`;
+        qualityStops.forEach((stop, i) => {
+            stop.classList.toggle('sse-disabled', !state.qualityAvailable.includes(QUALITY_LEVELS[i]));
+        });
+    };
+    on('quality:changed', updateQuality);
+    on('qualityAvailable:changed', updateQuality);
+    updateQuality();
+    // The stochastic renderer's toggle, where the device offers it
+    dom.stochasticRow.classList.toggle('sse-hidden', !global.quality.stochasticAllowed);
+    dom.stochasticRow.addEventListener('click', () => {
+        state.stochastic = !state.stochastic;
+    });
+    const updateStochastic = () => {
+        dom.stochasticCheck.classList.toggle('sse-active', state.stochastic);
+    };
+    on('stochastic:changed', updateStochastic);
+    updateStochastic();
     // Gaming mode toggle (settings row visible on mobile only)
     dom.gamingControlsRow.addEventListener('click', () => {
         state.gamingControls = !state.gamingControls;
@@ -88372,6 +100408,12 @@ const initUI = (global, viewer, getPicker, getCameraProgress) => {
     disposers.push(initControlsHint(viewer, root, localize));
     disposers.push(initFullscreenControls(viewer, root));
     disposers.push(initXrControls(viewer, root));
+    if (visionPro) {
+        disposers.push(initXrHint(viewer, root));
+    }
+    if (global.config.vr) {
+        disposers.push(initVrPrompt(viewer, root, localize));
+    }
     // Collision overlay: a settings row and the matching info-panel shortcut, shown only when
     // the scene ships an overlay
     on('hasCollisionOverlay:changed', (value) => {
@@ -88436,7 +100478,7 @@ const initUI = (global, viewer, getPicker, getCameraProgress) => {
     };
 };
 
-var uiHtml = "\n<canvas></canvas>\n\n<div class=\"sse-sceneLayer\"></div>\n\n<div class=\"sse-ui\">\n    <div class=\"sse-poster\"></div>\n\n    \n    <a class=\"sse-viewerBranding sse-hidden\" target=\"_blank\" rel=\"noopener noreferrer\">\n        <svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"64 64 384 384\" role=\"img\" aria-label=\"SuperSplat\">\n            <path\n                fill=\"#F26722\"\n                d=\"M129.83,217c9.75,0,17.64-7.9,17.64-17.64s-7.9-17.64-17.64-17.64-17.64,7.9-17.64,17.64,7.9,17.64,17.64,17.64Z\"\n            />\n            <path\n                fill=\"#F26722\"\n                d=\"M388.74,253.94c-12.46,0-22.57,10.11-22.57,22.57s10.11,22.57,22.57,22.57,22.57-10.11,22.57-22.57-10.11-22.57-22.57-22.57h0Z\"\n            />\n            <path\n                fill=\"#F26722\"\n                d=\"M345.26,161.1h.02c.37-.05.65-.22.97-.33,16.78-2.32,29.75-16.57,29.75-33.99,0-19.04-15.43-34.46-34.46-34.46s-34.46,15.43-34.46,34.46c0,4.29.88,8.35,2.32,12.14.04.12-.01.25.04.38,10.55,29.18-22.33,23.62-39.07,20.74-.49-.09-.88-.07-1.32-.11-4.27-.56-8.59-.97-13.03-.97-53.93,0-97.64,43.71-97.64,97.64,0,9.84,1.48,19.32,4.2,28.28.04.1,0,.17.05.27,8.97,30.15-14.83,25.49-25.52,25.69-1.04-.13-2.09-.32-3.18-.32-13.51,0-24.45,10.94-24.45,24.45s10.94,24.45,24.45,24.45c11.69,0,21.44-8.22,23.85-19.19h.02c6.31-26.57,25.9-18.02,31.15-12.67.2.2.4.26.59.42,17.44,16.25,40.75,26.26,66.47,26.26.67,0,1.34-.09,2.01-.1.66.01,1.31.04,2.04.04,9.7-.04,17.82,10.91,4.94,29.68h.13c-4.42,6.01-7.1,13.36-7.1,21.41,0,20.09,16.29,36.39,36.39,36.39s36.39-16.29,36.39-36.39c0-15.4-9.61-28.49-23.12-33.81-.32-.15-.61-.29-.98-.45-12.28-4.94-25.43-17.69-6.89-27.1l-.04-.1c31.93-16.06,53.88-49.02,53.88-87.2,0-21.15-6.8-40.68-18.23-56.66-.13-.23-.23-.47-.44-.74-23.15-31.67-2.37-36.07,10.3-38.09h-.01Z\"\n            />\n            <path\n                fill=\"#fff\"\n                d=\"M230.79,284.71c0,7.95-6.44,14.38-14.38,14.38s-14.38-6.44-14.38-14.38v-22.95c0-7.95,6.44-14.38,14.38-14.38s14.38,6.44,14.38,14.38v22.95Z\"\n            />\n            <path\n                fill=\"#fff\"\n                d=\"M309.78,284.71c0,7.95-6.44,14.38-14.38,14.38s-14.38-6.44-14.38-14.38v-22.95c0-7.95,6.44-14.38,14.38-14.38s14.38,6.44,14.38,14.38v22.95Z\"\n            />\n        </svg>\n        <span>SuperSplat</span>\n    </a>\n\n    \n    <div class=\"sse-loadingWrap\">\n        <div class=\"sse-loadingText\"></div>\n        <div class=\"sse-loadingBar\"></div>\n    </div>\n\n    <div class=\"sse-controlsWrap sse-hidden\">\n        \n        <div class=\"sse-timelineContainer sse-hidden\">\n            <div class=\"sse-line\"></div>\n            <div class=\"sse-handle\"></div>\n            <div class=\"sse-time sse-hidden\">0:00</div>\n        </div>\n\n        \n        <div class=\"sse-buttonsContainer\">\n            <div class=\"sse-buttonGroup\">\n                <button class=\"sse-play sse-controlButton sse-hidden\">\n                    <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\">\n                        <g class=\"sse-stroke\"><use href=\"#playIcon\" /></g>\n                        <g class=\"sse-fill\"><use href=\"#playIcon\" /></g>\n                    </svg>\n                </button>\n                <button class=\"sse-pause sse-controlButton sse-hidden\">\n                    <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24px\" height=\"24px\">\n                        <g class=\"sse-stroke\"><use href=\"#pauseIcon\" /></g>\n                        <g class=\"sse-fill\"><use href=\"#pauseIcon\" /></g>\n                    </svg>\n                </button>\n            </div>\n\n            <div class=\"sse-spacer\"></div>\n\n            <div class=\"sse-buttonGroup\">\n                <button class=\"sse-orbitCamera sse-controlButton sse-toggle sse-left\">\n                    <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\">\n                        <g class=\"sse-stroke\"><use href=\"#orbitIcon\" /></g>\n                        <g class=\"sse-fill\"><use href=\"#orbitIcon\" /></g>\n                    </svg>\n                </button>\n                <button class=\"sse-flyCamera sse-controlButton sse-toggle sse-right\">\n                    <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\">\n                        <g class=\"sse-stroke\"><use href=\"#flyIcon\" /></g>\n                        <g class=\"sse-fill\"><use href=\"#flyIcon\" /></g>\n                    </svg>\n                </button>\n                <button class=\"sse-fpsCamera sse-controlButton sse-toggle sse-right sse-hidden\">\n                    <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\">\n                        <g class=\"sse-stroke\"><use href=\"#walkIcon\" /></g>\n                        <g class=\"sse-fill\"><use href=\"#walkIcon\" /></g>\n                    </svg>\n                </button>\n            </div>\n\n            <div class=\"sse-buttonGroup\">\n                \n                <button class=\"sse-settings sse-controlButton\">\n                    <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\">\n                        <g class=\"sse-stroke\"><use href=\"#settingsIcon\" /></g>\n                        <g class=\"sse-fill\"><use href=\"#settingsIcon\" /></g>\n                    </svg>\n                </button>\n                <button class=\"sse-controlsButton sse-controlButton\">\n                    <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\">\n                        <g class=\"sse-stroke\"><use href=\"#keyboardIcon\" /></g>\n                        <g class=\"sse-fill\"><use href=\"#keyboardIcon\" /></g>\n                    </svg>\n                </button>\n                <button class=\"sse-info sse-controlButton\">\n                    <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\">\n                        <g class=\"sse-stroke\"><use href=\"#infoIcon\" /></g>\n                        <g class=\"sse-fill\"><use href=\"#infoIcon\" /></g>\n                    </svg>\n                </button>\n                <button class=\"sse-arMode sse-controlButton sse-hidden\">\n                    <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\">\n                        <g class=\"sse-stroke\"><use href=\"#arIcon\" /></g>\n                        <g class=\"sse-fill\"><use href=\"#arIcon\" /></g>\n                    </svg>\n                </button>\n                <button class=\"sse-vrMode sse-controlButton sse-hidden\">\n                    <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\">\n                        <g class=\"sse-stroke\"><use href=\"#vrIcon\" /></g>\n                        <g class=\"sse-fill\"><use href=\"#vrIcon\" /></g>\n                    </svg>\n                </button>\n                <button class=\"sse-enterFullscreen sse-controlButton\">\n                    <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\">\n                        <g class=\"sse-stroke\"><use href=\"#enterFullscreenIcon\" /></g>\n                        <g class=\"sse-fill\"><use href=\"#enterFullscreenIcon\" /></g>\n                    </svg>\n                </button>\n                <button class=\"sse-exitFullscreen sse-controlButton sse-hidden\">\n                    <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\">\n                        <g class=\"sse-stroke\"><use href=\"#exitFullscreenIcon\" /></g>\n                        <g class=\"sse-fill\"><use href=\"#exitFullscreenIcon\" /></g>\n                    </svg>\n                </button>\n            </div>\n        </div>\n    </div>\n\n    \n    <div class=\"sse-joystickBase sse-hidden\">\n        <div class=\"sse-joystick\"></div>\n    </div>\n\n    \n    <div class=\"sse-annotationNav sse-hidden\">\n        <button class=\"sse-annotationPrev\">\n            <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\">\n                <g class=\"sse-stroke\"><use href=\"#chevronLeftIcon\" /></g>\n                <g class=\"sse-fill\"><use href=\"#chevronLeftIcon\" /></g>\n            </svg>\n        </button>\n        <div class=\"sse-annotationInfo\">\n            <span class=\"sse-annotationNavNumber\"></span>\n            <span class=\"sse-annotationNavTitle\"></span>\n        </div>\n        <button class=\"sse-annotationNext\">\n            <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\">\n                <g class=\"sse-stroke\"><use href=\"#chevronRightIcon\" /></g>\n                <g class=\"sse-fill\"><use href=\"#chevronRightIcon\" /></g>\n            </svg>\n        </button>\n    </div>\n\n    \n    <div class=\"sse-controlsHint sse-hidden\">\n        <div class=\"sse-controlsHintHeader\">\n            <svg class=\"sse-controlsHintIcon\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n                <use href=\"#orbitIcon\" />\n            </svg>\n            <div class=\"sse-controlsHintTitles\">\n                <span class=\"sse-controlsHintTitle\"></span>\n                <span class=\"sse-controlsHintSubtitle\"></span>\n            </div>\n            <button class=\"sse-controlsHintClose sse-panelButton\">\n                <svg xmlns=\"http://www.w3.org/2000/svg\"><use href=\"#closeIcon\" /></svg>\n            </button>\n        </div>\n        <div class=\"sse-controlsHintRows\"></div>\n    </div>\n\n    \n    <div class=\"sse-settingsPanel sse-hidden\">\n        \n        <div class=\"sse-settingsGroup\">\n            <div class=\"sse-annotationsRow sse-settingsRow\">\n                <div class=\"sse-annotationsOption\" data-i18n=\"settings.show-annotations\">Show Annotations</div>\n                <div class=\"sse-annotationsCheck sse-toggleSwitch sse-active\">\n                    <div class=\"sse-toggleTrack\"><div class=\"sse-toggleThumb\"></div></div>\n                </div>\n            </div>\n            <div class=\"sse-showCollisionRow sse-settingsRow sse-hidden\">\n                <div class=\"sse-showCollisionOption\" data-i18n=\"settings.show-collision\">Show Collision</div>\n                <div class=\"sse-showCollisionCheck sse-toggleSwitch\">\n                    <div class=\"sse-toggleTrack\"><div class=\"sse-toggleThumb\"></div></div>\n                </div>\n            </div>\n        </div>\n        \n        <div class=\"sse-settingsGroup\">\n            <div class=\"sse-gamingControlsRow sse-settingsRow\">\n                <div class=\"sse-gamingControlsOption\" data-i18n=\"settings.gaming-controls\">Gaming Controls</div>\n                <div class=\"sse-gamingControlsCheck sse-toggleSwitch\">\n                    <div class=\"sse-toggleTrack\"><div class=\"sse-toggleThumb\"></div></div>\n                </div>\n            </div>\n            <div class=\"sse-performanceModeRow sse-settingsRow\">\n                <div class=\"sse-performanceModeOption\" data-i18n=\"settings.performance-mode\">Performance Mode</div>\n                <div class=\"sse-performanceModeCheck sse-toggleSwitch\">\n                    <div class=\"sse-toggleTrack\"><div class=\"sse-toggleThumb\"></div></div>\n                </div>\n            </div>\n        </div>\n        \n        <div class=\"sse-settingsGroup\">\n            <div class=\"sse-settingsRow\">\n                <button class=\"sse-frame\" data-i18n=\"settings.frame\">Frame</button>\n                <button class=\"sse-reset\" data-i18n=\"settings.reset\">Reset</button>\n            </div>\n        </div>\n    </div>\n\n    \n    <div class=\"sse-tooltip\"></div>\n\n    \n    <div class=\"sse-infoPanel sse-hidden\">\n        <div class=\"sse-infoPanelContent\" onpointerdown=\"event.stopPropagation()\" onwheel=\"event.stopPropagation()\">\n            <button class=\"sse-infoClose sse-panelButton\">\n                <svg xmlns=\"http://www.w3.org/2000/svg\"><use href=\"#closeIcon\" /></svg>\n            </button>\n            <a\n                class=\"sse-viewerTitle\"\n                href=\"https://github.com/playcanvas/supersplat-viewer\"\n                target=\"_blank\"\n                rel=\"noopener noreferrer\"\n            >\n                <svg class=\"sse-viewerLogo\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n                    <use href=\"#supersplatIcon\" />\n                </svg>\n                <span class=\"sse-title-name\">SuperSplat Viewer</span>\n                <span class=\"sse-title-version\">v<span class=\"sse-appVersionLabel\"></span></span>\n            </a>\n            <div class=\"sse-infoGpu\">\n                <span class=\"sse-rendererName\"></span>\n                <span class=\"sse-gpuName\"></span>\n            </div>\n            <div class=\"sse-infoLinks\">\n                <a\n                    class=\"sse-infoLink\"\n                    href=\"https://github.com/playcanvas/engine\"\n                    target=\"_blank\"\n                    rel=\"noopener noreferrer\"\n                >\n                    <span>PlayCanvas Engine</span>\n                    <span class=\"sse-infoLinkVersion\">v<span class=\"sse-engineVersionLabel\"></span></span>\n                </a>\n            </div>\n            <div class=\"sse-infoShortcuts\">\n                <h1 data-i18n=\"help.section.modes\">Mode Switching</h1>\n                <div class=\"sse-infoShortcut\">\n                    <span data-i18n=\"help.action.orbit-mode\">Orbit Mode</span>\n                    <kbd class=\"sse-key\">1</kbd>\n                </div>\n                <div class=\"sse-infoShortcut\">\n                    <span data-i18n=\"help.action.fly-mode\">Fly Mode</span>\n                    <kbd class=\"sse-key\">2</kbd>\n                </div>\n                <div class=\"sse-walkShortcut sse-infoShortcut\">\n                    <span data-i18n=\"help.action.toggle-walk\">Toggle Walk</span>\n                    <kbd class=\"sse-key\">3</kbd>\n                </div>\n                <div class=\"sse-infoShortcut\">\n                    <span data-i18n=\"help.action.toggle-gaming\">Toggle Gaming Controls</span>\n                    <kbd class=\"sse-key\">G</kbd>\n                </div>\n                <div class=\"sse-showCollisionShortcut sse-infoShortcut sse-hidden\">\n                    <span data-i18n=\"help.action.show-collision\">Show Collision</span>\n                    <kbd class=\"sse-key\">V</kbd>\n                </div>\n                <div class=\"sse-playShortcut sse-infoShortcut\">\n                    <span data-i18n=\"help.action.play-pause\">Play / Pause</span>\n                    <kbd class=\"sse-key\" data-i18n=\"help.key.space\">Space</kbd>\n                </div>\n                <div class=\"sse-infoShortcut\">\n                    <span data-i18n=\"help.action.toggle-controls\">Toggle Controls</span>\n                    <kbd class=\"sse-key\">H</kbd>\n                </div>\n                <div class=\"sse-infoShortcut\">\n                    <span data-i18n=\"help.action.toggle-help\">Toggle Info</span>\n                    <span class=\"sse-keys\"><kbd class=\"sse-key\">Shift</kbd><kbd class=\"sse-key\">H</kbd></span>\n                </div>\n                <div class=\"sse-infoShortcut\">\n                    <span data-i18n=\"help.action.exit-cancel\">Exit / Cancel</span>\n                    <kbd class=\"sse-key\" data-i18n=\"help.key.esc\">Esc</kbd>\n                </div>\n            </div>\n        </div>\n    </div>\n\n    \n    <div class=\"sse-xrModal sse-hidden\" onwheel=\"event.stopPropagation()\">\n        <div class=\"sse-xrModalContent\" onpointerdown=\"event.stopPropagation()\">\n            <h2 data-i18n=\"xr-modal.title\">WebGL Required</h2>\n            <p data-i18n=\"xr-modal.message\">\n                AR and VR are not supported on the WebGPU renderer. Pressing OK will reload the viewer with WebGL.\n            </p>\n            <div class=\"sse-xrModalButtons\">\n                <button class=\"sse-xrModalCancel\" data-i18n=\"xr-modal.cancel\">Cancel</button>\n                <button class=\"sse-xrModalOk\" data-i18n=\"xr-modal.ok\">OK</button>\n            </div>\n        </div>\n    </div>\n</div>\n\n<svg>\n    <symbol id=\"playIcon\" viewBox=\"-2 0 24 24\">\n        <path\n            d=\"M1 1.98725C1 1.20022 1.87789 0.730421 2.5332 1.16694L14.5605 9.18061C15.146 9.57066 15.146 10.4302 14.5605 10.8203L2.5332 18.833C1.87788 19.2695 1 18.7997 1 18.0126V1.98725Z\"\n            transform=\"translate(2 2)\"\n        />\n    </symbol>\n    <symbol id=\"pauseIcon\" viewBox=\"0 0 20 20\">\n        <path d=\"M5 16V4h3v12H5zm7-12h3v12h-3V4z\" />\n    </symbol>\n    <symbol id=\"orbitIcon\" viewBox=\"-2 -2 20 20\">\n        <path\n            fill-rule=\"evenodd\"\n            clip-rule=\"evenodd\"\n            d=\"M4.44728 1.7561C6.14077 0.763957 8.53159 1.57857 10.4375 3.58357C12.75 3.02099 14.4585 3.40647 14.6491 4.73071C14.7831 5.66256 14.139 6.87994 12.9942 8.09008C13.7427 10.7586 13.2413 13.2551 11.5527 14.2444C9.85867 15.2369 7.46679 14.4208 5.56056 12.4143C3.34914 12.9521 1.691 12.6254 1.38412 11.4371L1.35092 11.2698C1.21678 10.3379 1.85972 9.11931 3.00457 7.90909C2.28693 5.34963 2.72037 2.94871 4.24741 1.88435L4.44728 1.7561ZM11.9889 9.03995C11.002 9.88136 9.79998 10.6808 8.47918 11.3303L8.13673 11.4937C7.70533 11.6942 7.28148 11.8681 6.8698 12.0172C7.32387 12.4287 7.79226 12.7587 8.25326 12.9983C9.39237 13.5903 10.3231 13.574 10.946 13.2092C11.5745 12.841 12.0613 12.0184 12.1263 10.7086C12.1518 10.1934 12.1065 9.62999 11.9889 9.03995ZM3.46225 9.20206C3.15128 9.5802 2.91825 9.93412 2.76238 10.2489C2.54363 10.6909 2.51958 10.967 2.53842 11.0985C2.54902 11.1721 2.56635 11.2146 2.67058 11.2763C2.81832 11.3636 3.12484 11.4626 3.6478 11.467C3.95641 11.4696 4.3074 11.4373 4.69402 11.3707C4.45655 11.0439 4.23084 10.6971 4.02215 10.3303C3.81017 9.95774 3.62416 9.58004 3.46225 9.20206ZM10.0358 4.9423C9.42018 5.13611 8.75205 5.40184 8.05014 5.74698C6.61265 6.45384 5.33887 7.34291 4.37175 8.24373C4.55213 8.73829 4.78227 9.2401 5.06511 9.73722C5.33995 10.2202 5.64271 10.6614 5.96355 11.0575C6.5793 10.8637 7.24782 10.5987 7.94988 10.2535C9.38732 9.54667 10.6605 8.65688 11.6276 7.7561C11.4473 7.26173 11.2176 6.76019 10.9349 6.26326C10.66 5.78001 10.3568 5.33855 10.0358 4.9423ZM7.74675 3.00219C6.60759 2.41015 5.67698 2.42644 5.05405 2.79126C4.42548 3.15953 3.93866 3.98199 3.87371 5.29191C3.84822 5.80668 3.89236 6.36967 4.00978 6.95922C4.91091 6.19088 5.9923 5.45862 7.17905 4.84269L7.52084 4.67016C8.07056 4.39986 8.6096 4.17089 9.12957 3.98266C8.67568 3.57138 8.20757 3.24172 7.74675 3.00219ZM12.3522 4.53344C12.0433 4.53086 11.6918 4.56177 11.3047 4.6285C11.5425 4.95566 11.7689 5.3029 11.9779 5.67016C12.1897 6.04255 12.3753 6.41999 12.5371 6.79777C12.8481 6.41965 13.0818 6.06635 13.2376 5.75154C13.4564 5.30973 13.4804 5.03352 13.4616 4.90193C13.451 4.82831 13.4337 4.7859 13.3294 4.7242C13.1817 4.63684 12.8753 4.53787 12.3522 4.53344Z\"\n        />\n    </symbol>\n    <symbol id=\"flyIcon\" viewBox=\"-2 -2 20 20\">\n        <path\n            fill-rule=\"evenodd\"\n            clip-rule=\"evenodd\"\n            d=\"M12 1.33337C13.4727 1.33337 14.6666 2.52728 14.6666 4.00004C14.6666 5.4728 13.4727 6.66671 12 6.66671C11.4931 6.66671 11.0194 6.52491 10.6159 6.27934L10.2721 6.62374C10.0345 6.86142 9.90102 7.18411 9.90102 7.52022V8.47986C9.90102 8.81597 10.0345 9.13866 10.2721 9.37634L10.6159 9.72009C11.0193 9.47463 11.4932 9.33337 12 9.33337C13.4727 9.33337 14.6666 10.5273 14.6666 12C14.6666 13.4728 13.4727 14.6667 12 14.6667C10.5272 14.6667 9.33331 13.4728 9.33331 12C9.33331 11.4932 9.47457 11.0194 9.72003 10.6159L9.37628 10.2722C9.1386 10.0345 8.81591 9.90108 8.4798 9.90108H7.52016C7.18405 9.90108 6.86136 10.0345 6.62368 10.2722L6.27928 10.6159C6.52485 11.0195 6.66665 11.4931 6.66665 12C6.66665 13.4728 5.47274 14.6667 3.99998 14.6667C2.52722 14.6667 1.33331 13.4728 1.33331 12C1.33331 10.5273 2.52722 9.33337 3.99998 9.33337C4.50658 9.33337 4.98008 9.47481 5.38344 9.72009L5.72784 9.37634C5.9655 9.13866 6.09894 8.81597 6.09894 8.47986V7.52022C6.09894 7.18411 5.9655 6.86142 5.72784 6.62374L5.38344 6.27934C4.98001 6.52473 4.5067 6.66671 3.99998 6.66671C2.52722 6.66671 1.33331 5.4728 1.33331 4.00004C1.33331 2.52728 2.52722 1.33337 3.99998 1.33337C5.47274 1.33337 6.66665 2.52728 6.66665 4.00004C6.66665 4.50676 6.52467 4.98008 6.27928 5.3835L6.62368 5.72791C6.86136 5.96556 7.18405 6.099 7.52016 6.099H8.4798C8.81591 6.099 9.1386 5.96556 9.37628 5.72791L9.72003 5.3835C9.47475 4.98014 9.33331 4.50664 9.33331 4.00004C9.33331 2.52728 10.5272 1.33337 12 1.33337ZM3.99998 10.3998C3.11632 10.3998 2.39972 11.1164 2.39972 12C2.39972 12.8837 3.11632 13.6003 3.99998 13.6003C4.88364 13.6003 5.60024 12.8837 5.60024 12C5.60024 11.7911 5.55917 11.5919 5.48631 11.4089L4.41469 12.4812C4.16723 12.7284 3.76625 12.7286 3.51886 12.4812C3.27147 12.2338 3.27158 11.8328 3.51886 11.5853L4.59047 10.5131C4.40769 10.4404 4.20862 10.3998 3.99998 10.3998ZM12 10.3998C11.7911 10.3998 11.5918 10.4403 11.4088 10.5131L12.4811 11.5853C12.7284 11.8328 12.7285 12.2338 12.4811 12.4812C12.2337 12.7286 11.8327 12.7284 11.5853 12.4812L10.513 11.4089C10.4402 11.5918 10.3997 11.7912 10.3997 12C10.3997 12.8837 11.1163 13.6003 12 13.6003C12.8836 13.6003 13.6002 12.8837 13.6002 12C13.6002 11.1164 12.8836 10.3998 12 10.3998ZM3.99998 2.39978C3.11632 2.39978 2.39972 3.11639 2.39972 4.00004C2.39972 4.8837 3.11632 5.6003 3.99998 5.6003C4.20871 5.6003 4.40763 5.55909 4.59047 5.48637L3.51886 4.41475C3.27158 4.16729 3.27147 3.76631 3.51886 3.51892C3.76625 3.27153 4.16723 3.27164 4.41469 3.51892L5.48631 4.59054C5.55903 4.40769 5.60024 4.20877 5.60024 4.00004C5.60024 3.11639 4.88364 2.39978 3.99998 2.39978ZM12 2.39978C11.1163 2.39978 10.3997 3.11639 10.3997 4.00004C10.3997 4.20868 10.4403 4.40775 10.513 4.59054L11.5853 3.51892C11.8327 3.27164 12.2337 3.27153 12.4811 3.51892C12.7285 3.76631 12.7284 4.16729 12.4811 4.41475L11.4088 5.48637C11.5918 5.55923 11.791 5.6003 12 5.6003C12.8836 5.6003 13.6002 4.8837 13.6002 4.00004C13.6002 3.11639 12.8836 2.39978 12 2.39978Z\"\n        />\n    </symbol>\n    <symbol id=\"walkIcon\" viewBox=\"-2 -2 20 20\">\n        <path d=\"M9.75 2a1.75 1.75 0 1 1-3.5 0 1.75 1.75 0 0 1 3.5 0zM5.25 4.75h5.5v4.5h-.5v5h-2v-5h-.5v5h-2v-5h-.5z\" />\n    </symbol>\n    <symbol id=\"arIcon\" viewBox=\"0 0 24 24\">\n        <path\n            fill-rule=\"evenodd\"\n            clip-rule=\"evenodd\"\n            d=\"M12 15.3994V6H16.9629C18.2109 6 19.1167 6.1089 19.6797 6.32715C20.248 6.53997 20.7021 6.92247 21.042 7.47363C21.3818 8.02476 21.5518 8.65491 21.5518 9.36426C21.5518 10.2645 21.2943 11.0093 20.7793 11.5986C20.2641 12.1825 19.4938 12.5513 18.4688 12.7041C18.9786 13.0097 19.3983 13.3453 19.7275 13.7109C20.0621 14.0766 20.5113 14.7261 21.0742 15.6592L22.5 18H19.6797L17.9746 15.3887C17.3694 14.4559 16.9555 13.8691 16.7324 13.6289C16.5095 13.3835 16.2729 13.2172 16.0234 13.1299C15.7738 13.0371 15.3777 12.9902 14.8359 12.9902H14.3584V18H10.4053L9.35742 15.2744H4.56055L3.57031 18H1L5.67383 6H8.23633L12 15.3994ZM5.30566 13.252H8.58008L6.92676 8.7998L5.30566 13.252ZM14.3584 11.0752H16.1025C17.2336 11.0752 17.9401 11.0259 18.2217 10.9277C18.5032 10.8295 18.7235 10.66 18.8828 10.4199C19.0421 10.1798 19.1221 9.87966 19.1221 9.51953C19.122 9.11597 19.016 8.79138 18.8037 8.5459C18.5966 8.29488 18.3013 8.13677 17.9189 8.07129C17.7276 8.04401 17.1541 8.03027 16.1982 8.03027H14.3584V11.0752Z\"\n        />\n    </symbol>\n    <symbol id=\"vrIcon\" viewBox=\"0 0 24 24\">\n        <path\n            fill-rule=\"evenodd\"\n            clip-rule=\"evenodd\"\n            d=\"M5.52148 10.7021L7.15918 15.1133L8.76465 10.7021L9.50195 8.7002L10.4834 6H16.9541C18.1903 6 19.0879 6.10801 19.6455 6.32422C20.2081 6.53499 20.6576 6.9134 20.9941 7.45898C21.3308 8.00484 21.499 8.62946 21.499 9.33203C21.499 10.2239 21.2446 10.9622 20.7344 11.5459C20.2241 12.1242 19.4606 12.4893 18.4453 12.6406C18.9503 12.9433 19.3662 13.2756 19.6924 13.6377C20.0238 13.9999 20.4688 14.6432 21.0264 15.5674L22.4385 17.8857H19.6455L17.9561 15.2998C17.3565 14.3758 16.9466 13.7946 16.7256 13.5566C16.5047 13.3135 16.2706 13.148 16.0234 13.0615C15.7762 12.9696 15.3841 12.9238 14.8477 12.9238H14.374V17.8857H12.0381V8.54395L8.39941 17.8857H5.86133L1.10254 6H3.71289L5.52148 10.7021ZM14.374 11.0264H16.1025C17.2228 11.0264 17.9224 10.9781 18.2012 10.8809C18.4799 10.7836 17.6986 10.6157 18.8564 10.3779C19.0141 10.1402 19.0928 9.84288 19.0928 9.48633C19.0928 9.08641 18.9877 8.7647 18.7773 8.52148C18.5722 8.27286 18.2801 8.11565 17.9014 8.05078C17.712 8.02376 17.1439 8.01075 16.1973 8.01074H14.374V11.0264Z\"\n        />\n    </symbol>\n    <symbol id=\"infoIcon\" viewBox=\"-2 -2 24 24\">\n        <path\n            d=\"M9.98633 7.58301C10.2598 7.58301 10.4854 7.67643 10.6631 7.86328C10.8408 8.05013 10.9297 8.3099 10.9297 8.64258V14.0361C10.9297 14.4098 10.8408 14.6924 10.6631 14.8838C10.4854 15.0752 10.2598 15.1709 9.98633 15.1709C9.71289 15.1709 9.48958 15.0729 9.31641 14.877C9.14779 14.681 9.06348 14.4007 9.06348 14.0361V8.69727C9.06348 8.32812 9.14779 8.05013 9.31641 7.86328C9.48958 7.67643 9.71289 7.58301 9.98633 7.58301Z\"\n        />\n        <path\n            d=\"M10.0068 4.88965C10.2484 4.88965 10.4626 4.96712 10.6494 5.12207C10.8363 5.27702 10.9297 5.5026 10.9297 5.79883C10.9297 6.08594 10.8385 6.31152 10.6562 6.47559C10.474 6.63509 10.2575 6.71484 10.0068 6.71484C9.74707 6.71484 9.52376 6.63509 9.33691 6.47559C9.15462 6.31608 9.06348 6.09049 9.06348 5.79883C9.06348 5.53451 9.1569 5.31803 9.34375 5.14941C9.53516 4.97624 9.75618 4.88965 10.0068 4.88965Z\"\n        />\n        <path\n            fill-rule=\"evenodd\"\n            clip-rule=\"evenodd\"\n            d=\"M10 0C15.5228 0 20 4.47715 20 10C20 15.5228 15.5228 20 10 20C4.47715 20 0 15.5228 0 10C0 4.47715 4.47715 0 10 0ZM10 1.7998C5.47126 1.7998 1.7998 5.47126 1.7998 10C1.7998 14.5287 5.47126 18.2002 10 18.2002C14.5287 18.2002 18.2002 14.5287 18.2002 10C18.2002 5.47126 14.5287 1.7998 10 1.7998Z\"\n        />\n    </symbol>\n    <symbol id=\"settingsIcon\" viewBox=\"0 0 24 24\">\n        <path\n            fill-rule=\"evenodd\"\n            clip-rule=\"evenodd\"\n            d=\"M12 8C14.2091 8 16 9.79086 16 12C16 14.2091 14.2091 16 12 16C9.79086 16 8 14.2091 8 12C8 9.79086 9.79086 8 12 8ZM12 9.7998C10.785 9.7998 9.7998 10.785 9.7998 12C9.7998 13.215 10.785 14.2002 12 14.2002C13.215 14.2002 14.2002 13.215 14.2002 12C14.2002 10.785 13.215 9.7998 12 9.7998Z\"\n        />\n        <path\n            fill-rule=\"evenodd\"\n            clip-rule=\"evenodd\"\n            d=\"M12.7119 2.2002C13.1961 2.20028 13.6296 2.49055 13.8164 2.93066L13.8506 3.02051L14.3652 4.56641C14.7875 4.70091 15.1932 4.87075 15.5801 5.07129L17.042 4.3418L17.1299 4.30176C17.5436 4.13502 18.017 4.21245 18.3564 4.50195L18.4268 4.56641L19.4336 5.57324C19.7985 5.93836 19.8889 6.49621 19.6582 6.95801L18.9268 8.41895C19.1274 8.80592 19.2971 9.21159 19.4316 9.63379L20.9795 10.1504C21.4693 10.3138 21.7997 10.7717 21.7998 11.2881V12.7119C21.7997 13.2284 21.4695 13.6873 20.9795 13.8506L19.4316 14.3652C19.2971 14.7875 19.1274 15.1932 18.9268 15.5801L19.6582 17.042C19.8889 17.5038 19.7985 18.0616 19.4336 18.4268L18.4268 19.4336C18.0616 19.7985 17.5038 19.8889 17.042 19.6582L15.5801 18.9268C15.1932 19.1274 14.7875 19.2971 14.3652 19.4316L13.8506 20.9795C13.6873 21.4695 13.2284 21.7997 12.7119 21.7998H11.2881C10.7717 21.7997 10.3138 21.4693 10.1504 20.9795L9.63379 19.4316C9.21159 19.2971 8.80592 19.1274 8.41895 18.9268L6.95801 19.6582C6.49621 19.8889 5.93836 19.7985 5.57324 19.4336L4.56641 18.4268C4.20146 18.0617 4.1112 17.5038 4.3418 17.042L5.07129 15.5801C4.87075 15.1932 4.70091 14.7875 4.56641 14.3652L3.02051 13.8506C2.53057 13.6873 2.20029 13.2283 2.2002 12.7119V11.2881C2.20024 10.7718 2.53076 10.3139 3.02051 10.1504L4.56641 9.63379C4.70094 9.21149 4.86966 8.80498 5.07031 8.41797L4.3418 6.95801C4.11113 6.49617 4.20145 5.93834 4.56641 5.57324L5.57324 4.56641C5.93834 4.20145 6.49617 4.11113 6.95801 4.3418L8.41797 5.07031C8.80498 4.86966 9.21149 4.70094 9.63379 4.56641L10.1504 3.02051L10.1836 2.92969C10.3706 2.49001 10.8042 2.20023 11.2881 2.2002H12.7119ZM11.0186 5.4707L10.8809 5.88477L10.458 5.99316C9.88479 6.13982 9.34317 6.36768 8.84473 6.66309L8.46875 6.88477L8.0791 6.69043L6.50098 5.90137L5.90137 6.50098L6.69043 8.0791L6.88477 8.46875L6.66309 8.84473C6.36768 9.34317 6.13982 9.88479 5.99316 10.458L5.88477 10.8809L5.4707 11.0186L3.7998 11.5762V12.4229L5.4707 12.9805L5.88477 13.1182L5.99316 13.541C6.13969 14.1141 6.36763 14.6556 6.66309 15.1543L6.88477 15.5303L6.69043 15.9199L5.90137 17.498L6.50098 18.0977L8.0791 17.3086L8.46875 17.1133L8.84473 17.3359C9.34314 17.6314 9.88463 17.8591 10.458 18.0059L10.8809 18.1143L11.0186 18.5283L11.5771 20.2002H12.4229L13.1182 18.1143L13.541 18.0059C14.1143 17.8593 14.6556 17.6314 15.1543 17.3359L15.5303 17.1143L15.9199 17.3086L17.498 18.0977L18.0977 17.498L17.3086 15.9199L17.1143 15.5303L17.3359 15.1543C17.6314 14.6556 17.8593 14.1143 18.0059 13.541L18.1143 13.1182L20.2002 12.4229V11.5762L18.1143 10.8809L18.0059 10.458C17.8591 9.88463 17.6314 9.34314 17.3359 8.84473L17.1133 8.46875L17.3086 8.0791L18.0977 6.50098L17.498 5.90137L15.9199 6.69043L15.5303 6.88477L15.1543 6.66309C14.6556 6.36763 14.1141 6.13969 13.541 5.99316L13.1182 5.88477L12.9805 5.4707L12.4229 3.7998H11.5762L11.0186 5.4707Z\"\n        />\n    </symbol>\n    <symbol id=\"enterFullscreenIcon\" viewBox=\"0 0 24 24\">\n        <path\n            d=\"M3 14.7002C3.49693 14.7002 3.90018 15.1027 3.90039 15.5996V20C3.90039 20.0552 3.94477 20.0996 4 20.0996H8.40039C8.89727 20.0998 9.2998 20.5031 9.2998 21C9.2998 21.4969 8.89727 21.9002 8.40039 21.9004H4C2.95066 21.9004 2.09961 21.0493 2.09961 20V15.5996C2.09982 15.1027 2.50307 14.7002 3 14.7002Z\"\n        />\n        <path\n            d=\"M21 14.7002C21.4969 14.7002 21.9002 15.1027 21.9004 15.5996V20C21.9004 21.0493 21.0493 21.9004 20 21.9004H15.5996C15.1027 21.9002 14.7002 21.4969 14.7002 21C14.7002 20.5031 15.1027 20.0998 15.5996 20.0996H20C20.0552 20.0996 20.0996 20.0552 20.0996 20V15.5996C20.0998 15.1027 20.5031 14.7002 21 14.7002Z\"\n        />\n        <path\n            d=\"M8.40039 2.09961C8.89727 2.09982 9.2998 2.50307 9.2998 3C9.2998 3.49693 8.89727 3.90018 8.40039 3.90039H4C3.94477 3.90039 3.90039 3.94477 3.90039 4V8.40039C3.90018 8.89727 3.49693 9.2998 3 9.2998C2.50307 9.2998 2.09982 8.89727 2.09961 8.40039V4C2.09961 2.95066 2.95066 2.09961 4 2.09961H8.40039Z\"\n        />\n        <path\n            d=\"M20 2.09961C21.0493 2.09961 21.9004 2.95066 21.9004 4V8.40039C21.9002 8.89727 21.4969 9.2998 21 9.2998C20.5031 9.2998 20.0998 8.89727 20.0996 8.40039V4C20.0996 3.94477 20.0552 3.90039 20 3.90039H15.5996C15.1027 3.90018 14.7002 3.49693 14.7002 3C14.7002 2.50307 15.1027 2.09982 15.5996 2.09961H20Z\"\n        />\n    </symbol>\n    <symbol id=\"supersplatIcon\" viewBox=\"64 64 384 384\">\n        <path\n            fill=\"#F26722\"\n            d=\"M129.83,217c9.75,0,17.64-7.9,17.64-17.64s-7.9-17.64-17.64-17.64-17.64,7.9-17.64,17.64,7.9,17.64,17.64,17.64Z\"\n        />\n        <path\n            fill=\"#F26722\"\n            d=\"M388.74,253.94c-12.46,0-22.57,10.11-22.57,22.57s10.11,22.57,22.57,22.57,22.57-10.11,22.57-22.57-10.11-22.57-22.57-22.57h0Z\"\n        />\n        <path\n            fill=\"#F26722\"\n            d=\"M345.26,161.1h.02c.37-.05.65-.22.97-.33,16.78-2.32,29.75-16.57,29.75-33.99,0-19.04-15.43-34.46-34.46-34.46s-34.46,15.43-34.46,34.46c0,4.29.88,8.35,2.32,12.14.04.12-.01.25.04.38,10.55,29.18-22.33,23.62-39.07,20.74-.49-.09-.88-.07-1.32-.11-4.27-.56-8.59-.97-13.03-.97-53.93,0-97.64,43.71-97.64,97.64,0,9.84,1.48,19.32,4.2,28.28.04.1,0,.17.05.27,8.97,30.15-14.83,25.49-25.52,25.69-1.04-.13-2.09-.32-3.18-.32-13.51,0-24.45,10.94-24.45,24.45s10.94,24.45,24.45,24.45c11.69,0,21.44-8.22,23.85-19.19h.02c6.31-26.57,25.9-18.02,31.15-12.67.2.2.4.26.59.42,17.44,16.25,40.75,26.26,66.47,26.26.67,0,1.34-.09,2.01-.1.66.01,1.31.04,2.04.04,9.7-.04,17.82,10.91,4.94,29.68h.13c-4.42,6.01-7.1,13.36-7.1,21.41,0,20.09,16.29,36.39,36.39,36.39s36.39-16.29,36.39-36.39c0-15.4-9.61-28.49-23.12-33.81-.32-.15-.61-.29-.98-.45-12.28-4.94-25.43-17.69-6.89-27.1l-.04-.1c31.93-16.06,53.88-49.02,53.88-87.2,0-21.15-6.8-40.68-18.23-56.66-.13-.23-.23-.47-.44-.74-23.15-31.67-2.37-36.07,10.3-38.09h-.01Z\"\n        />\n        <path\n            fill=\"#fff\"\n            d=\"M230.79,284.71c0,7.95-6.44,14.38-14.38,14.38s-14.38-6.44-14.38-14.38v-22.95c0-7.95,6.44-14.38,14.38-14.38s14.38,6.44,14.38,14.38v22.95Z\"\n        />\n        <path\n            fill=\"#fff\"\n            d=\"M309.78,284.71c0,7.95-6.44,14.38-14.38,14.38s-14.38-6.44-14.38-14.38v-22.95c0-7.95,6.44-14.38,14.38-14.38s14.38,6.44,14.38,14.38v22.95Z\"\n        />\n    </symbol>\n    <symbol id=\"keyboardIcon\" viewBox=\"0 0 24 24\">\n        <path\n            fill-rule=\"evenodd\"\n            clip-rule=\"evenodd\"\n            d=\"M4 5.5h16a2.5 2.5 0 0 1 2.5 2.5v8a2.5 2.5 0 0 1-2.5 2.5H4A2.5 2.5 0 0 1 1.5 16V8A2.5 2.5 0 0 1 4 5.5Zm0 1.8a.7.7 0 0 0-.7.7v8c0 .39.31.7.7.7h16a.7.7 0 0 0 .7-.7V8a.7.7 0 0 0-.7-.7H4Z\"\n        />\n        <path d=\"M5 9h2v2H5zM8.5 9h2v2h-2zM12 9h2v2h-2zM15.5 9h2v2h-2zM7 13h10v2H7z\" />\n    </symbol>\n    <symbol id=\"closeIcon\" viewBox=\"0 0 24 24\">\n        <path d=\"M6 6l12 12M18 6L6 18\" />\n    </symbol>\n    <symbol id=\"chevronLeftIcon\" viewBox=\"0 0 24 24\">\n        <path d=\"M15 19l-7-7 7-7\" />\n    </symbol>\n    <symbol id=\"chevronRightIcon\" viewBox=\"0 0 24 24\">\n        <path d=\"M9 5l7 7-7 7\" />\n    </symbol>\n    <symbol id=\"exitFullscreenIcon\" viewBox=\"0 0 24 24\">\n        <path\n            d=\"M8 15.0996C8.49706 15.0996 8.90039 15.5029 8.90039 16V21C8.90039 21.4971 8.49706 21.9004 8 21.9004C7.50294 21.9004 7.09961 21.4971 7.09961 21V16.9004H3C2.50294 16.9004 2.09961 16.4971 2.09961 16C2.09961 15.5029 2.50294 15.0996 3 15.0996H8Z\"\n        />\n        <path\n            d=\"M21 15.0996C21.4971 15.0996 21.9004 15.5029 21.9004 16C21.9004 16.4971 21.4971 16.9004 21 16.9004H16.9004V21C16.9004 21.4971 16.4971 21.9004 16 21.9004C15.5029 21.9004 15.0996 21.4971 15.0996 21V16C15.0996 15.5029 15.5029 15.0996 16 15.0996H21Z\"\n        />\n        <path\n            d=\"M8 2.09961C8.49706 2.09961 8.90039 2.50294 8.90039 3V8C8.90039 8.49706 8.49706 8.90039 8 8.90039H3C2.50294 8.90039 2.09961 8.49706 2.09961 8C2.09961 7.50294 2.50294 7.09961 3 7.09961H7.09961V3C7.09961 2.50294 7.50294 2.09961 8 2.09961Z\"\n        />\n        <path\n            d=\"M16 2.09961C16.4971 2.09961 16.9004 2.50294 16.9004 3V7.09961H21C21.4971 7.09961 21.9004 7.50294 21.9004 8C21.9004 8.49706 21.4971 8.90039 21 8.90039H16C15.5029 8.90039 15.0996 8.49706 15.0996 8V3C15.0996 2.50294 15.5029 2.09961 16 2.09961Z\"\n        />\n    </symbol>\n</svg>\n";
+var uiHtml = "\n<canvas></canvas>\n\n<div class=\"sse-sceneLayer\"></div>\n\n<div class=\"sse-ui\">\n    <div class=\"sse-poster\"></div>\n\n    \n    <a class=\"sse-viewerBranding sse-hidden\" target=\"_blank\" rel=\"noopener noreferrer\">\n        <svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"64 64 384 384\" role=\"img\" aria-label=\"SuperSplat\">\n            <path\n                fill=\"#F26722\"\n                d=\"M129.83,217c9.75,0,17.64-7.9,17.64-17.64s-7.9-17.64-17.64-17.64-17.64,7.9-17.64,17.64,7.9,17.64,17.64,17.64Z\"\n            />\n            <path\n                fill=\"#F26722\"\n                d=\"M388.74,253.94c-12.46,0-22.57,10.11-22.57,22.57s10.11,22.57,22.57,22.57,22.57-10.11,22.57-22.57-10.11-22.57-22.57-22.57h0Z\"\n            />\n            <path\n                fill=\"#F26722\"\n                d=\"M345.26,161.1h.02c.37-.05.65-.22.97-.33,16.78-2.32,29.75-16.57,29.75-33.99,0-19.04-15.43-34.46-34.46-34.46s-34.46,15.43-34.46,34.46c0,4.29.88,8.35,2.32,12.14.04.12-.01.25.04.38,10.55,29.18-22.33,23.62-39.07,20.74-.49-.09-.88-.07-1.32-.11-4.27-.56-8.59-.97-13.03-.97-53.93,0-97.64,43.71-97.64,97.64,0,9.84,1.48,19.32,4.2,28.28.04.1,0,.17.05.27,8.97,30.15-14.83,25.49-25.52,25.69-1.04-.13-2.09-.32-3.18-.32-13.51,0-24.45,10.94-24.45,24.45s10.94,24.45,24.45,24.45c11.69,0,21.44-8.22,23.85-19.19h.02c6.31-26.57,25.9-18.02,31.15-12.67.2.2.4.26.59.42,17.44,16.25,40.75,26.26,66.47,26.26.67,0,1.34-.09,2.01-.1.66.01,1.31.04,2.04.04,9.7-.04,17.82,10.91,4.94,29.68h.13c-4.42,6.01-7.1,13.36-7.1,21.41,0,20.09,16.29,36.39,36.39,36.39s36.39-16.29,36.39-36.39c0-15.4-9.61-28.49-23.12-33.81-.32-.15-.61-.29-.98-.45-12.28-4.94-25.43-17.69-6.89-27.1l-.04-.1c31.93-16.06,53.88-49.02,53.88-87.2,0-21.15-6.8-40.68-18.23-56.66-.13-.23-.23-.47-.44-.74-23.15-31.67-2.37-36.07,10.3-38.09h-.01Z\"\n            />\n            <path\n                fill=\"#fff\"\n                d=\"M230.79,284.71c0,7.95-6.44,14.38-14.38,14.38s-14.38-6.44-14.38-14.38v-22.95c0-7.95,6.44-14.38,14.38-14.38s14.38,6.44,14.38,14.38v22.95Z\"\n            />\n            <path\n                fill=\"#fff\"\n                d=\"M309.78,284.71c0,7.95-6.44,14.38-14.38,14.38s-14.38-6.44-14.38-14.38v-22.95c0-7.95,6.44-14.38,14.38-14.38s14.38,6.44,14.38,14.38v22.95Z\"\n            />\n        </svg>\n        <span>SuperSplat</span>\n    </a>\n\n    \n    <div class=\"sse-loadingWrap\">\n        <div class=\"sse-loadingText\"></div>\n        <div class=\"sse-loadingBar\"></div>\n    </div>\n\n    <div class=\"sse-controlsWrap sse-hidden\">\n        \n        <div class=\"sse-timelineContainer sse-hidden\">\n            <div class=\"sse-line\"></div>\n            <div class=\"sse-handle\"></div>\n            <div class=\"sse-time sse-hidden\">0:00</div>\n        </div>\n\n        \n        <div class=\"sse-buttonsContainer\">\n            <div class=\"sse-buttonGroup\">\n                <button class=\"sse-play sse-controlButton sse-hidden\">\n                    <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\">\n                        <g class=\"sse-stroke\"><use href=\"#playIcon\" /></g>\n                        <g class=\"sse-fill\"><use href=\"#playIcon\" /></g>\n                    </svg>\n                </button>\n                <button class=\"sse-pause sse-controlButton sse-hidden\">\n                    <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24px\" height=\"24px\">\n                        <g class=\"sse-stroke\"><use href=\"#pauseIcon\" /></g>\n                        <g class=\"sse-fill\"><use href=\"#pauseIcon\" /></g>\n                    </svg>\n                </button>\n            </div>\n\n            <div class=\"sse-spacer\"></div>\n\n            <div class=\"sse-buttonGroup\">\n                <button class=\"sse-orbitCamera sse-controlButton sse-toggle sse-left\">\n                    <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\">\n                        <g class=\"sse-stroke\"><use href=\"#orbitIcon\" /></g>\n                        <g class=\"sse-fill\"><use href=\"#orbitIcon\" /></g>\n                    </svg>\n                </button>\n                <button class=\"sse-flyCamera sse-controlButton sse-toggle sse-right\">\n                    <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\">\n                        <g class=\"sse-stroke\"><use href=\"#flyIcon\" /></g>\n                        <g class=\"sse-fill\"><use href=\"#flyIcon\" /></g>\n                    </svg>\n                </button>\n                <button class=\"sse-fpsCamera sse-controlButton sse-toggle sse-right sse-hidden\">\n                    <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\">\n                        <g class=\"sse-stroke\"><use href=\"#walkIcon\" /></g>\n                        <g class=\"sse-fill\"><use href=\"#walkIcon\" /></g>\n                    </svg>\n                </button>\n            </div>\n\n            <div class=\"sse-buttonGroup\">\n                \n                <button class=\"sse-settings sse-controlButton\">\n                    <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\">\n                        <g class=\"sse-stroke\"><use href=\"#settingsIcon\" /></g>\n                        <g class=\"sse-fill\"><use href=\"#settingsIcon\" /></g>\n                    </svg>\n                </button>\n                <button class=\"sse-controlsButton sse-controlButton\">\n                    <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\">\n                        <g class=\"sse-stroke\"><use href=\"#keyboardIcon\" /></g>\n                        <g class=\"sse-fill\"><use href=\"#keyboardIcon\" /></g>\n                    </svg>\n                </button>\n                <button class=\"sse-info sse-controlButton\">\n                    <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\">\n                        <g class=\"sse-stroke\"><use href=\"#infoIcon\" /></g>\n                        <g class=\"sse-fill\"><use href=\"#infoIcon\" /></g>\n                    </svg>\n                </button>\n                <button class=\"sse-arMode sse-controlButton sse-hidden\">\n                    <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\">\n                        <g class=\"sse-stroke\"><use href=\"#arIcon\" /></g>\n                        <g class=\"sse-fill\"><use href=\"#arIcon\" /></g>\n                    </svg>\n                </button>\n                <button class=\"sse-vrMode sse-controlButton sse-hidden\">\n                    <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\">\n                        <g class=\"sse-stroke\"><use href=\"#vrIcon\" /></g>\n                        <g class=\"sse-fill\"><use href=\"#vrIcon\" /></g>\n                    </svg>\n                </button>\n                <button class=\"sse-enterFullscreen sse-controlButton\">\n                    <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\">\n                        <g class=\"sse-stroke\"><use href=\"#enterFullscreenIcon\" /></g>\n                        <g class=\"sse-fill\"><use href=\"#enterFullscreenIcon\" /></g>\n                    </svg>\n                </button>\n                <button class=\"sse-exitFullscreen sse-controlButton sse-hidden\">\n                    <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\">\n                        <g class=\"sse-stroke\"><use href=\"#exitFullscreenIcon\" /></g>\n                        <g class=\"sse-fill\"><use href=\"#exitFullscreenIcon\" /></g>\n                    </svg>\n                </button>\n            </div>\n        </div>\n    </div>\n\n    \n    <div class=\"sse-joystickBase sse-hidden\">\n        <div class=\"sse-joystick\"></div>\n    </div>\n\n    \n    <div class=\"sse-annotationNav sse-hidden\">\n        <button class=\"sse-annotationPrev\">\n            <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\">\n                <g class=\"sse-stroke\"><use href=\"#chevronLeftIcon\" /></g>\n                <g class=\"sse-fill\"><use href=\"#chevronLeftIcon\" /></g>\n            </svg>\n        </button>\n        <div class=\"sse-annotationInfo\">\n            <span class=\"sse-annotationNavNumber\"></span>\n            <span class=\"sse-annotationNavTitle\"></span>\n        </div>\n        <button class=\"sse-annotationNext\">\n            <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\">\n                <g class=\"sse-stroke\"><use href=\"#chevronRightIcon\" /></g>\n                <g class=\"sse-fill\"><use href=\"#chevronRightIcon\" /></g>\n            </svg>\n        </button>\n    </div>\n\n    \n    <div class=\"sse-controlsHint sse-hidden\">\n        <div class=\"sse-controlsHintHeader\">\n            <svg class=\"sse-controlsHintIcon\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n                <use href=\"#orbitIcon\" />\n            </svg>\n            <div class=\"sse-controlsHintTitles\">\n                <span class=\"sse-controlsHintTitle\"></span>\n                <span class=\"sse-controlsHintSubtitle\"></span>\n            </div>\n            <button class=\"sse-controlsHintClose sse-panelButton\">\n                <svg xmlns=\"http://www.w3.org/2000/svg\"><use href=\"#closeIcon\" /></svg>\n            </button>\n        </div>\n        <div class=\"sse-controlsHintRows\"></div>\n    </div>\n\n    \n    <div class=\"sse-settingsPanel sse-hidden\">\n        \n        <div class=\"sse-settingsGroup\">\n            <div class=\"sse-annotationsRow sse-settingsRow\">\n                <div class=\"sse-annotationsOption\" data-i18n=\"settings.show-annotations\">Show Annotations</div>\n                <div class=\"sse-annotationsCheck sse-toggleSwitch sse-active\">\n                    <div class=\"sse-toggleTrack\"><div class=\"sse-toggleThumb\"></div></div>\n                </div>\n            </div>\n            <div class=\"sse-showCollisionRow sse-settingsRow sse-hidden\">\n                <div class=\"sse-showCollisionOption\" data-i18n=\"settings.show-collision\">Show Collision</div>\n                <div class=\"sse-showCollisionCheck sse-toggleSwitch\">\n                    <div class=\"sse-toggleTrack\"><div class=\"sse-toggleThumb\"></div></div>\n                </div>\n            </div>\n        </div>\n        \n        <div class=\"sse-settingsGroup\">\n            <div class=\"sse-gamingControlsRow sse-settingsRow\">\n                <div class=\"sse-gamingControlsOption\" data-i18n=\"settings.gaming-controls\">Gaming Controls</div>\n                <div class=\"sse-gamingControlsCheck sse-toggleSwitch\">\n                    <div class=\"sse-toggleTrack\"><div class=\"sse-toggleThumb\"></div></div>\n                </div>\n            </div>\n            \n            <div class=\"sse-qualityRow sse-settingsRow\">\n                <div class=\"sse-qualityOption\" data-i18n=\"settings.quality\">Quality</div>\n                <div class=\"sse-qualityValue\"></div>\n            </div>\n            <div class=\"sse-qualitySliderRow sse-settingsRow\">\n                <div class=\"sse-qualityTrack\">\n                    <div class=\"sse-qualityRail\">\n                        <div class=\"sse-qualityStop\"></div>\n                        <div class=\"sse-qualityStop\"></div>\n                        <div class=\"sse-qualityStop\"></div>\n                        <div class=\"sse-qualityStop\"></div>\n                        <div class=\"sse-qualityThumb\"></div>\n                    </div>\n                </div>\n            </div>\n            \n            <div class=\"sse-stochasticRow sse-settingsRow sse-hidden\">\n                <div class=\"sse-stochasticOption\" data-i18n=\"settings.stochastic\">Stochastic Rendering</div>\n                <div class=\"sse-stochasticCheck sse-toggleSwitch\">\n                    <div class=\"sse-toggleTrack\"><div class=\"sse-toggleThumb\"></div></div>\n                </div>\n            </div>\n        </div>\n        \n        <div class=\"sse-settingsGroup\">\n            <div class=\"sse-settingsRow\">\n                <button class=\"sse-frame\" data-i18n=\"settings.frame\">Frame</button>\n                <button class=\"sse-reset\" data-i18n=\"settings.reset\">Reset</button>\n            </div>\n        </div>\n    </div>\n\n    \n    <div class=\"sse-tooltip\"></div>\n\n    \n    <div class=\"sse-infoPanel sse-hidden\">\n        <div class=\"sse-infoPanelContent\" onpointerdown=\"event.stopPropagation()\" onwheel=\"event.stopPropagation()\">\n            <button class=\"sse-infoClose sse-panelButton\">\n                <svg xmlns=\"http://www.w3.org/2000/svg\"><use href=\"#closeIcon\" /></svg>\n            </button>\n            <a\n                class=\"sse-viewerTitle\"\n                href=\"https://github.com/playcanvas/supersplat-viewer\"\n                target=\"_blank\"\n                rel=\"noopener noreferrer\"\n            >\n                <svg class=\"sse-viewerLogo\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n                    <use href=\"#supersplatIcon\" />\n                </svg>\n                <span class=\"sse-title-name\">SuperSplat Viewer</span>\n                <span class=\"sse-title-version\">v<span class=\"sse-appVersionLabel\"></span></span>\n            </a>\n            <div class=\"sse-infoGpu\">\n                <span class=\"sse-rendererName\"></span>\n                <span class=\"sse-gpuName\"></span>\n            </div>\n            <div class=\"sse-infoLinks\">\n                <a\n                    class=\"sse-infoLink\"\n                    href=\"https://github.com/playcanvas/engine\"\n                    target=\"_blank\"\n                    rel=\"noopener noreferrer\"\n                >\n                    <span>PlayCanvas Engine</span>\n                    <span class=\"sse-infoLinkVersion\">v<span class=\"sse-engineVersionLabel\"></span></span>\n                </a>\n            </div>\n            <div class=\"sse-infoShortcuts\">\n                <h1 data-i18n=\"help.section.modes\">Mode Switching</h1>\n                <div class=\"sse-infoShortcut\">\n                    <span data-i18n=\"help.action.orbit-mode\">Orbit Mode</span>\n                    <kbd class=\"sse-key\">1</kbd>\n                </div>\n                <div class=\"sse-infoShortcut\">\n                    <span data-i18n=\"help.action.fly-mode\">Fly Mode</span>\n                    <kbd class=\"sse-key\">2</kbd>\n                </div>\n                <div class=\"sse-walkShortcut sse-infoShortcut\">\n                    <span data-i18n=\"help.action.toggle-walk\">Toggle Walk</span>\n                    <kbd class=\"sse-key\">3</kbd>\n                </div>\n                <div class=\"sse-infoShortcut\">\n                    <span data-i18n=\"help.action.toggle-gaming\">Toggle Gaming Controls</span>\n                    <kbd class=\"sse-key\">G</kbd>\n                </div>\n                <div class=\"sse-showCollisionShortcut sse-infoShortcut sse-hidden\">\n                    <span data-i18n=\"help.action.show-collision\">Show Collision</span>\n                    <kbd class=\"sse-key\">V</kbd>\n                </div>\n                <div class=\"sse-playShortcut sse-infoShortcut\">\n                    <span data-i18n=\"help.action.play-pause\">Play / Pause</span>\n                    <kbd class=\"sse-key\" data-i18n=\"help.key.space\">Space</kbd>\n                </div>\n                <div class=\"sse-infoShortcut\">\n                    <span data-i18n=\"help.action.toggle-controls\">Toggle Controls</span>\n                    <kbd class=\"sse-key\">H</kbd>\n                </div>\n                <div class=\"sse-infoShortcut\">\n                    <span data-i18n=\"help.action.toggle-help\">Toggle Info</span>\n                    <span class=\"sse-keys\"><kbd class=\"sse-key\">Shift</kbd><kbd class=\"sse-key\">H</kbd></span>\n                </div>\n                <div class=\"sse-infoShortcut\">\n                    <span data-i18n=\"help.action.exit-cancel\">Exit / Cancel</span>\n                    <kbd class=\"sse-key\" data-i18n=\"help.key.esc\">Esc</kbd>\n                </div>\n            </div>\n        </div>\n    </div>\n\n    \n    <div class=\"sse-xrModal sse-hidden\" onwheel=\"event.stopPropagation()\">\n        <div class=\"sse-xrModalContent\" onpointerdown=\"event.stopPropagation()\">\n            <h2 data-i18n=\"xr-modal.title\">WebGL Required</h2>\n            <p data-i18n=\"xr-modal.message\">\n                AR and VR are not supported on the WebGPU renderer. Pressing OK will reload the viewer with WebGL.\n            </p>\n            <div class=\"sse-xrModalButtons\">\n                <button class=\"sse-xrModalCancel\" data-i18n=\"xr-modal.cancel\">Cancel</button>\n                <button class=\"sse-xrModalOk\" data-i18n=\"xr-modal.ok\">OK</button>\n            </div>\n        </div>\n    </div>\n\n    \n    <div class=\"sse-vrPrompt sse-hidden\" onwheel=\"event.stopPropagation()\">\n        <button class=\"sse-vrPromptPill\" type=\"button\">\n            <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\">\n                <g class=\"sse-stroke\"><use href=\"#vrIcon\" /></g>\n                <g class=\"sse-fill\"><use href=\"#vrIcon\" /></g>\n            </svg>\n            <span class=\"sse-vrPromptText\" data-i18n=\"vr-prompt.loading\">Loading…</span>\n        </button>\n    </div>\n\n    \n    <div class=\"sse-xrHint sse-hidden\" data-i18n=\"xr-hint.stalled\">Nothing happening? Switch tabs and back.</div>\n</div>\n\n<svg>\n    <symbol id=\"playIcon\" viewBox=\"-2 0 24 24\">\n        <path\n            d=\"M1 1.98725C1 1.20022 1.87789 0.730421 2.5332 1.16694L14.5605 9.18061C15.146 9.57066 15.146 10.4302 14.5605 10.8203L2.5332 18.833C1.87788 19.2695 1 18.7997 1 18.0126V1.98725Z\"\n            transform=\"translate(2 2)\"\n        />\n    </symbol>\n    <symbol id=\"pauseIcon\" viewBox=\"0 0 20 20\">\n        <path d=\"M5 16V4h3v12H5zm7-12h3v12h-3V4z\" />\n    </symbol>\n    <symbol id=\"orbitIcon\" viewBox=\"-2 -2 20 20\">\n        <path\n            fill-rule=\"evenodd\"\n            clip-rule=\"evenodd\"\n            d=\"M4.44728 1.7561C6.14077 0.763957 8.53159 1.57857 10.4375 3.58357C12.75 3.02099 14.4585 3.40647 14.6491 4.73071C14.7831 5.66256 14.139 6.87994 12.9942 8.09008C13.7427 10.7586 13.2413 13.2551 11.5527 14.2444C9.85867 15.2369 7.46679 14.4208 5.56056 12.4143C3.34914 12.9521 1.691 12.6254 1.38412 11.4371L1.35092 11.2698C1.21678 10.3379 1.85972 9.11931 3.00457 7.90909C2.28693 5.34963 2.72037 2.94871 4.24741 1.88435L4.44728 1.7561ZM11.9889 9.03995C11.002 9.88136 9.79998 10.6808 8.47918 11.3303L8.13673 11.4937C7.70533 11.6942 7.28148 11.8681 6.8698 12.0172C7.32387 12.4287 7.79226 12.7587 8.25326 12.9983C9.39237 13.5903 10.3231 13.574 10.946 13.2092C11.5745 12.841 12.0613 12.0184 12.1263 10.7086C12.1518 10.1934 12.1065 9.62999 11.9889 9.03995ZM3.46225 9.20206C3.15128 9.5802 2.91825 9.93412 2.76238 10.2489C2.54363 10.6909 2.51958 10.967 2.53842 11.0985C2.54902 11.1721 2.56635 11.2146 2.67058 11.2763C2.81832 11.3636 3.12484 11.4626 3.6478 11.467C3.95641 11.4696 4.3074 11.4373 4.69402 11.3707C4.45655 11.0439 4.23084 10.6971 4.02215 10.3303C3.81017 9.95774 3.62416 9.58004 3.46225 9.20206ZM10.0358 4.9423C9.42018 5.13611 8.75205 5.40184 8.05014 5.74698C6.61265 6.45384 5.33887 7.34291 4.37175 8.24373C4.55213 8.73829 4.78227 9.2401 5.06511 9.73722C5.33995 10.2202 5.64271 10.6614 5.96355 11.0575C6.5793 10.8637 7.24782 10.5987 7.94988 10.2535C9.38732 9.54667 10.6605 8.65688 11.6276 7.7561C11.4473 7.26173 11.2176 6.76019 10.9349 6.26326C10.66 5.78001 10.3568 5.33855 10.0358 4.9423ZM7.74675 3.00219C6.60759 2.41015 5.67698 2.42644 5.05405 2.79126C4.42548 3.15953 3.93866 3.98199 3.87371 5.29191C3.84822 5.80668 3.89236 6.36967 4.00978 6.95922C4.91091 6.19088 5.9923 5.45862 7.17905 4.84269L7.52084 4.67016C8.07056 4.39986 8.6096 4.17089 9.12957 3.98266C8.67568 3.57138 8.20757 3.24172 7.74675 3.00219ZM12.3522 4.53344C12.0433 4.53086 11.6918 4.56177 11.3047 4.6285C11.5425 4.95566 11.7689 5.3029 11.9779 5.67016C12.1897 6.04255 12.3753 6.41999 12.5371 6.79777C12.8481 6.41965 13.0818 6.06635 13.2376 5.75154C13.4564 5.30973 13.4804 5.03352 13.4616 4.90193C13.451 4.82831 13.4337 4.7859 13.3294 4.7242C13.1817 4.63684 12.8753 4.53787 12.3522 4.53344Z\"\n        />\n    </symbol>\n    <symbol id=\"flyIcon\" viewBox=\"-2 -2 20 20\">\n        <path\n            fill-rule=\"evenodd\"\n            clip-rule=\"evenodd\"\n            d=\"M12 1.33337C13.4727 1.33337 14.6666 2.52728 14.6666 4.00004C14.6666 5.4728 13.4727 6.66671 12 6.66671C11.4931 6.66671 11.0194 6.52491 10.6159 6.27934L10.2721 6.62374C10.0345 6.86142 9.90102 7.18411 9.90102 7.52022V8.47986C9.90102 8.81597 10.0345 9.13866 10.2721 9.37634L10.6159 9.72009C11.0193 9.47463 11.4932 9.33337 12 9.33337C13.4727 9.33337 14.6666 10.5273 14.6666 12C14.6666 13.4728 13.4727 14.6667 12 14.6667C10.5272 14.6667 9.33331 13.4728 9.33331 12C9.33331 11.4932 9.47457 11.0194 9.72003 10.6159L9.37628 10.2722C9.1386 10.0345 8.81591 9.90108 8.4798 9.90108H7.52016C7.18405 9.90108 6.86136 10.0345 6.62368 10.2722L6.27928 10.6159C6.52485 11.0195 6.66665 11.4931 6.66665 12C6.66665 13.4728 5.47274 14.6667 3.99998 14.6667C2.52722 14.6667 1.33331 13.4728 1.33331 12C1.33331 10.5273 2.52722 9.33337 3.99998 9.33337C4.50658 9.33337 4.98008 9.47481 5.38344 9.72009L5.72784 9.37634C5.9655 9.13866 6.09894 8.81597 6.09894 8.47986V7.52022C6.09894 7.18411 5.9655 6.86142 5.72784 6.62374L5.38344 6.27934C4.98001 6.52473 4.5067 6.66671 3.99998 6.66671C2.52722 6.66671 1.33331 5.4728 1.33331 4.00004C1.33331 2.52728 2.52722 1.33337 3.99998 1.33337C5.47274 1.33337 6.66665 2.52728 6.66665 4.00004C6.66665 4.50676 6.52467 4.98008 6.27928 5.3835L6.62368 5.72791C6.86136 5.96556 7.18405 6.099 7.52016 6.099H8.4798C8.81591 6.099 9.1386 5.96556 9.37628 5.72791L9.72003 5.3835C9.47475 4.98014 9.33331 4.50664 9.33331 4.00004C9.33331 2.52728 10.5272 1.33337 12 1.33337ZM3.99998 10.3998C3.11632 10.3998 2.39972 11.1164 2.39972 12C2.39972 12.8837 3.11632 13.6003 3.99998 13.6003C4.88364 13.6003 5.60024 12.8837 5.60024 12C5.60024 11.7911 5.55917 11.5919 5.48631 11.4089L4.41469 12.4812C4.16723 12.7284 3.76625 12.7286 3.51886 12.4812C3.27147 12.2338 3.27158 11.8328 3.51886 11.5853L4.59047 10.5131C4.40769 10.4404 4.20862 10.3998 3.99998 10.3998ZM12 10.3998C11.7911 10.3998 11.5918 10.4403 11.4088 10.5131L12.4811 11.5853C12.7284 11.8328 12.7285 12.2338 12.4811 12.4812C12.2337 12.7286 11.8327 12.7284 11.5853 12.4812L10.513 11.4089C10.4402 11.5918 10.3997 11.7912 10.3997 12C10.3997 12.8837 11.1163 13.6003 12 13.6003C12.8836 13.6003 13.6002 12.8837 13.6002 12C13.6002 11.1164 12.8836 10.3998 12 10.3998ZM3.99998 2.39978C3.11632 2.39978 2.39972 3.11639 2.39972 4.00004C2.39972 4.8837 3.11632 5.6003 3.99998 5.6003C4.20871 5.6003 4.40763 5.55909 4.59047 5.48637L3.51886 4.41475C3.27158 4.16729 3.27147 3.76631 3.51886 3.51892C3.76625 3.27153 4.16723 3.27164 4.41469 3.51892L5.48631 4.59054C5.55903 4.40769 5.60024 4.20877 5.60024 4.00004C5.60024 3.11639 4.88364 2.39978 3.99998 2.39978ZM12 2.39978C11.1163 2.39978 10.3997 3.11639 10.3997 4.00004C10.3997 4.20868 10.4403 4.40775 10.513 4.59054L11.5853 3.51892C11.8327 3.27164 12.2337 3.27153 12.4811 3.51892C12.7285 3.76631 12.7284 4.16729 12.4811 4.41475L11.4088 5.48637C11.5918 5.55923 11.791 5.6003 12 5.6003C12.8836 5.6003 13.6002 4.8837 13.6002 4.00004C13.6002 3.11639 12.8836 2.39978 12 2.39978Z\"\n        />\n    </symbol>\n    <symbol id=\"walkIcon\" viewBox=\"-2 -2 20 20\">\n        <path d=\"M9.75 2a1.75 1.75 0 1 1-3.5 0 1.75 1.75 0 0 1 3.5 0zM5.25 4.75h5.5v4.5h-.5v5h-2v-5h-.5v5h-2v-5h-.5z\" />\n    </symbol>\n    <symbol id=\"arIcon\" viewBox=\"0 0 24 24\">\n        <path\n            fill-rule=\"evenodd\"\n            clip-rule=\"evenodd\"\n            d=\"M12 15.3994V6H16.9629C18.2109 6 19.1167 6.1089 19.6797 6.32715C20.248 6.53997 20.7021 6.92247 21.042 7.47363C21.3818 8.02476 21.5518 8.65491 21.5518 9.36426C21.5518 10.2645 21.2943 11.0093 20.7793 11.5986C20.2641 12.1825 19.4938 12.5513 18.4688 12.7041C18.9786 13.0097 19.3983 13.3453 19.7275 13.7109C20.0621 14.0766 20.5113 14.7261 21.0742 15.6592L22.5 18H19.6797L17.9746 15.3887C17.3694 14.4559 16.9555 13.8691 16.7324 13.6289C16.5095 13.3835 16.2729 13.2172 16.0234 13.1299C15.7738 13.0371 15.3777 12.9902 14.8359 12.9902H14.3584V18H10.4053L9.35742 15.2744H4.56055L3.57031 18H1L5.67383 6H8.23633L12 15.3994ZM5.30566 13.252H8.58008L6.92676 8.7998L5.30566 13.252ZM14.3584 11.0752H16.1025C17.2336 11.0752 17.9401 11.0259 18.2217 10.9277C18.5032 10.8295 18.7235 10.66 18.8828 10.4199C19.0421 10.1798 19.1221 9.87966 19.1221 9.51953C19.122 9.11597 19.016 8.79138 18.8037 8.5459C18.5966 8.29488 18.3013 8.13677 17.9189 8.07129C17.7276 8.04401 17.1541 8.03027 16.1982 8.03027H14.3584V11.0752Z\"\n        />\n    </symbol>\n    <symbol id=\"vrIcon\" viewBox=\"0 0 24 24\">\n        <path\n            fill-rule=\"evenodd\"\n            clip-rule=\"evenodd\"\n            d=\"M5.52148 10.7021L7.15918 15.1133L8.76465 10.7021L9.50195 8.7002L10.4834 6H16.9541C18.1903 6 19.0879 6.10801 19.6455 6.32422C20.2081 6.53499 20.6576 6.9134 20.9941 7.45898C21.3308 8.00484 21.499 8.62946 21.499 9.33203C21.499 10.2239 21.2446 10.9622 20.7344 11.5459C20.2241 12.1242 19.4606 12.4893 18.4453 12.6406C18.9503 12.9433 19.3662 13.2756 19.6924 13.6377C20.0238 13.9999 20.4688 14.6432 21.0264 15.5674L22.4385 17.8857H19.6455L17.9561 15.2998C17.3565 14.3758 16.9466 13.7946 16.7256 13.5566C16.5047 13.3135 16.2706 13.148 16.0234 13.0615C15.7762 12.9696 15.3841 12.9238 14.8477 12.9238H14.374V17.8857H12.0381V8.54395L8.39941 17.8857H5.86133L1.10254 6H3.71289L5.52148 10.7021ZM14.374 11.0264H16.1025C17.2228 11.0264 17.9224 10.9781 18.2012 10.8809C18.4799 10.7836 17.6986 10.6157 18.8564 10.3779C19.0141 10.1402 19.0928 9.84288 19.0928 9.48633C19.0928 9.08641 18.9877 8.7647 18.7773 8.52148C18.5722 8.27286 18.2801 8.11565 17.9014 8.05078C17.712 8.02376 17.1439 8.01075 16.1973 8.01074H14.374V11.0264Z\"\n        />\n    </symbol>\n    <symbol id=\"infoIcon\" viewBox=\"-2 -2 24 24\">\n        <path\n            d=\"M9.98633 7.58301C10.2598 7.58301 10.4854 7.67643 10.6631 7.86328C10.8408 8.05013 10.9297 8.3099 10.9297 8.64258V14.0361C10.9297 14.4098 10.8408 14.6924 10.6631 14.8838C10.4854 15.0752 10.2598 15.1709 9.98633 15.1709C9.71289 15.1709 9.48958 15.0729 9.31641 14.877C9.14779 14.681 9.06348 14.4007 9.06348 14.0361V8.69727C9.06348 8.32812 9.14779 8.05013 9.31641 7.86328C9.48958 7.67643 9.71289 7.58301 9.98633 7.58301Z\"\n        />\n        <path\n            d=\"M10.0068 4.88965C10.2484 4.88965 10.4626 4.96712 10.6494 5.12207C10.8363 5.27702 10.9297 5.5026 10.9297 5.79883C10.9297 6.08594 10.8385 6.31152 10.6562 6.47559C10.474 6.63509 10.2575 6.71484 10.0068 6.71484C9.74707 6.71484 9.52376 6.63509 9.33691 6.47559C9.15462 6.31608 9.06348 6.09049 9.06348 5.79883C9.06348 5.53451 9.1569 5.31803 9.34375 5.14941C9.53516 4.97624 9.75618 4.88965 10.0068 4.88965Z\"\n        />\n        <path\n            fill-rule=\"evenodd\"\n            clip-rule=\"evenodd\"\n            d=\"M10 0C15.5228 0 20 4.47715 20 10C20 15.5228 15.5228 20 10 20C4.47715 20 0 15.5228 0 10C0 4.47715 4.47715 0 10 0ZM10 1.7998C5.47126 1.7998 1.7998 5.47126 1.7998 10C1.7998 14.5287 5.47126 18.2002 10 18.2002C14.5287 18.2002 18.2002 14.5287 18.2002 10C18.2002 5.47126 14.5287 1.7998 10 1.7998Z\"\n        />\n    </symbol>\n    <symbol id=\"settingsIcon\" viewBox=\"0 0 24 24\">\n        <path\n            fill-rule=\"evenodd\"\n            clip-rule=\"evenodd\"\n            d=\"M12 8C14.2091 8 16 9.79086 16 12C16 14.2091 14.2091 16 12 16C9.79086 16 8 14.2091 8 12C8 9.79086 9.79086 8 12 8ZM12 9.7998C10.785 9.7998 9.7998 10.785 9.7998 12C9.7998 13.215 10.785 14.2002 12 14.2002C13.215 14.2002 14.2002 13.215 14.2002 12C14.2002 10.785 13.215 9.7998 12 9.7998Z\"\n        />\n        <path\n            fill-rule=\"evenodd\"\n            clip-rule=\"evenodd\"\n            d=\"M12.7119 2.2002C13.1961 2.20028 13.6296 2.49055 13.8164 2.93066L13.8506 3.02051L14.3652 4.56641C14.7875 4.70091 15.1932 4.87075 15.5801 5.07129L17.042 4.3418L17.1299 4.30176C17.5436 4.13502 18.017 4.21245 18.3564 4.50195L18.4268 4.56641L19.4336 5.57324C19.7985 5.93836 19.8889 6.49621 19.6582 6.95801L18.9268 8.41895C19.1274 8.80592 19.2971 9.21159 19.4316 9.63379L20.9795 10.1504C21.4693 10.3138 21.7997 10.7717 21.7998 11.2881V12.7119C21.7997 13.2284 21.4695 13.6873 20.9795 13.8506L19.4316 14.3652C19.2971 14.7875 19.1274 15.1932 18.9268 15.5801L19.6582 17.042C19.8889 17.5038 19.7985 18.0616 19.4336 18.4268L18.4268 19.4336C18.0616 19.7985 17.5038 19.8889 17.042 19.6582L15.5801 18.9268C15.1932 19.1274 14.7875 19.2971 14.3652 19.4316L13.8506 20.9795C13.6873 21.4695 13.2284 21.7997 12.7119 21.7998H11.2881C10.7717 21.7997 10.3138 21.4693 10.1504 20.9795L9.63379 19.4316C9.21159 19.2971 8.80592 19.1274 8.41895 18.9268L6.95801 19.6582C6.49621 19.8889 5.93836 19.7985 5.57324 19.4336L4.56641 18.4268C4.20146 18.0617 4.1112 17.5038 4.3418 17.042L5.07129 15.5801C4.87075 15.1932 4.70091 14.7875 4.56641 14.3652L3.02051 13.8506C2.53057 13.6873 2.20029 13.2283 2.2002 12.7119V11.2881C2.20024 10.7718 2.53076 10.3139 3.02051 10.1504L4.56641 9.63379C4.70094 9.21149 4.86966 8.80498 5.07031 8.41797L4.3418 6.95801C4.11113 6.49617 4.20145 5.93834 4.56641 5.57324L5.57324 4.56641C5.93834 4.20145 6.49617 4.11113 6.95801 4.3418L8.41797 5.07031C8.80498 4.86966 9.21149 4.70094 9.63379 4.56641L10.1504 3.02051L10.1836 2.92969C10.3706 2.49001 10.8042 2.20023 11.2881 2.2002H12.7119ZM11.0186 5.4707L10.8809 5.88477L10.458 5.99316C9.88479 6.13982 9.34317 6.36768 8.84473 6.66309L8.46875 6.88477L8.0791 6.69043L6.50098 5.90137L5.90137 6.50098L6.69043 8.0791L6.88477 8.46875L6.66309 8.84473C6.36768 9.34317 6.13982 9.88479 5.99316 10.458L5.88477 10.8809L5.4707 11.0186L3.7998 11.5762V12.4229L5.4707 12.9805L5.88477 13.1182L5.99316 13.541C6.13969 14.1141 6.36763 14.6556 6.66309 15.1543L6.88477 15.5303L6.69043 15.9199L5.90137 17.498L6.50098 18.0977L8.0791 17.3086L8.46875 17.1133L8.84473 17.3359C9.34314 17.6314 9.88463 17.8591 10.458 18.0059L10.8809 18.1143L11.0186 18.5283L11.5771 20.2002H12.4229L13.1182 18.1143L13.541 18.0059C14.1143 17.8593 14.6556 17.6314 15.1543 17.3359L15.5303 17.1143L15.9199 17.3086L17.498 18.0977L18.0977 17.498L17.3086 15.9199L17.1143 15.5303L17.3359 15.1543C17.6314 14.6556 17.8593 14.1143 18.0059 13.541L18.1143 13.1182L20.2002 12.4229V11.5762L18.1143 10.8809L18.0059 10.458C17.8591 9.88463 17.6314 9.34314 17.3359 8.84473L17.1133 8.46875L17.3086 8.0791L18.0977 6.50098L17.498 5.90137L15.9199 6.69043L15.5303 6.88477L15.1543 6.66309C14.6556 6.36763 14.1141 6.13969 13.541 5.99316L13.1182 5.88477L12.9805 5.4707L12.4229 3.7998H11.5762L11.0186 5.4707Z\"\n        />\n    </symbol>\n    <symbol id=\"enterFullscreenIcon\" viewBox=\"0 0 24 24\">\n        <path\n            d=\"M3 14.7002C3.49693 14.7002 3.90018 15.1027 3.90039 15.5996V20C3.90039 20.0552 3.94477 20.0996 4 20.0996H8.40039C8.89727 20.0998 9.2998 20.5031 9.2998 21C9.2998 21.4969 8.89727 21.9002 8.40039 21.9004H4C2.95066 21.9004 2.09961 21.0493 2.09961 20V15.5996C2.09982 15.1027 2.50307 14.7002 3 14.7002Z\"\n        />\n        <path\n            d=\"M21 14.7002C21.4969 14.7002 21.9002 15.1027 21.9004 15.5996V20C21.9004 21.0493 21.0493 21.9004 20 21.9004H15.5996C15.1027 21.9002 14.7002 21.4969 14.7002 21C14.7002 20.5031 15.1027 20.0998 15.5996 20.0996H20C20.0552 20.0996 20.0996 20.0552 20.0996 20V15.5996C20.0998 15.1027 20.5031 14.7002 21 14.7002Z\"\n        />\n        <path\n            d=\"M8.40039 2.09961C8.89727 2.09982 9.2998 2.50307 9.2998 3C9.2998 3.49693 8.89727 3.90018 8.40039 3.90039H4C3.94477 3.90039 3.90039 3.94477 3.90039 4V8.40039C3.90018 8.89727 3.49693 9.2998 3 9.2998C2.50307 9.2998 2.09982 8.89727 2.09961 8.40039V4C2.09961 2.95066 2.95066 2.09961 4 2.09961H8.40039Z\"\n        />\n        <path\n            d=\"M20 2.09961C21.0493 2.09961 21.9004 2.95066 21.9004 4V8.40039C21.9002 8.89727 21.4969 9.2998 21 9.2998C20.5031 9.2998 20.0998 8.89727 20.0996 8.40039V4C20.0996 3.94477 20.0552 3.90039 20 3.90039H15.5996C15.1027 3.90018 14.7002 3.49693 14.7002 3C14.7002 2.50307 15.1027 2.09982 15.5996 2.09961H20Z\"\n        />\n    </symbol>\n    <symbol id=\"supersplatIcon\" viewBox=\"64 64 384 384\">\n        <path\n            fill=\"#F26722\"\n            d=\"M129.83,217c9.75,0,17.64-7.9,17.64-17.64s-7.9-17.64-17.64-17.64-17.64,7.9-17.64,17.64,7.9,17.64,17.64,17.64Z\"\n        />\n        <path\n            fill=\"#F26722\"\n            d=\"M388.74,253.94c-12.46,0-22.57,10.11-22.57,22.57s10.11,22.57,22.57,22.57,22.57-10.11,22.57-22.57-10.11-22.57-22.57-22.57h0Z\"\n        />\n        <path\n            fill=\"#F26722\"\n            d=\"M345.26,161.1h.02c.37-.05.65-.22.97-.33,16.78-2.32,29.75-16.57,29.75-33.99,0-19.04-15.43-34.46-34.46-34.46s-34.46,15.43-34.46,34.46c0,4.29.88,8.35,2.32,12.14.04.12-.01.25.04.38,10.55,29.18-22.33,23.62-39.07,20.74-.49-.09-.88-.07-1.32-.11-4.27-.56-8.59-.97-13.03-.97-53.93,0-97.64,43.71-97.64,97.64,0,9.84,1.48,19.32,4.2,28.28.04.1,0,.17.05.27,8.97,30.15-14.83,25.49-25.52,25.69-1.04-.13-2.09-.32-3.18-.32-13.51,0-24.45,10.94-24.45,24.45s10.94,24.45,24.45,24.45c11.69,0,21.44-8.22,23.85-19.19h.02c6.31-26.57,25.9-18.02,31.15-12.67.2.2.4.26.59.42,17.44,16.25,40.75,26.26,66.47,26.26.67,0,1.34-.09,2.01-.1.66.01,1.31.04,2.04.04,9.7-.04,17.82,10.91,4.94,29.68h.13c-4.42,6.01-7.1,13.36-7.1,21.41,0,20.09,16.29,36.39,36.39,36.39s36.39-16.29,36.39-36.39c0-15.4-9.61-28.49-23.12-33.81-.32-.15-.61-.29-.98-.45-12.28-4.94-25.43-17.69-6.89-27.1l-.04-.1c31.93-16.06,53.88-49.02,53.88-87.2,0-21.15-6.8-40.68-18.23-56.66-.13-.23-.23-.47-.44-.74-23.15-31.67-2.37-36.07,10.3-38.09h-.01Z\"\n        />\n        <path\n            fill=\"#fff\"\n            d=\"M230.79,284.71c0,7.95-6.44,14.38-14.38,14.38s-14.38-6.44-14.38-14.38v-22.95c0-7.95,6.44-14.38,14.38-14.38s14.38,6.44,14.38,14.38v22.95Z\"\n        />\n        <path\n            fill=\"#fff\"\n            d=\"M309.78,284.71c0,7.95-6.44,14.38-14.38,14.38s-14.38-6.44-14.38-14.38v-22.95c0-7.95,6.44-14.38,14.38-14.38s14.38,6.44,14.38,14.38v22.95Z\"\n        />\n    </symbol>\n    <symbol id=\"keyboardIcon\" viewBox=\"0 0 24 24\">\n        <path\n            fill-rule=\"evenodd\"\n            clip-rule=\"evenodd\"\n            d=\"M4 5.5h16a2.5 2.5 0 0 1 2.5 2.5v8a2.5 2.5 0 0 1-2.5 2.5H4A2.5 2.5 0 0 1 1.5 16V8A2.5 2.5 0 0 1 4 5.5Zm0 1.8a.7.7 0 0 0-.7.7v8c0 .39.31.7.7.7h16a.7.7 0 0 0 .7-.7V8a.7.7 0 0 0-.7-.7H4Z\"\n        />\n        <path d=\"M5 9h2v2H5zM8.5 9h2v2h-2zM12 9h2v2h-2zM15.5 9h2v2h-2zM7 13h10v2H7z\" />\n    </symbol>\n    <symbol id=\"closeIcon\" viewBox=\"0 0 24 24\">\n        <path d=\"M6 6l12 12M18 6L6 18\" />\n    </symbol>\n    <symbol id=\"chevronLeftIcon\" viewBox=\"0 0 24 24\">\n        <path d=\"M15 19l-7-7 7-7\" />\n    </symbol>\n    <symbol id=\"chevronRightIcon\" viewBox=\"0 0 24 24\">\n        <path d=\"M9 5l7 7-7 7\" />\n    </symbol>\n    <symbol id=\"exitFullscreenIcon\" viewBox=\"0 0 24 24\">\n        <path\n            d=\"M8 15.0996C8.49706 15.0996 8.90039 15.5029 8.90039 16V21C8.90039 21.4971 8.49706 21.9004 8 21.9004C7.50294 21.9004 7.09961 21.4971 7.09961 21V16.9004H3C2.50294 16.9004 2.09961 16.4971 2.09961 16C2.09961 15.5029 2.50294 15.0996 3 15.0996H8Z\"\n        />\n        <path\n            d=\"M21 15.0996C21.4971 15.0996 21.9004 15.5029 21.9004 16C21.9004 16.4971 21.4971 16.9004 21 16.9004H16.9004V21C16.9004 21.4971 16.4971 21.9004 16 21.9004C15.5029 21.9004 15.0996 21.4971 15.0996 21V16C15.0996 15.5029 15.5029 15.0996 16 15.0996H21Z\"\n        />\n        <path\n            d=\"M8 2.09961C8.49706 2.09961 8.90039 2.50294 8.90039 3V8C8.90039 8.49706 8.49706 8.90039 8 8.90039H3C2.50294 8.90039 2.09961 8.49706 2.09961 8C2.09961 7.50294 2.50294 7.09961 3 7.09961H7.09961V3C7.09961 2.50294 7.50294 2.09961 8 2.09961Z\"\n        />\n        <path\n            d=\"M16 2.09961C16.4971 2.09961 16.9004 2.50294 16.9004 3V7.09961H21C21.4971 7.09961 21.9004 7.50294 21.9004 8C21.9004 8.49706 21.4971 8.90039 21 8.90039H16C15.5029 8.90039 15.0996 8.49706 15.0996 8V3C15.0996 2.50294 15.5029 2.09961 16 2.09961Z\"\n        />\n    </symbol>\n</svg>\n";
 
 /**
  * Creates a figure-8 (lemniscate / infinity sign) camera animation track.
@@ -89030,14 +101072,6 @@ class SpawnState {
         this._has = true;
     }
     /**
-     * Forget any previously-stored spawn pose so a subsequent `has` check
-     * reports false. Used by controllers that scope spawn to a single mode
-     * entry (e.g. walk).
-     */
-    clear() {
-        this._has = false;
-    }
-    /**
      * Copy the captured pose into the supplied targets. Caller must check
      * `has` first; calling `restore` before `store` returns the field
      * defaults (position and angles zeroed, distance `1`).
@@ -89241,20 +101275,13 @@ class SphereMover {
 }
 
 /**
- * Maximum Euclidean distance (metres) from the spawn origin to search for a valid placement.
- * Used by the cylinder search, which has to reach far enough to find a standable floor. The
- * sphere search sizes itself from its own radius instead — see `SPHERE_SEARCH_REACH_RADII`.
- */
-const SEARCH_RADIUS = 5;
-const SEARCH_RADIUS_SQ = SEARCH_RADIUS * SEARCH_RADIUS;
-/**
  * Reach of the sphere search, in multiples of the sphere's radius.
  *
  * Its job is to un-clip a sphere that is intersecting a surface, not to relocate one that is deep
  * inside geometry — `FlyController` holds collision until the camera is clear rather than relying
  * on a rescue — so reaching a few radii is enough. Bounding the reach is what makes the search
  * cheap: at radius 0.2 on a 0.05 m grid the worst case, finding nothing, is 7,153 probes, where
- * reaching `SEARCH_RADIUS` cost 8,120,601. A sphere deep inside geometry never finds a free cell
+ * reaching 5 m cost 8,120,601. A sphere deep inside geometry never finds a free cell
  * to tighten `bestDistSq`, so nothing breaks the search early and it pays for every shell.
  *
  * The lattice still steps by `collision.voxelResolution`, deliberately. A coarser step is not
@@ -89264,8 +101291,6 @@ const SEARCH_RADIUS_SQ = SEARCH_RADIUS * SEARCH_RADIUS;
  * placement at all.
  */
 const SPHERE_SEARCH_REACH_RADII = 3;
-/** Ray budget when probing for ground/ceiling under or above a candidate column. */
-const RAY_MAX_DIST = 1000;
 // Scratch values reused across calls — these helpers run only at spawn time
 // so the lack of re-entrancy is fine.
 const scratchPush = { x: 0, y: 0, z: 0 };
@@ -89329,115 +101354,6 @@ const findSphereSpawn = (collision, ox, oy, oz, radius, out) => {
     }
     return found;
 };
-/**
- * Find the closest standable cylinder placement to (ox, oy, oz). Output is the
- * floor world position the cylinder rests on (highest geometry hit across the
- * footprint). Used for walk-camera spawn.
- *
- * The algorithm:
- *
- * 1. Lattice search for the closest free voxel `C` (per `isFreeAt`) that has
- *    geometry somewhere below — i.e. a downward ray from `C` hits.
- * 2. At `(C.x, C.z)`, fan rays up and down from `C.y` through every cell
- *    (step = `collision.voxelResolution`) within the xz footprint disc.
- *    Compute, across columns:
- *      - `floor = max(yDown_i)`         (highest ground in the footprint)
- *      - `ceiling = min(yUp_i)`         (lowest obstruction overhead, or ∞)
- *    Every column must have a `yDown` hit; otherwise the cylinder is partly
- *    unsupported and the candidate is discarded.
- * 3. The cylinder fits iff `floor + halfHeight ≤ ceiling - halfHeight`,
- *    i.e. enough vertical clearance for the full cylinder above the floor.
- *    The "resting on ground" placement has centre at `floor + halfHeight`.
- *
- * Cylinder math (flat ends, no hemispheres) intentionally matches the carve,
- * which used a separable XYZ dilation.
- *
- * @param collision - Active collision implementation.
- * @param ox - Origin X (world space).
- * @param oy - Origin Y (world space).
- * @param oz - Origin Z (world space).
- * @param halfHeight - Cylinder half-height (full height = 2 × halfHeight).
- * @param radius - Cylinder radius.
- * @param out - Receives the floor position the cylinder rests on.
- * @returns True if a valid placement was found.
- */
-const findCylinderSpawn = (collision, ox, oy, oz, halfHeight, radius, out) => {
-    const step = collision.voxelResolution;
-    const maxCells = Math.ceil(SEARCH_RADIUS / step);
-    // Round up so float division (e.g. 0.2 / 0.05) can't accidentally drop
-    // the outer ring of footprint cells; the Euclidean check below trims any
-    // overshoot back to the true radius.
-    const footCells = Math.ceil(radius / step);
-    const radiusSq = radius * radius;
-    let bestDistSq = Infinity;
-    let found = false;
-    for (let r = 0; r <= maxCells; r++) {
-        const shellMinDistSq = r * step * (r * step);
-        if (shellMinDistSq >= bestDistSq)
-            break;
-        for (let dy = -r; dy <= r; dy++) {
-            const absDy = dy < 0 ? -dy : dy;
-            for (let dz = -r; dz <= r; dz++) {
-                const absDz = dz < 0 ? -dz : dz;
-                // Enumerate the Chebyshev shell of radius r directly rather than scanning the
-                // whole cube and skipping its interior — see `findSphereSpawn`.
-                const full = absDy === r || absDz === r;
-                const dxStep = full ? 1 : 2 * r;
-                for (let dx = -r; dx <= r; dx += dxStep) {
-                    const distSq = (dx * dx + dy * dy + dz * dz) * step * step;
-                    if (distSq >= bestDistSq || distSq > SEARCH_RADIUS_SQ)
-                        continue;
-                    const cx = ox + dx * step;
-                    const cy = oy + dy * step;
-                    const cz = oz + dz * step;
-                    // Stage 1: cheap filter — only consider free voxels.
-                    // The footprint loop below will reject candidates whose
-                    // center column has no ground support, so no separate
-                    // down-ray probe is needed here.
-                    if (!collision.isFreeAt(cx, cy, cz))
-                        continue;
-                    // Stage 2/3: fan rays through the xz footprint.
-                    let floor = -Infinity;
-                    let ceiling = Infinity;
-                    let supported = true;
-                    for (let i = -footCells; i <= footCells && supported; i++) {
-                        const fxOff = i * step;
-                        const fxOffSq = fxOff * fxOff;
-                        for (let j = -footCells; j <= footCells; j++) {
-                            const fzOff = j * step;
-                            if (fxOffSq + fzOff * fzOff > radiusSq)
-                                continue;
-                            const fx = cx + fxOff;
-                            const fz = cz + fzOff;
-                            const down = collision.queryRay(fx, cy, fz, 0, -1, 0, RAY_MAX_DIST);
-                            if (!down) {
-                                supported = false;
-                                break;
-                            }
-                            if (down.y > floor)
-                                floor = down.y;
-                            const up = collision.queryRay(fx, cy, fz, 0, 1, 0, RAY_MAX_DIST);
-                            if (up && up.y < ceiling)
-                                ceiling = up.y;
-                        }
-                    }
-                    if (!supported)
-                        continue;
-                    // Cylinder vertical extent = 2 × halfHeight. Need that
-                    // much room between floor and ceiling.
-                    if (floor + 2 * halfHeight > ceiling)
-                        continue;
-                    bestDistSq = distSq;
-                    out.x = cx;
-                    out.y = floor;
-                    out.z = cz;
-                    found = true;
-                }
-            }
-        }
-    }
-    return found;
-};
 
 /** Radius of the camera collision sphere (meters) */
 const CAMERA_RADIUS = 0.2;
@@ -89445,7 +101361,7 @@ const forward$2 = new Vec3();
 const right$2 = new Vec3();
 const up$1 = new Vec3();
 const offset$1 = new Vec3();
-const spawnProbe$1 = new Vec3();
+const spawnProbe = new Vec3();
 const clearProbe = { x: 0, y: 0, z: 0 };
 // Whether the camera sphere fits at `position` without intersecting collision geometry.
 const isClear = (collision, position) => !collision.querySphere(position.x, position.y, position.z, CAMERA_RADIUS, clearProbe);
@@ -89508,8 +101424,8 @@ class FlyController {
         const collision = this._mover.collision ?? this._pendingCollision;
         this._pendingCollision = null;
         if (collision) {
-            if (findSphereSpawn(collision, this._position.x, this._position.y, this._position.z, CAMERA_RADIUS, spawnProbe$1)) {
-                this._position.copy(spawnProbe$1);
+            if (findSphereSpawn(collision, this._position.x, this._position.y, this._position.z, CAMERA_RADIUS, spawnProbe)) {
+                this._position.copy(spawnProbe);
             }
             // Engage at the placed position. The search starts at the camera's own cell, so
             // failing it means the camera is inside geometry with no free space within reach to
@@ -89834,15 +101750,41 @@ class OrbitController {
 
 const FIXED_DT = 1 / 60;
 const MAX_SUBSTEPS = 10;
+/**
+ * How far below the capsule a floor must be for collision to engage. With none in reach the
+ * capsule is over a hole in the collision, or far above anything it could land on, and engaged
+ * collision would drop it out of the scene, so collision is held instead.
+ */
+const FLOOR_SEARCH_DIST = 10;
+/**
+ * How far below the camera entry looks for a floor to stand on. Unbounded in practice, unlike
+ * `FLOOR_SEARCH_DIST`: entering from high up, from an orbit view, should land on the floor below.
+ */
+const ENTRY_FLOOR_DIST = 1000;
+/**
+ * How far above the camera entry looks for a floor, when there is none to stand on below it: a
+ * camera sunk into the ground or just under it stands on the surface above instead.
+ */
+const ENTRY_RISE_REACH = 2;
+/**
+ * Spacing of the rays that look for a floor above the camera. Each is cast down from its own
+ * height, so a surface between two floors cannot hide the lower one from all of them.
+ */
+const ENTRY_RISE_STEP = 0.25;
+/**
+ * Reach of the entry un-clip, in capsule radii, as `FlyController`'s: enough to free a capsule
+ * that clips a surface, not to relocate one deep inside geometry, which holds collision instead.
+ */
+const UNCLIP_REACH_RADII = 3;
 /** Pre-allocated push-out vector for capsule collision */
 const out = { x: 0, y: 0, z: 0 };
 const v = new Vec3();
 const d = new Vec3();
+const nudged = new Vec3();
 const forward = new Vec3();
 const right$1 = new Vec3();
 const moveStep = [0, 0, 0];
 const offset = new Vec3();
-const spawnProbe = new Vec3();
 /**
  * First-person camera controller with spring-damper suspension over collision terrain.
  *
@@ -89920,7 +101862,6 @@ class WalkController {
     _targetAngles = new Vec3();
     _distance = 1;
     _spawn = new SpawnState();
-    _spawnGrounded = false;
     _velocity = new Vec3();
     _pendingMove = [0, 0, 0];
     _accumulator = 0;
@@ -89929,10 +101870,12 @@ class WalkController {
     _jumpHeld = false;
     _collision = null;
     /**
-     * Collision held because the capsule is inside geometry, mirroring `FlyController`. While
-     * held, `_heldFloorY` stands in for the ground probe so the camera walks on the level it
-     * entered at instead of falling, and the capsule check is skipped. `_step` engages it for
-     * real as soon as the capsule fits.
+     * Collision held because the capsule is inside geometry, mirroring `FlyController`, or
+     * because there is no floor within `FLOOR_SEARCH_DIST` below it, where engaged collision
+     * would fall out of the scene.
+     * While held, `_heldFloorY` stands in for the ground probe so the camera walks on the level
+     * it was held at instead of falling, and the capsule check is skipped. `_step` engages it for
+     * real as soon as the capsule fits over a floor.
      */
     _pendingCollision = null;
     /**
@@ -89947,15 +101890,14 @@ class WalkController {
     _hasPosition = false;
     /**
      * Optional collision for capsule collision with sliding. Assigning while the capsule is
-     * inside geometry holds the attachment instead: engaged collision cannot escape a solid
-     * region, so the capsule keeps the synthetic floor and `_step` engages it once it fits.
-     * Collision normally lands this way, after walk mode may already be active.
+     * inside geometry, or over no floor in reach, holds the attachment instead: engaged collision
+     * cannot escape a solid region and has nothing to land on over a void, so the capsule keeps
+     * the synthetic floor and `_step` engages it once it fits over a floor. Collision normally
+     * lands this way, after walk mode may already be active.
      */
     set collision(value) {
-        if (value && this._hasPosition && !this._capsuleClear(value, this._position)) {
-            this._pendingCollision = value;
-            this._collision = null;
-            this._heldFloorY = this._position.y - this.eyeHeight - this.hoverHeight;
+        if (value && this._hasPosition && !this._canEngage(value, this._position)) {
+            this._hold(value);
             return;
         }
         this._pendingCollision = null;
@@ -89967,47 +101909,26 @@ class WalkController {
     }
     onEnter(camera) {
         this.goto(camera);
-        // Spawn is scoped to this walk-mode entry; reset so a stale spawn from a previous entry
-        // can't be restored if this entry fails or has no collision to place against.
-        this._spawn.clear();
         // Entry may follow a previous one that ended with collision held, so start from the
         // collision we have either way. Whether to hold again is decided fresh, from this
         // entry's position.
         const collision = this._collision ?? this._pendingCollision;
-        // Stand on the entry level until collision can place the capsule. This covers collision
-        // that has not arrived yet as well as a spawn search that finds nowhere to go: engaged
-        // collision would strand the camera either way, with no floor under the ground probe and
-        // nothing for push-out to push against. Held, the user can walk out the way they came,
-        // and the setter or `_step` engages collision once the capsule fits.
+        // Stand on the entry level until collision can engage. This covers collision that has not
+        // arrived yet as well as an entry inside geometry or over no floor, where engaged
+        // collision would strand the camera or drop it. Held, the user can walk out the way they
+        // came, and the setter or `_step` engages collision once the capsule fits over a floor.
         this._pendingCollision = null;
         this._collision = null;
         this._heldFloorY = this._position.y - this.eyeHeight - this.hoverHeight;
         this._grounded = true;
         if (collision) {
-            // Treat the walk capsule as a tight-superset cylinder for spawn.
-            // The carve was produced with a separable XYZ dilation (flat ends,
-            // no hemispheres), so cylinder math matches the data exactly.
-            // Include `hoverHeight` in the height so the ceiling-clearance
-            // check accounts for the placed capsule's full vertical envelope:
-            // foot sits at `floor + hoverHeight`, head at `floor + hoverHeight
-            // + capsuleHeight`.
-            if (findCylinderSpawn(collision, camera.position.x, camera.position.y, camera.position.z, (this.capsuleHeight + this.hoverHeight) * 0.5, this.capsuleRadius, spawnProbe)) {
-                // spawnProbe is the floor world position the cylinder rests
-                // on. Eye sits hoverHeight + eyeHeight above the floor.
-                this._position.set(spawnProbe.x, spawnProbe.y + this.hoverHeight + this.eyeHeight, spawnProbe.z);
-                this._storeSpawn();
-                // The placement is known to fit, so engage directly rather than re-testing it
-                // through the setter's capsule query, which is a different test from the
-                // cylinder search and could hold on a hairline disagreement.
-                this._heldFloorY = null;
-                this._collision = collision;
+            if (!this._standOnFloor(collision)) {
+                this._fit(collision, this._position);
             }
-            else {
-                // No placement within reach. The setter holds if the capsule is inside geometry
-                // and engages otherwise, which is what `_step` would do on its first step anyway.
-                this.collision = collision;
-            }
+            this.collision = collision;
         }
+        // reset returns to where walk was entered
+        this._spawn.store(this._position, this._angles, this._distance);
         this._prevPosition.copy(this._position);
     }
     update(deltaTime, inputFrame, camera) {
@@ -90042,14 +101963,20 @@ class WalkController {
         camera.fov = this.fov;
     }
     _step(dt, move) {
-        // engage a held attachment as soon as the capsule reaches space it fits in
-        if (this._pendingCollision && this._capsuleClear(this._pendingCollision, this._position)) {
+        // engage a held attachment as soon as the capsule reaches space it fits in, over a floor
+        if (this._pendingCollision && this._canEngage(this._pendingCollision, this._position)) {
             this._collision = this._pendingCollision;
             this._pendingCollision = null;
             this._heldFloorY = null;
         }
         // ground probe: cast a ray downward to find the terrain surface
-        const groundY = this._probeGround(this._position);
+        let groundY = this._probeGround(this._position);
+        // airborne with no floor in reach, over a hole in the collision, would fall out of the
+        // scene: hold collision and walk on at this level until there is floor below again
+        if (groundY === null && this._collision && !this._floorBelow(this._collision, this._position)) {
+            this._hold(this._collision);
+            groundY = this._heldFloorY;
+        }
         const hasGround = groundY !== null;
         // jump (require release before re-triggering)
         if (this._velocity.y < 0) {
@@ -90132,16 +102059,17 @@ class WalkController {
         this._prevPosition.copy(this._position);
         this._targetAngles.copy(this._angles);
         this._resetMotion();
-        this._grounded = this._spawnGrounded;
+        // decide afresh at the spawn whether to engage or hold, since a held floor belongs to
+        // wherever it was held, mirroring `FlyController`
+        const collision = this._collision ?? this._pendingCollision;
+        if (collision) {
+            this.collision = collision;
+        }
         camera.position.copy(this._position);
         camera.angles.copy(this._angles);
         camera.distance = this._distance;
         camera.fov = this.fov;
         return true;
-    }
-    _storeSpawn() {
-        this._spawn.store(this._position, this._angles, this._distance);
-        this._spawnGrounded = this._grounded;
     }
     _resetMotion() {
         this._velocity.set(0, 0, 0);
@@ -90164,6 +102092,96 @@ class WalkController {
         const center = pos.y - this.eyeHeight + this.capsuleHeight * 0.5;
         const half = this.capsuleHeight * 0.5 - this.capsuleRadius;
         return !collision.queryCapsule(pos.x, center, pos.z, half, this.capsuleRadius, out);
+    }
+    /**
+     * Whether there is a floor within `FLOOR_SEARCH_DIST` below the capsule.
+     *
+     * @param collision - Collision to test against.
+     * @param pos - Eye position in PlayCanvas world space.
+     * @returns True if a downward ray from the capsule's foot hits geometry in reach.
+     */
+    _floorBelow(collision, pos) {
+        return !!collision.queryRay(pos.x, pos.y - this.eyeHeight, pos.z, 0, -1, 0, FLOOR_SEARCH_DIST);
+    }
+    _canEngage(collision, pos) {
+        return this._capsuleClear(collision, pos) && this._floorBelow(collision, pos);
+    }
+    /**
+     * Put the eye at standing height on a floor, so the capsule neither sinks into the ground nor
+     * hangs over it: the floor below the camera however far down, for a camera flown onto the
+     * ground or entering from above, and failing that the nearest floor up to `ENTRY_RISE_REACH`
+     * above it, for a camera sunk into the ground or just under it. Below comes first, or an
+     * entry from high up could stand on a roof. A floor counts only if the capsule fits standing
+     * on it, after `_fit`; with none, the camera stays where it is.
+     *
+     * @param collision - Collision to test against.
+     * @returns True if the camera was moved onto a floor.
+     */
+    _standOnFloor(collision) {
+        const pos = this._position;
+        if (this._tryStandFrom(collision, pos.y, ENTRY_FLOOR_DIST))
+            return true;
+        for (let rise = ENTRY_RISE_STEP; rise <= ENTRY_RISE_REACH + 1e-6; rise += ENTRY_RISE_STEP) {
+            if (this._tryStandFrom(collision, pos.y + rise, rise))
+                return true;
+        }
+        return false;
+    }
+    /**
+     * Stand on the floor a downward ray from `fromY` finds within `maxDist`, if the capsule fits
+     * there once `_fit` has freed it from a wall it clips. A ray that hits at its origin started
+     * inside geometry and finds no floor.
+     *
+     * @param collision - Collision to test against.
+     * @param fromY - Height to cast from, above the camera's column.
+     * @param maxDist - Reach of the ray.
+     * @returns True if the camera was moved onto a floor.
+     */
+    _tryStandFrom(collision, fromY, maxDist) {
+        const pos = this._position;
+        const hit = collision.queryRay(pos.x, fromY, pos.z, 0, -1, 0, maxDist);
+        if (!hit || hit.y >= fromY)
+            return false;
+        v.set(pos.x, hit.y + this.hoverHeight + this.eyeHeight, pos.z);
+        if (!this._fit(collision, v))
+            return false;
+        pos.copy(v);
+        return true;
+    }
+    /**
+     * Fit the capsule at `p`, freeing it from a surface it clips: move it by the push-out of one
+     * capsule query, if that is within `UNCLIP_REACH_RADII` and leaves it clear. Otherwise `p` is
+     * left as it was.
+     *
+     * @param collision - Collision to test against.
+     * @param p - Eye position, moved if the capsule had to be freed.
+     * @returns True if the capsule fits at `p`.
+     */
+    _fit(collision, p) {
+        const center = p.y - this.eyeHeight + this.capsuleHeight * 0.5;
+        const half = this.capsuleHeight * 0.5 - this.capsuleRadius;
+        if (!collision.queryCapsule(p.x, center, p.z, half, this.capsuleRadius, out))
+            return true;
+        const reach = this.capsuleRadius * UNCLIP_REACH_RADII;
+        if (out.x * out.x + out.y * out.y + out.z * out.z > reach * reach)
+            return false;
+        nudged.set(p.x + out.x, p.y + out.y, p.z + out.z);
+        if (!this._capsuleClear(collision, nudged))
+            return false;
+        p.copy(nudged);
+        return true;
+    }
+    /**
+     * Hold `collision` rather than engage it, standing on the current level.
+     *
+     * @param collision - Collision to engage once the capsule can.
+     */
+    _hold(collision) {
+        this._pendingCollision = collision;
+        this._collision = null;
+        this._heldFloorY = this._position.y - this.eyeHeight - this.hoverHeight;
+        this._velocity.y = 0;
+        this._jumping = false;
     }
     /**
      * Cast multiple rays downward to find the average ground surface height.
@@ -90368,9 +102386,14 @@ const settleFrom = (slope) => (x) => 1 - Math.pow(1 - x, SETTLE_POWER) * (1 + (S
 // minimum (in metres); below it walk mode is hidden and the viewer falls
 // back to fly as the default first-person mode.
 const WALK_MIN_HORIZONTAL_RANGE = 5;
-const isWalkAllowed = (bbox, collision) => {
+// whether a scene is large enough to walk around in, taking its content as real-world scale; XR
+// grabbing also tells a scene from an object by it
+const isWalkableSize = (bbox) => {
     const { x, z } = bbox.halfExtents;
-    return !!collision && x * 2 >= WALK_MIN_HORIZONTAL_RANGE && z * 2 >= WALK_MIN_HORIZONTAL_RANGE;
+    return x * 2 >= WALK_MIN_HORIZONTAL_RANGE && z * 2 >= WALK_MIN_HORIZONTAL_RANGE;
+};
+const isWalkAllowed = (bbox, collision) => {
+    return !!collision && isWalkableSize(bbox);
 };
 const createCamera = (position, target, fov) => {
     const result = new Camera();
@@ -90957,861 +102980,6 @@ const restoreCameraState = (cm, state, snapshot) => {
     cm.snap();
 };
 
-/**
- * World picking for splat scenes.
- *
- * Uses a custom `pickPS` / `gsplatPS` patch for a stochastic pick pass, because the stock pick
- * pass encodes splat IDs rather than depth. Each splat fragment survives with probability equal
- * to its opacity, and a MIN blend keeps each pixel's nearest survivor, so a pixel is nearer than
- * a depth with probability equal to the scene's opacity in front of that depth, whatever order
- * the splats draw in. Surfaces are then the depth where that opacity reaches one half: faint haze
- * does not count, while enough of it layered together does.
- */
-// Override global picking to output stochastic splat depth instead of meshInstance id.
-const pickDepthGlsl = /* glsl */ `
-vec4 encodePickOutput(uint id) {
-    const vec4 inv = vec4(1.0 / 255.0);
-    const uvec4 shifts = uvec4(16, 8, 0, 24);
-    uvec4 col = (uvec4(id) >> shifts) & uvec4(0xff);
-    return vec4(col) * inv;
-}
-
-#ifdef GSPLAT_PICK_DEPTH
-    #ifndef CAMERAPLANES
-        #define CAMERAPLANES
-        uniform vec4 camera_params; // x: 1/far, y: far, z: near, w: isOrtho
-    #endif
-
-    uint pickHash(uint v) {
-        v ^= v >> 16u;
-        v *= 0x7feb352du;
-        v ^= v >> 15u;
-        v *= 0x846ca68bu;
-        v ^= v >> 16u;
-        return v;
-    }
-
-    // Four independent trials, one per channel: each keeps the fragment with probability alpha,
-    // the splat's opacity at this fragment with its falloff included, writing its depth there,
-    // and the far plane where it does not. The splat's seed (see pickSeedVS) and depth, both
-    // the same across its quad, hashed with the pixel decorrelate the splats covering one pixel.
-    vec4 getSplatPickOutput(float alpha) {
-        float normalizedDepth;
-        if (camera_params.w > 0.5) {
-            normalizedDepth = gl_FragCoord.z;
-        } else {
-            float linearDepth = 1.0 / gl_FragCoord.w;
-            normalizedDepth = (linearDepth - camera_params.z) / (camera_params.y - camera_params.z);
-        }
-
-        uvec2 p = uvec2(gl_FragCoord.xy);
-        uint h = pickHash(p.x ^ pickHash(p.y ^ pickHash(vPickSeed ^ floatBitsToUint(normalizedDepth))));
-        uvec4 trials = uvec4(pickHash(h), pickHash(h ^ 0x9e3779b9u), pickHash(h ^ 0x7f4a7c15u), pickHash(h ^ 0x2545f491u));
-        bvec4 keep = lessThan(vec4(trials >> 8u) * (1.0 / 16777216.0), vec4(alpha));
-        if (!any(keep)) {
-            discard;
-        }
-        return mix(vec4(1.0), vec4(normalizedDepth), vec4(keep));
-    }
-#else
-    #ifndef PICK_CUSTOM_ID
-        uniform uint meshInstanceId;
-
-        vec4 getPickOutput() {
-            return encodePickOutput(meshInstanceId);
-        }
-    #endif
-#endif
-
-#ifdef DEPTH_PICK_PASS
-    #include "floatAsUintPS"
-    #ifndef CAMERAPLANES
-        #define CAMERAPLANES
-        uniform vec4 camera_params; // x: 1/far, y: far, z: near, w: isOrtho
-    #endif
-
-    vec4 getPickDepth() {
-        float linearDepth;
-        if (camera_params.w > 0.5) {
-            linearDepth = gl_FragCoord.z;
-        } else {
-            float viewDist = 1.0 / gl_FragCoord.w;
-            linearDepth = (viewDist - camera_params.z) / (camera_params.y - camera_params.z);
-        }
-        return float2uint(linearDepth);
-    }
-#endif
-`;
-const pickDepthWgsl = /* wgsl */ `
-fn encodePickOutput(id: u32) -> vec4f {
-    let inv: vec4f = vec4f(1.0 / 255.0);
-    let shifts: vec4u = vec4u(16u, 8u, 0u, 24u);
-    let col: vec4u = (vec4u(id) >> shifts) & vec4u(0xffu);
-    return vec4f(col) * inv;
-}
-
-#ifdef GSPLAT_PICK_DEPTH
-    #ifndef CAMERAPLANES
-        #define CAMERAPLANES
-        uniform camera_params: vec4f; // x: 1/far, y: far, z: near, w: isOrtho
-    #endif
-
-    fn pickHash(value: u32) -> u32 {
-        var v = value;
-        v ^= v >> 16u;
-        v *= 0x7feb352du;
-        v ^= v >> 15u;
-        v *= 0x846ca68bu;
-        v ^= v >> 16u;
-        return v;
-    }
-
-    // Four independent trials, one per channel: each keeps the fragment with probability alpha,
-    // the splat's opacity at this fragment with its falloff included, writing its depth there,
-    // and the far plane where it does not. The splat's seed (see pickSeedVS) and depth, both
-    // the same across its quad, hashed with the pixel decorrelate the splats covering one pixel.
-    fn getSplatPickOutput(alpha: f32) -> vec4f {
-        var normalizedDepth: f32;
-        if (uniform.camera_params.w > 0.5) {
-            normalizedDepth = pcPosition.z;
-        } else {
-            let linearDepth = 1.0 / pcPosition.w;
-            normalizedDepth = (linearDepth - uniform.camera_params.z) / (uniform.camera_params.y - uniform.camera_params.z);
-        }
-
-        let p = vec2u(pcPosition.xy);
-        let h = pickHash(p.x ^ pickHash(p.y ^ pickHash(vPickSeed ^ bitcast<u32>(normalizedDepth))));
-        let trials = vec4u(pickHash(h), pickHash(h ^ 0x9e3779b9u), pickHash(h ^ 0x7f4a7c15u), pickHash(h ^ 0x2545f491u));
-        let keep = vec4f(trials >> vec4u(8u)) * (1.0 / 16777216.0) < vec4f(alpha);
-        if (!any(keep)) {
-            discard;
-        }
-        return select(vec4f(1.0), vec4f(normalizedDepth), keep);
-    }
-#else
-    #ifndef PICK_CUSTOM_ID
-        uniform meshInstanceId: u32;
-
-        fn getPickOutput() -> vec4f {
-            return encodePickOutput(uniform.meshInstanceId);
-        }
-    #endif
-#endif
-
-#ifdef DEPTH_PICK_PASS
-    #include "floatAsUintPS"
-    #ifndef CAMERAPLANES
-        #define CAMERAPLANES
-        uniform camera_params: vec4f; // x: 1/far, y: far, z: near, w: isOrtho
-    #endif
-
-    fn getPickDepth() -> vec4f {
-        var linearDepth: f32;
-        if (uniform.camera_params.w > 0.5) {
-            linearDepth = pcPosition.z;
-        } else {
-            let viewDist = 1.0 / pcPosition.w;
-            linearDepth = (viewDist - uniform.camera_params.z) / (uniform.camera_params.y - uniform.camera_params.z);
-        }
-        return float2uint(linearDepth);
-    }
-#endif
-`;
-const safeChunkReplace = (s, find, repl) => {
-    const out = s.replace(find, repl);
-    if (out === s) {
-        throw new Error('picker: engine gsplat/pick chunk patch failed (engine version mismatch?)');
-    }
-    return out;
-};
-const pickPassChunkInjected = (seedVarying) => `#ifdef PICK_PASS
-    ${seedVarying}
-    #define GSPLAT_PICK_DEPTH
-    #include "pickPS"
-#endif`;
-const seedVaryingGlsl = 'flat varying uint vPickSeed;';
-const seedVaryingWgsl = 'varying @interpolate(flat) vPickSeed: u32;';
-// pickSeedVS: a per-splat seed for the survival trials, from its projected centre. The depth
-// alone would give splats at exactly the same depth the same random values at a pixel, so
-// their survivals would be correlated. The centre rather than an index: the cache index of the
-// GPU-sort path is the splat's slot in this frame's compacted list, which changes from render
-// to render, so repeated picks at one pose would disagree. Only exact duplicates (same centre
-// and depth) stay correlated
-const pickSeedGlsl = (proj) => `vPickSeed = (floatBitsToUint(${proj}.x) * 0x9e3779b9u) ^ (floatBitsToUint(${proj}.y) * 0x85ebca6bu) ^ (floatBitsToUint(${proj}.w) * 0xc2b2ae35u);`;
-const pickSeedWgsl = (proj) => `output.vPickSeed = (bitcast<u32>(${proj}.x) * 0x9e3779b9u) ^ (bitcast<u32>(${proj}.y) * 0x85ebca6bu) ^ (bitcast<u32>(${proj}.w) * 0xc2b2ae35u);`;
-const inPickPass = (line) => `\n#ifdef PICK_PASS\n    ${line}\n#endif\n`;
-const patchGsplatVSGlsl = (chunk) => safeChunkReplace(safeChunkReplace(chunk, /(varying mediump vec2 gaussianUV;)/, `$1${inPickPass(seedVaryingGlsl)}`), /(gaussianUV = corner\.uv;)/, `$1${inPickPass(pickSeedGlsl('center.proj'))}`);
-const patchGsplatVSWgsl = (chunk) => safeChunkReplace(safeChunkReplace(chunk, /(varying gaussianUV: half2;)/, `$1${inPickPass(seedVaryingWgsl)}`), /(output\.gaussianUV = corner\.uv;)/, `$1${inPickPass(pickSeedWgsl('center.proj'))}`);
-const patchGsplatHybridVSWgsl = (chunk) => safeChunkReplace(safeChunkReplace(chunk, /(varying gaussianUV: half2;)/, `$1${inPickPass(seedVaryingWgsl)}`), /(output\.gaussianUV = half2\(cornerClipped\);)/, `$1${inPickPass(pickSeedWgsl('proj'))}`);
-// Both pick-output calls (with and without unified ids) take the fragment's alpha, which
-// `main` computes locally: the varying holds only the splat's peak opacity.
-const patchGsplatPickGlsl = (chunk) => {
-    return safeChunkReplace(safeChunkReplace(chunk, /#ifdef PICK_PASS\s*#include "pickPS"\s*#endif/, pickPassChunkInjected(seedVaryingGlsl)), /pcFragColor0 = (encodePickOutput\(vPickId\)|getPickOutput\(\));/g, 'pcFragColor0 = getSplatPickOutput(alpha);');
-};
-const patchGsplatPickWgsl = (chunk) => {
-    return safeChunkReplace(safeChunkReplace(chunk, /#ifdef PICK_PASS\s*#include "pickPS"\s*#endif/, pickPassChunkInjected(seedVaryingWgsl)), /output\.color = (encodePickOutput\(vPickId\)|getPickOutput\(\));/g, 'output.color = getSplatPickOutput(f32(alpha));');
-};
-/** Per-device original chunk strings + refcount so we can restore after the last Picker releases. */
-const pickerShaderPatchState = new WeakMap();
-const vec4 = new Vec4();
-const viewProjMat = new Mat4();
-// the pick pass keeps the nearest surviving depth, so it starts at the far plane
-const farColor = new Color(1, 1, 1, 1);
-// independent survival trials per pixel, one per channel of the pick render
-const PICK_TRIALS = 4;
-// A surface's depth is taken over a disc of this radius around each pick pixel (a css pixel,
-// see prepareSample): each pixel is one random sample, so a single one says little. Small,
-// since it also blurs edges
-const SURFACE_RADIUS_PX = 2;
-// A surface is where the opacity in front first reaches this. Well under one half: captured
-// surfaces seen at a glancing angle, a deck or a floor, can be little more than half opaque,
-// and a pick must not pass through them to whatever lies beneath
-const SURFACE_OPACITY = 0.3;
-const NORMAL_EPSILON$1 = 1e-12;
-const NORMAL_DEGENERATE_EPSILON = 1e-20;
-// Sampling for the surface-normal estimator runs on a circular footprint of
-// fixed *world* radius, projected to pixels at the picked-point's depth.
-// Keeping the world area constant means adjacent cursor positions sample
-// almost the same world cluster, which stabilises the plane fit. The pixel
-// radius is clamped so distant picks still get enough samples and very-close
-// picks don't blow the block read.
-const NORMAL_SAMPLE_WORLD_RADIUS = 0.2;
-const NORMAL_SAMPLE_MIN_PX = 6;
-const NORMAL_SAMPLE_MAX_PX = 48;
-const NORMAL_RING_FRACTIONS = [0.3, 0.55, 0.8, 1.0];
-const NORMAL_OUTLIER_THRESHOLD = 2.5;
-const NORMAL_SAMPLE_DIRECTIONS = [
-    [1, 0],
-    [1, 1],
-    [0, 1],
-    [-1, 1],
-    [-1, 0],
-    [-1, -1],
-    [0, -1],
-    [1, -1]
-];
-// Shared buffer for half-to-float conversion
-const float32 = new Float32Array(1);
-const uint32 = new Uint32Array(float32.buffer);
-// Convert 16-bit half-float to 32-bit float using bit manipulation.
-const half2Float = (h) => {
-    const sign = (h & 0x8000) << 16;
-    const exponent = (h & 0x7c00) >> 10;
-    const mantissa = h & 0x03ff;
-    if (exponent === 0) {
-        if (mantissa === 0) {
-            uint32[0] = sign;
-        }
-        else {
-            let e = -1;
-            let m = mantissa;
-            do {
-                e++;
-                m <<= 1;
-            } while ((m & 0x0400) === 0);
-            uint32[0] = sign | ((127 - 15 - e) << 23) | ((m & 0x03ff) << 13);
-        }
-    }
-    else if (exponent === 31) {
-        uint32[0] = sign | 0x7f800000 | (mantissa << 13);
-    }
-    else {
-        uint32[0] = sign | ((exponent + 127 - 15) << 23) | (mantissa << 13);
-    }
-    return float32[0];
-};
-const registerPickerShaderPatches = (app) => {
-    const device = app.graphicsDevice;
-    const existing = pickerShaderPatchState.get(device);
-    if (existing) {
-        existing.refCount++;
-        return;
-    }
-    const glslChunks = ShaderChunks.get(device, 'glsl');
-    const wgslChunks = ShaderChunks.get(device, 'wgsl');
-    const glslPickPS = glslChunks.get('pickPS');
-    const glslGsplatPS = glslChunks.get('gsplatPS');
-    const wgslPickPS = wgslChunks.get('pickPS');
-    const wgslGsplatPS = wgslChunks.get('gsplatPS');
-    const glslGsplatVS = glslChunks.get('gsplatVS');
-    const wgslGsplatVS = wgslChunks.get('gsplatVS');
-    const wgslGsplatHybridVS = wgslChunks.get('gsplatHybridVS');
-    // Patch strings before mutating ShaderChunks so engine mismatches leave globals untouched.
-    const patchedGlslGsplatPS = patchGsplatPickGlsl(glslGsplatPS);
-    const patchedWgslGsplatPS = patchGsplatPickWgsl(wgslGsplatPS);
-    const patchedGlslGsplatVS = patchGsplatVSGlsl(glslGsplatVS);
-    const patchedWgslGsplatVS = patchGsplatVSWgsl(wgslGsplatVS);
-    const patchedWgslGsplatHybridVS = patchGsplatHybridVSWgsl(wgslGsplatHybridVS);
-    const state = {
-        glslPickPS,
-        glslGsplatPS,
-        wgslPickPS,
-        wgslGsplatPS,
-        glslGsplatVS,
-        wgslGsplatVS,
-        wgslGsplatHybridVS,
-        refCount: 1
-    };
-    pickerShaderPatchState.set(device, state);
-    glslChunks.set('pickPS', pickDepthGlsl);
-    wgslChunks.set('pickPS', pickDepthWgsl);
-    glslChunks.set('gsplatPS', patchedGlslGsplatPS);
-    wgslChunks.set('gsplatPS', patchedWgslGsplatPS);
-    glslChunks.set('gsplatVS', patchedGlslGsplatVS);
-    wgslChunks.set('gsplatVS', patchedWgslGsplatVS);
-    wgslChunks.set('gsplatHybridVS', patchedWgslGsplatHybridVS);
-};
-const unregisterPickerShaderPatches = (app) => {
-    const device = app.graphicsDevice;
-    const state = pickerShaderPatchState.get(device);
-    if (!state) {
-        return;
-    }
-    state.refCount--;
-    if (state.refCount > 0) {
-        return;
-    }
-    const glslChunks = ShaderChunks.get(device, 'glsl');
-    const wgslChunks = ShaderChunks.get(device, 'wgsl');
-    glslChunks.set('pickPS', state.glslPickPS);
-    glslChunks.set('gsplatPS', state.glslGsplatPS);
-    wgslChunks.set('pickPS', state.wgslPickPS);
-    wgslChunks.set('gsplatPS', state.wgslGsplatPS);
-    glslChunks.set('gsplatVS', state.glslGsplatVS);
-    wgslChunks.set('gsplatVS', state.wgslGsplatVS);
-    wgslChunks.set('gsplatHybridVS', state.wgslGsplatHybridVS);
-    pickerShaderPatchState.delete(device);
-};
-const createPickCameraSnapshot = () => ({
-    position: new Vec3(),
-    viewMatrix: new Mat4(),
-    projectionMatrix: new Mat4(),
-    nearClip: 0,
-    farClip: 0,
-    projection: 0
-});
-const captureCameraSnapshot = (camera, out) => {
-    const cam = camera.camera;
-    out.position.copy(camera.getPosition());
-    out.viewMatrix.copy(cam.viewMatrix);
-    out.projectionMatrix.copy(cam.projectionMatrix);
-    out.nearClip = cam.nearClip;
-    out.farClip = cam.farClip;
-    out.projection = cam.projection;
-};
-const getWorldPoint = (camera, x, y, width, height, normalizedDepth, out) => {
-    if (!Number.isFinite(normalizedDepth) || normalizedDepth < 0 || normalizedDepth > 1) {
-        return null;
-    }
-    const { farClip: far, nearClip: near } = camera;
-    const ndcDepth = camera.projection === PROJECTION_ORTHOGRAPHIC
-        ? normalizedDepth
-        : (far * normalizedDepth) / (normalizedDepth * (far - near) + near);
-    viewProjMat.mul2(camera.projectionMatrix, camera.viewMatrix).invert();
-    vec4.set((x / width) * 2 - 1, (1 - y / height) * 2 - 1, ndcDepth * 2 - 1, 1);
-    viewProjMat.transformVec4(vec4, vec4);
-    if (!Number.isFinite(vec4.w) || Math.abs(vec4.w) < 1e-8) {
-        return null;
-    }
-    vec4.mulScalar(1 / vec4.w);
-    if (!Number.isFinite(vec4.x) || !Number.isFinite(vec4.y) || !Number.isFinite(vec4.z)) {
-        return null;
-    }
-    return (out ?? new Vec3()).set(vec4.x, vec4.y, vec4.z);
-};
-const setCameraFacingNormal = (cameraPosition, position, normal) => {
-    normal.sub2(cameraPosition, position);
-    const len = normal.length();
-    if (len > 1e-6) {
-        normal.mulScalar(1 / len);
-    }
-    else {
-        normal.set(0, 1, 0);
-    }
-    return normal;
-};
-// Project a world-space radius around `pos` to its on-screen pixel radius for
-// the given camera. Uses the projection matrix's [1][1] entry (= 1/tan(fov/2)
-// for perspective, = 1/orthoHeight for orthographic) so we don't need fov or
-// orthoHeight on the snapshot.
-const worldRadiusToPixelRadius = (cam, pos, canvasHeight, worldRadius) => {
-    const projY = cam.projectionMatrix.data[5];
-    if (cam.projection === PROJECTION_ORTHOGRAPHIC) {
-        return (worldRadius * projY * canvasHeight) / 2;
-    }
-    const dx = pos.x - cam.position.x;
-    const dy = pos.y - cam.position.y;
-    const dz = pos.z - cam.position.z;
-    const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
-    if (distance < 1e-6)
-        return Infinity;
-    return (worldRadius * projY * canvasHeight) / (2 * distance);
-};
-// Single least-squares plane fit through a cluster of 3D points. The normal
-// is the eigenvector of the smallest eigenvalue of the points' 3x3 covariance
-// matrix, computed in closed form (analytic eigendecomposition for 3x3
-// symmetric, Smith 1961). Returns null on degenerate input.
-const fitPlaneOnce = (points) => {
-    const n = points.length;
-    if (n < 3)
-        return null;
-    let cx = 0, cy = 0, cz = 0;
-    for (let i = 0; i < n; i++) {
-        cx += points[i].x;
-        cy += points[i].y;
-        cz += points[i].z;
-    }
-    cx /= n;
-    cy /= n;
-    cz /= n;
-    let cxx = 0, cxy = 0, cxz = 0, cyy = 0, cyz = 0, czz = 0;
-    for (let i = 0; i < n; i++) {
-        const dx = points[i].x - cx;
-        const dy = points[i].y - cy;
-        const dz = points[i].z - cz;
-        cxx += dx * dx;
-        cxy += dx * dy;
-        cxz += dx * dz;
-        cyy += dy * dy;
-        cyz += dy * dz;
-        czz += dz * dz;
-    }
-    const q = (cxx + cyy + czz) / 3;
-    const a = cxx - q, b = cyy - q, c = czz - q;
-    const p2 = a * a + b * b + c * c + 2 * (cxy * cxy + cxz * cxz + cyz * cyz);
-    if (p2 < NORMAL_DEGENERATE_EPSILON)
-        return null;
-    const p = Math.sqrt(p2 / 6);
-    const inv = 1 / p;
-    const Bxx = a * inv, Bxy = cxy * inv, Bxz = cxz * inv;
-    const Byy = b * inv, Byz = cyz * inv, Bzz = c * inv;
-    const detB = Bxx * (Byy * Bzz - Byz * Byz) - Bxy * (Bxy * Bzz - Byz * Bxz) + Bxz * (Bxy * Byz - Byy * Bxz);
-    const r = Math.max(-1, Math.min(1, detB / 2));
-    const phi = Math.acos(r) / 3;
-    const lambdaMin = q + 2 * p * Math.cos(phi + (2 * Math.PI) / 3);
-    const Mxx = cxx - lambdaMin, Myy = cyy - lambdaMin, Mzz = czz - lambdaMin;
-    const v1x = cxy * cyz - cxz * Myy;
-    const v1y = cxz * cxy - Mxx * cyz;
-    const v1z = Mxx * Myy - cxy * cxy;
-    const v2x = cxy * Mzz - cxz * cyz;
-    const v2y = cxz * cxz - Mxx * Mzz;
-    const v2z = Mxx * cyz - cxy * cxz;
-    const v3x = Myy * Mzz - cyz * cyz;
-    const v3y = cyz * cxz - cxy * Mzz;
-    const v3z = cxy * cyz - Myy * cxz;
-    const l1 = v1x * v1x + v1y * v1y + v1z * v1z;
-    const l2 = v2x * v2x + v2y * v2y + v2z * v2z;
-    const l3 = v3x * v3x + v3y * v3y + v3z * v3z;
-    let vx, vy, vz, lSq;
-    if (l1 >= l2 && l1 >= l3) {
-        vx = v1x;
-        vy = v1y;
-        vz = v1z;
-        lSq = l1;
-    }
-    else if (l2 >= l3) {
-        vx = v2x;
-        vy = v2y;
-        vz = v2z;
-        lSq = l2;
-    }
-    else {
-        vx = v3x;
-        vy = v3y;
-        vz = v3z;
-        lSq = l3;
-    }
-    if (lSq < NORMAL_EPSILON$1)
-        return null;
-    const invLen = 1 / Math.sqrt(lSq);
-    return { cx, cy, cz, vx: vx * invLen, vy: vy * invLen, vz: vz * invLen };
-};
-// Two-pass plane fit: first pass on all points, then drop points whose
-// distance from the fitted plane exceeds NORMAL_OUTLIER_THRESHOLD * the mean
-// residual, refit on the inliers. Sign-flips the result toward toCamera so
-// the cursor's tangent basis stays consistent. Returns false on degenerate
-// input (fewer than 3 points, collinear/coincident samples).
-const fitPlaneNormal = (points, toCamera, outNormal) => {
-    const first = fitPlaneOnce(points);
-    if (!first)
-        return false;
-    let residualSum = 0;
-    for (let i = 0; i < points.length; i++) {
-        const dx = points[i].x - first.cx;
-        const dy = points[i].y - first.cy;
-        const dz = points[i].z - first.cz;
-        residualSum += Math.abs(dx * first.vx + dy * first.vy + dz * first.vz);
-    }
-    const threshold = (residualSum / points.length) * NORMAL_OUTLIER_THRESHOLD;
-    const inliers = [];
-    for (let i = 0; i < points.length; i++) {
-        const dx = points[i].x - first.cx;
-        const dy = points[i].y - first.cy;
-        const dz = points[i].z - first.cz;
-        if (Math.abs(dx * first.vx + dy * first.vy + dz * first.vz) <= threshold) {
-            inliers.push(points[i]);
-        }
-    }
-    let result = first;
-    if (inliers.length >= 3 && inliers.length < points.length) {
-        const refined = fitPlaneOnce(inliers);
-        if (refined)
-            result = refined;
-    }
-    let { vx, vy, vz } = result;
-    if (vx * toCamera.x + vy * toCamera.y + vz * toCamera.z < 0) {
-        vx = -vx;
-        vy = -vy;
-        vz = -vz;
-    }
-    outNormal.set(vx, vy, vz);
-    return true;
-};
-// The surface at a pixel: the SURFACE_OPACITY quantile of the nearest survivors over a small
-// disc, which is the depth where the opacity in front reaches that. Null where it never does.
-const surfaceDepth = (depthAt, x, y) => {
-    const samples = [];
-    for (let dy = -SURFACE_RADIUS_PX; dy <= SURFACE_RADIUS_PX; dy++) {
-        for (let dx = -SURFACE_RADIUS_PX; dx <= SURFACE_RADIUS_PX; dx++) {
-            if (dx * dx + dy * dy > SURFACE_RADIUS_PX * SURFACE_RADIUS_PX)
-                continue;
-            for (let trial = 0; trial < PICK_TRIALS; trial++) {
-                const depth = depthAt(x + dx, y + dy, trial);
-                if (depth !== null)
-                    samples.push(depth);
-            }
-        }
-    }
-    if (samples.length === 0) {
-        return null;
-    }
-    samples.sort((a, b) => a - b);
-    const depth = samples[Math.max(0, Math.ceil(samples.length * SURFACE_OPACITY) - 1)];
-    return Number.isFinite(depth) && depth < 1 ? depth : null;
-};
-// The surface under a pixel and its normal, fitted through surface points on rings around it.
-// `depthAt` must cover NORMAL_SAMPLE_MAX_PX + SURFACE_RADIUS_PX around the pixel.
-const estimateSurface = (depthAt, pickCamera, width, height, screenX, screenY) => {
-    const surfacePoint = (px, py) => {
-        const depth = surfaceDepth(depthAt, px, py);
-        return depth === null ? null : getWorldPoint(pickCamera, px, py, width, height, depth);
-    };
-    const position = surfacePoint(screenX, screenY);
-    if (!position) {
-        return null;
-    }
-    const samplePixel = (px, py) => {
-        if (px < 0 || px >= width || py < 0 || py >= height) {
-            return null;
-        }
-        return surfacePoint(px, py);
-    };
-    // Pixel radius corresponding to a fixed world radius at the
-    // picked-point's depth. Clamped so distant picks still sample
-    // enough pixels and very-close picks stay inside the block read.
-    const pixelRadius = Math.max(NORMAL_SAMPLE_MIN_PX, Math.min(NORMAL_SAMPLE_MAX_PX, worldRadiusToPixelRadius(pickCamera, position, height, NORMAL_SAMPLE_WORLD_RADIUS)));
-    const ringPixelRadii = NORMAL_RING_FRACTIONS.map((f) => Math.max(1, Math.round(f * pixelRadius)));
-    const sampleRings = ringPixelRadii.map((radius) => {
-        return NORMAL_SAMPLE_DIRECTIONS.map(([dx, dy]) => {
-            return samplePixel(screenX + dx * radius, screenY + dy * radius);
-        });
-    });
-    const toCamera = setCameraFacingNormal(pickCamera.position, position, new Vec3());
-    // Collect every valid 3D sample: the picked position plus all ring
-    // samples that didn't fall off-screen or find no surface.
-    const fitPoints = [position];
-    for (let i = 0; i < sampleRings.length; i++) {
-        const ring = sampleRings[i];
-        for (let j = 0; j < ring.length; j++) {
-            const pt = ring[j];
-            if (pt)
-                fitPoints.push(pt);
-        }
-    }
-    const normal = new Vec3();
-    if (!fitPlaneNormal(fitPoints, toCamera, normal)) {
-        normal.copy(toCamera);
-    }
-    return {
-        position,
-        normal
-    };
-};
-// The share of samples over a disc of `r` pixels whose nearest survivor is nearer than the view
-// depth `depth`; null where the disc has no samples. `depthAt` must cover the disc.
-const opacityInFront = (depthAt, pickCamera, screenX, screenY, r, depth) => {
-    const threshold = (depth - pickCamera.nearClip) / (pickCamera.farClip - pickCamera.nearClip);
-    let total = 0;
-    let inFront = 0;
-    for (let dy = -r; dy <= r; dy++) {
-        for (let dx = -r; dx <= r; dx++) {
-            if (dx * dx + dy * dy > r * r)
-                continue;
-            for (let trial = 0; trial < PICK_TRIALS; trial++) {
-                const nearest = depthAt(screenX + dx, screenY + dy, trial);
-                if (nearest === null)
-                    continue;
-                total++;
-                if (nearest < threshold)
-                    inFront++;
-            }
-        }
-    }
-    return total > 0 ? inFront / total : null;
-};
-// One pick pixel per css pixel, never more than the backbuffer has: picking then behaves the
-// same in performance mode and at any device pixel ratio, since the pixel sizes above are css
-// pixels, and a high-density display does not multiply the pass's cost. Null before the device
-// or the canvas has been sized.
-const pickTargetSize = (graphicsDevice) => {
-    const canvas = graphicsDevice.canvas;
-    const width = Math.min(Math.floor(graphicsDevice.width), Math.round(canvas.clientWidth));
-    const height = Math.min(Math.floor(graphicsDevice.height), Math.round(canvas.clientHeight));
-    return width > 0 && height > 0 ? { width, height } : null;
-};
-const clampPixel = (v, size) => Math.min(size - 1, Math.max(0, Math.floor(v * size)));
-// Picks run one at a time, since they share one render. `fallback` is the result for a pick
-// that release overtakes: one queued behind another pick, or one whose read-back is cut short
-// as the device goes.
-class PickQueue {
-    released = false;
-    queue = Promise.resolve();
-    run(operation, fallback) {
-        const guarded = () => {
-            if (this.released) {
-                return Promise.resolve(fallback);
-            }
-            return operation().catch((error) => {
-                if (this.released) {
-                    return fallback;
-                }
-                throw error;
-            });
-        };
-        const result = this.queue.then(guarded, guarded);
-        this.queue = result.then(() => undefined, () => undefined);
-        return result;
-    }
-}
-class Picker {
-    pick;
-    pickSurface;
-    /**
-     * Estimate how opaque the scene is in front of several points, for testing many at once
-     * (the annotation occlusion test): the share of the pick render's pixels, over a disc of
-     * `radius` around each point, whose nearest survivor is nearer than the point's `depth`.
-     * Coordinates and radius are normalised like `pick`'s (the radius to the height); `depth`
-     * is the view depth to test against. Each result is 0 (nothing in front) to 1 (opaque), or
-     * null where the disc is off the render.
-     */
-    pickVisibility;
-    /**
-     * Bring the pick render up to date for the current camera and return its texture, for a view
-     * that reads it on the GPU (the debug panel's pick depth), with a count of the renders so
-     * far, which changes whenever the texture does. Each channel is one trial's nearest
-     * surviving normalised depth, 1 where nothing survived. Null before the device is sized or
-     * after release. Call it between frames, as the picks do: a pick pass rendered during a
-     * frame (in `prerender`, say) can come out empty.
-     */
-    renderView;
-    release;
-    constructor(app, camera) {
-        const { graphicsDevice } = app;
-        let pickBuffer;
-        let pickTarget;
-        let pickPass;
-        let chunksPatched = false;
-        const queue = new PickQueue();
-        let cacheValid = false;
-        let renders = 0;
-        let cacheWidth = 0;
-        let cacheHeight = 0;
-        const cacheCamera = createPickCameraSnapshot();
-        const initPickTarget = (width, height) => {
-            pickBuffer = new Texture(graphicsDevice, {
-                format: PIXELFORMAT_RGBA16F,
-                width,
-                height,
-                mipmaps: false,
-                minFilter: FILTER_NEAREST,
-                magFilter: FILTER_NEAREST,
-                addressU: ADDRESS_CLAMP_TO_EDGE,
-                addressV: ADDRESS_CLAMP_TO_EDGE,
-                name: 'picker-stochastic'
-            });
-            pickTarget = new RenderTarget({
-                colorBuffer: pickBuffer,
-                depth: false // not needed: the blend keeps the nearest depth
-            });
-            pickPass = new RenderPassPicker(graphicsDevice, app.renderer);
-            // the nearest surviving depth wins, whatever order the splats draw in
-            pickPass.blendState = new BlendState(true, BLENDEQUATION_MIN, BLENDMODE_ONE, BLENDMODE_ONE, BLENDEQUATION_MIN, BLENDMODE_ONE, BLENDMODE_ONE);
-        };
-        const updateCache = (width, height) => {
-            captureCameraSnapshot(camera, cacheCamera);
-            cacheWidth = width;
-            cacheHeight = height;
-        };
-        const cameraMatches = (width, height) => {
-            const cam = camera.camera;
-            return (cacheValid &&
-                cacheWidth === width &&
-                cacheHeight === height &&
-                cacheCamera.viewMatrix.equals(cam.viewMatrix) &&
-                cacheCamera.projectionMatrix.equals(cam.projectionMatrix) &&
-                cacheCamera.nearClip === cam.nearClip &&
-                cacheCamera.farClip === cam.farClip &&
-                cacheCamera.projection === cam.projection);
-        };
-        const getCacheCameraSnapshot = () => {
-            const snapshot = createPickCameraSnapshot();
-            snapshot.position.copy(cacheCamera.position);
-            snapshot.viewMatrix.copy(cacheCamera.viewMatrix);
-            snapshot.projectionMatrix.copy(cacheCamera.projectionMatrix);
-            snapshot.nearClip = cacheCamera.nearClip;
-            snapshot.farClip = cacheCamera.farClip;
-            snapshot.projection = cacheCamera.projection;
-            return snapshot;
-        };
-        // Read the pick render around a pixel, `margin` pixels each way, clamped to the render.
-        const readAround = async (screenX, screenY, margin, width, height) => {
-            const blockX = Math.max(0, screenX - margin);
-            const blockY = Math.max(0, screenY - margin);
-            const blockWidth = Math.min(width - 1, screenX + margin) - blockX + 1;
-            const blockHeight = Math.min(height - 1, screenY + margin) - blockY + 1;
-            const texY = graphicsDevice.isWebGL2 ? pickTarget.height - blockY - blockHeight : blockY;
-            const pixels = (await pickBuffer.read(blockX, texY, blockWidth, blockHeight, {
-                renderTarget: pickTarget,
-                immediate: true
-            }));
-            return (x, y, trial) => {
-                const localX = x - blockX;
-                const localY = y - blockY;
-                if (localX < 0 || localX >= blockWidth || localY < 0 || localY >= blockHeight) {
-                    return null;
-                }
-                const row = graphicsDevice.isWebGL2 ? blockHeight - localY - 1 : localY;
-                return half2Float(pixels[(row * blockWidth + localX) * 4 + trial]);
-            };
-        };
-        const ensureRendered = (width, height, worldLayer) => {
-            if (cameraMatches(width, height)) {
-                return;
-            }
-            // No gsplat ids: the pass outputs depth, not ids, and switching `enableIds` changes the
-            // work buffer's format, which rebuilds the whole work buffer on the next frame
-            if (!chunksPatched) {
-                registerPickerShaderPatches(app);
-                chunksPatched = true;
-            }
-            if (!pickPass) {
-                initPickTarget(width, height);
-            }
-            else if (cacheWidth !== width || cacheHeight !== height) {
-                cacheValid = false;
-                pickTarget.resize(width, height);
-            }
-            pickPass.init(pickTarget);
-            pickPass.setClearColor(farColor);
-            pickPass.update(camera.camera, app.scene, [worldLayer], new Map(), false);
-            pickPass.render();
-            updateCache(width, height);
-            cacheValid = true;
-            renders++;
-        };
-        const prepareSample = (x, y) => {
-            if (queue.released) {
-                return null;
-            }
-            const size = pickTargetSize(graphicsDevice);
-            if (!size) {
-                return null;
-            }
-            const { width, height } = size;
-            const worldLayer = app.scene.layers.getLayerByName('World');
-            if (!worldLayer) {
-                return null;
-            }
-            const screenX = clampPixel(x, width);
-            const screenY = clampPixel(y, height);
-            ensureRendered(width, height, worldLayer);
-            const pickCamera = getCacheCameraSnapshot();
-            return { width, height, screenX, screenY, pickCamera };
-        };
-        const pick = async (x, y) => {
-            const sample = prepareSample(x, y);
-            if (!sample) {
-                return null;
-            }
-            const { width, height, screenX, screenY, pickCamera } = sample;
-            const depthAt = await readAround(screenX, screenY, SURFACE_RADIUS_PX, width, height);
-            const depth = surfaceDepth(depthAt, screenX, screenY);
-            return depth === null ? null : getWorldPoint(pickCamera, screenX, screenY, width, height, depth);
-        };
-        const pickSurface = async (x, y) => {
-            const sample = prepareSample(x, y);
-            if (!sample) {
-                return null;
-            }
-            const { width, height, screenX, screenY, pickCamera } = sample;
-            // Single block read serves both the depth (center pixel) and the normal samples.
-            // Sized to the maximum possible ring pixel-radius, plus the surface disc around each
-            // sample, so the dynamic ring offsets always lie inside the buffer we read.
-            const depthAt = await readAround(screenX, screenY, NORMAL_SAMPLE_MAX_PX + SURFACE_RADIUS_PX, width, height);
-            return estimateSurface(depthAt, pickCamera, width, height, screenX, screenY);
-        };
-        const pickVisibility = async (points, radius) => {
-            if (points.length === 0) {
-                return [];
-            }
-            // every point renders from the same cached pass, since the camera cannot change
-            // between these synchronous calls; the reads then run in parallel
-            return Promise.all(points.map(async ({ x, y, depth }) => {
-                const sample = prepareSample(x, y);
-                if (!sample) {
-                    return null;
-                }
-                const { width, height, screenX, screenY, pickCamera } = sample;
-                const r = Math.max(1, Math.round(radius * height));
-                const depthAt = await readAround(screenX, screenY, r, width, height);
-                return opacityInFront(depthAt, pickCamera, screenX, screenY, r, depth);
-            }));
-        };
-        this.pick = (x, y) => queue.run(() => pick(x, y), null);
-        this.pickSurface = (x, y) => queue.run(() => pickSurface(x, y), null);
-        this.pickVisibility = (points, radius) => queue.run(() => pickVisibility(points, radius), points.map(() => null));
-        this.renderView = () => (prepareSample(0, 0) ? { texture: pickBuffer, renders } : null);
-        // The scene can change under a still camera, which the camera-based cache cannot see:
-        // finer detail streams in after the reveal and after every move. The engine reports each
-        // frame whether all the detail it wants is resident, so the cached render is stale on
-        // every frame it is not, and once more when it becomes so. Nothing re-renders until a
-        // pick needs it.
-        const gsplatSystem = app.systems.gsplat;
-        let contentReady = false;
-        const onFrameReady = (frameCamera, _layer, ready) => {
-            if (frameCamera !== camera.camera)
-                return;
-            if (!ready || !contentReady) {
-                cacheValid = false;
-            }
-            contentReady = ready;
-        };
-        gsplatSystem.on('frame:ready', onFrameReady);
-        this.release = () => {
-            queue.released = true;
-            gsplatSystem.off('frame:ready', onFrameReady);
-            if (chunksPatched) {
-                unregisterPickerShaderPatches(app);
-                chunksPatched = false;
-            }
-            pickPass?.destroy();
-            pickTarget?.destroy();
-            pickBuffer?.destroy();
-            cacheValid = false;
-        };
-    }
-}
-
 // the pick render's samples in a surface disc, and how many of the nearest the quantile needs
 let discPixels = 0;
 for (let dy = -SURFACE_RADIUS_PX; dy <= SURFACE_RADIUS_PX; dy++) {
@@ -92132,7 +103300,11 @@ const STYLES = `
     border-radius: 4px;
     pointer-events: auto;
     user-select: none;
-    min-width: 220px;
+    /* a fixed width, wide enough for the longest labels, so the panel keeps its layout as
+       values change and options are toggled */
+    box-sizing: border-box;
+    width: 56ch;
+    max-width: calc(100% - 16px);
 }
 .${PANEL_CLASS} .sse-debug-row {
     display: flex;
@@ -92152,6 +103324,7 @@ const STYLES = `
     border-radius: 2px;
     transition: background-color 0.15s ease;
     outline: none;
+    white-space: pre;
 }
 .${PANEL_CLASS} .sse-debug-row .sse-debug-value:hover {
     background: rgba(255, 255, 255, 0.08);
@@ -92167,12 +103340,21 @@ const STYLES = `
     background: rgba(220, 100, 100, 0.45);
 }
 .${PANEL_CLASS} .sse-debug-buttons {
-    display: flex;
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
     gap: 6px;
     margin-top: 6px;
 }
+.${PANEL_CLASS} .sse-debug-buttons.sse-debug-grid {
+    grid-auto-flow: row;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
 .${PANEL_CLASS} button {
-    flex: 1;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     background: rgba(255, 255, 255, 0.08);
     color: #eee;
     border: 1px solid rgba(255, 255, 255, 0.12);
@@ -92206,7 +103388,8 @@ const STYLES = `
     background: rgba(120, 180, 255, 0.35);
 }
 `;
-const fmt = (v) => `${v.x.toFixed(3)}, ${v.y.toFixed(3)}, ${v.z.toFixed(3)}`;
+// each component padded to a fixed width, so the values hold their place as the camera moves
+const fmt = (v) => [v.x, v.y, v.z].map((c) => c.toFixed(3).padStart(8)).join(',');
 // Accepts "1,2,3", "1, 2, 3", "1 2 3", with or without trailing whitespace.
 const parseVector = (text) => {
     const parts = text
@@ -92228,7 +103411,8 @@ class DebugPanel {
     _splatRenderer;
     _cullButton = null;
     _taaButton = null;
-    _poplessButton = null;
+    _coverageButton = null;
+    _sharpenButton = null;
     _culledValue = null;
     _cullStatsFrames = 0;
     _cullStatsPending = false;
@@ -92348,16 +103532,17 @@ class DebugPanel {
                 <button data-id="pick-depth" title="Show the depth a navigation pick finds at every pixel">Show depth</button>
                 <button data-id="ministats" title="Show the engine's MiniStats graphs (the viewer then renders every frame)">MiniStats</button>
             </div>
-            <input class="sse-debug-paste" data-id="paste-field" placeholder="Clipboard blocked here: paste with Ctrl/Cmd+V" spellcheck="false" style="display: none">
             ${this._splatRenderer
             ? `
-            <div class="sse-debug-buttons">
+            <div class="sse-debug-buttons sse-debug-grid">
                 <button data-id="depth-cull" title="Stochastic renderer: cull splats hidden in the previous frame's depth (auto suspends the test when it removes too little)">Depth cull</button>
                 <button data-id="taa" title="Stochastic renderer: accumulate the samples over frames (reprojected while the camera moves)">TAA</button>
-                <button data-id="popless" title="Stochastic renderer: give each fragment the depth of the Gaussian's peak along its ray, rather than the splat centre's">Popless</button>
+                <button data-id="coverage" title="Stochastic renderer: pick the coverage threshold per pixel (dither), per splat (a solid ellipse of random size, drawn without discard) or per splat and interleaved pixel set (four sizes per 2x2 pixel quad)">Coverage</button>
+                <button data-id="sharpen" title="Stochastic renderer: an unsharp mask on the accumulated history at display, fading out as it converges (off, 1, 2)">Sharpen</button>
             </div>
             <div class="sse-debug-row"><span class="sse-debug-label">culled</span><span class="sse-debug-value" data-id="culled">—</span></div>`
             : ''}
+            <input class="sse-debug-paste" data-id="paste-field" placeholder="Clipboard blocked here: paste with Ctrl/Cmd+V" spellcheck="false" style="display: none">
         `;
         host.appendChild(root);
         this._root = root;
@@ -92389,11 +103574,20 @@ class DebugPanel {
         if (this._splatRenderer) {
             this._cullButton = root.querySelector('[data-id="depth-cull"]');
             this._taaButton = root.querySelector('[data-id="taa"]');
-            this._poplessButton = root.querySelector('[data-id="popless"]');
-            this._poplessButton.addEventListener('click', () => {
+            this._coverageButton = root.querySelector('[data-id="coverage"]');
+            this._coverageButton.addEventListener('click', () => {
                 const renderer = this._splatRenderer;
-                renderer.variant.popless = renderer.variant.popless === 'on' ? 'off' : 'on';
+                const next = { pixel: 'splat', splat: 'interleaved', interleaved: 'pixel' };
+                renderer.variant.coverage = next[renderer.variant.coverage];
                 renderer.applyVariant();
+                this._renderCull();
+            });
+            this._sharpenButton = root.querySelector('[data-id="sharpen"]');
+            // cycles the display sharpen: off -> 1 -> 2 -> off, without resetting the history
+            this._sharpenButton.addEventListener('click', () => {
+                const renderer = this._splatRenderer;
+                const k = renderer.variant.taaSharpen;
+                renderer.setSharpen(k >= 2 ? 0 : k >= 1 ? 2 : 1);
                 this._renderCull();
             });
             this._culledValue = root.querySelector('[data-id="culled"]');
@@ -92520,9 +103714,14 @@ class DebugPanel {
             this._taaButton.textContent = `TAA: ${renderer.variant.taa}`;
             this._taaButton.classList.toggle('sse-debug-on', renderer.variant.taa === 'on');
         }
-        if (this._poplessButton) {
-            this._poplessButton.textContent = `Popless: ${renderer.variant.popless}`;
-            this._poplessButton.classList.toggle('sse-debug-on', renderer.variant.popless === 'on');
+        if (this._coverageButton) {
+            this._coverageButton.textContent = `Coverage: ${renderer.variant.coverage}`;
+            this._coverageButton.classList.toggle('sse-debug-on', renderer.variant.coverage !== 'pixel');
+        }
+        if (this._sharpenButton) {
+            const k = renderer.variant.taaSharpen;
+            this._sharpenButton.textContent = `Sharpen: ${k > 0 ? k : 'off'}`;
+            this._sharpenButton.classList.toggle('sse-debug-on', k > 0);
         }
         if (mode === 'off') {
             this._culledValue.textContent = 'off';
@@ -92695,6 +103894,122 @@ class DebugPanel {
     _flashBad(el) {
         el.classList.add('sse-flash-bad');
         setTimeout(() => el.classList.remove('sse-flash-bad'), 400);
+    }
+}
+
+/**
+ * Holds the viewer's continuous on-demand renders while the gpu is behind. Browsers let a page
+ * queue frames far ahead of a busy gpu: a turn of the flat view ran 80-140 ms behind its input in
+ * Safari on Apple Vision Pro, about 110 ms in Chrome on a Pixel 7 Pro with WebGPU and 400 ms with
+ * WebGL (docs/frames-in-flight.md). The renders asked for every frame (the camera moving, the
+ * stochastic renderer accumulating) go through {@link FrameGate#request}, which holds them while
+ * `limit` rendered frames have not finished on the gpu and renders as soon as one does, with the
+ * camera where it is by then. One-shot requests (captures, picks, scrubbing, screenshots, streamed
+ * detail) still set `renderNextFrame` themselves, as they wait for the frame they asked for. The
+ * gate is open with a limit of 0 and while the app renders every frame (loading, XR sessions,
+ * which the compositor paces). WebGPU reports a frame's completion with a promise; WebGL with a
+ * fence, checked at the start of every tick.
+ */
+class FrameGate {
+    /** The most rendered frames the gpu may have unfinished before a request waits; 0 is off. */
+    limit;
+    /** Requests that waited for the gpu, for measuring the gate. */
+    held = 0;
+    app;
+    queue;
+    gl;
+    // a WebGL fence per rendered frame the gpu has not finished, oldest first
+    fences = [];
+    // rendered frames the gpu has not finished
+    pending = 0;
+    // a request waiting for one to finish
+    owed = false;
+    rendered = false;
+    destroyed = false;
+    handles;
+    /**
+     * @param app - The application.
+     * @param limit - The most unfinished frames before a request waits; 0 is off.
+     */
+    constructor(app, limit) {
+        this.app = app;
+        this.limit = limit;
+        const device = app.graphicsDevice;
+        this.queue = device.wgpu?.queue ?? null;
+        this.gl = this.queue ? null : (device.gl ?? null);
+        this.handles = [
+            app.on('frameupdate', () => this.poll()),
+            app.on('postrender', () => {
+                this.rendered = true;
+            }),
+            app.on('frameend', () => this.frameEnd())
+        ];
+    }
+    /** Renders the next frame, or once the gpu has caught up. */
+    request() {
+        if (this.limit > 0 && !this.app.autoRender && this.pending >= this.limit) {
+            if (!this.owed)
+                this.held++;
+            this.owed = true;
+            return;
+        }
+        this.app.renderNextFrame = true;
+    }
+    destroy() {
+        this.destroyed = true;
+        for (const handle of this.handles)
+            handle.off();
+        const { gl } = this;
+        if (gl && !gl.isContextLost()) {
+            for (const fence of this.fences)
+                gl.deleteSync(fence);
+        }
+        this.fences.length = 0;
+    }
+    // a rendered frame's work is all submitted by its end
+    frameEnd() {
+        if (!this.rendered)
+            return;
+        this.rendered = false;
+        if (this.queue) {
+            this.pending++;
+            // a lost device settles it either way
+            this.queue.onSubmittedWorkDone().then(() => this.finished(), () => this.finished());
+        }
+        else if (this.gl) {
+            const fence = this.gl.fenceSync(this.gl.SYNC_GPU_COMMANDS_COMPLETE, 0);
+            if (fence) {
+                this.fences.push(fence);
+                this.pending++;
+            }
+        }
+    }
+    // the WebGL frames finished since the last tick; a lost context finishes them all
+    poll() {
+        const { gl, fences } = this;
+        if (!gl || !fences.length)
+            return;
+        if (gl.isContextLost()) {
+            fences.length = 0;
+            this.pending = 0;
+            this.finished();
+            return;
+        }
+        while (fences.length && gl.getSyncParameter(fences[0], gl.SYNC_STATUS) === gl.SIGNALED) {
+            gl.deleteSync(fences.shift());
+            this.finished();
+        }
+    }
+    // One-shot renders and frames rendered while the gate was open (loading) can leave more than
+    // limit frames unfinished, so a completion grants the owed render only once the gpu is under
+    // the limit, or the gate is open
+    finished() {
+        this.pending = Math.max(this.pending - 1, 0);
+        const open = this.limit <= 0 || this.app.autoRender || this.pending < this.limit;
+        if (this.owed && open && !this.destroyed) {
+            this.owed = false;
+            this.app.renderNextFrame = true;
+        }
     }
 }
 
@@ -92961,9 +104276,13 @@ class NavInteraction {
         const cameraPos = camera.getPosition();
         camera.camera.screenToWorld(offsetX, offsetY, 1.0, tmpV$4);
         tmpV$4.sub(cameraPos).normalize();
-        const hit = this.collision.queryRay(cameraPos.x, cameraPos.y, cameraPos.z, tmpV$4.x, tmpV$4.y, tmpV$4.z, camera.camera.farClip);
+        // a camera inside solid geometry picks where the ray leaves it, not its own position
+        const hit = this.collision.queryRay(cameraPos.x, cameraPos.y, cameraPos.z, tmpV$4.x, tmpV$4.y, tmpV$4.z, camera.camera.farClip, true);
         if (!hit)
             return null;
+        // an exit's surface faces along the ray, so its normal is found looking back along it
+        if (hit.exit)
+            tmpV$4.mulScalar(-1);
         const sn = this.collision.querySurfaceNormal(hit.x, hit.y, hit.z, tmpV$4.x, tmpV$4.y, tmpV$4.z);
         return {
             position: new Vec3(hit.x, hit.y, hit.z),
@@ -94536,10 +105855,14 @@ class NavCursor {
         const cameraPos = camera.getPosition();
         camera.camera.screenToWorld(offsetX, offsetY, 1.0, tmpV);
         tmpV.sub(cameraPos).normalize();
-        const hit = collision.queryRay(cameraPos.x, cameraPos.y, cameraPos.z, tmpV.x, tmpV.y, tmpV.z, camera.camera.farClip);
+        // a camera inside solid geometry picks where the ray leaves it, not its own position
+        const hit = collision.queryRay(cameraPos.x, cameraPos.y, cameraPos.z, tmpV.x, tmpV.y, tmpV.z, camera.camera.farClip, true);
         if (!hit) {
             return null;
         }
+        // an exit's surface faces along the ray, so its normal is found looking back along it
+        if (hit.exit)
+            tmpV.mulScalar(-1);
         const sn = collision.querySurfaceNormal(hit.x, hit.y, hit.z, tmpV.x, tmpV.y, tmpV.z);
         this.collisionTarget.position.set(hit.x, hit.y, hit.z);
         this.collisionTarget.normal.set(sn.nx, sn.ny, sn.nz);
@@ -94835,3033 +106158,6 @@ class FrameDepthPicker {
         this.target = null;
         this.texture = null;
         this.shader.destroy();
-    }
-}
-
-// The resident set: which splats the engine's LOD and streaming have made resident this
-// frame, and where each node's data sits. The engine keeps octree LOD, the budget, file
-// streaming and the block allocator (one slot range per node); the stochastic renderer
-// consumes its decisions and owns everything after them.
-//
-// Read through the engine's internal (@ignore) gsplat-unified classes until the public
-// `world:update` api lands (engine change E3 in the plan). Every internal shape used is
-// narrowed here to the members this file reads, so a change in the engine fails in one place.
-const tmpVec = new Vec3();
-const tmpVec2$1 = new Vec3();
-/**
- * Hooks the engine's per-frame gsplat update for one camera and layer and exposes the resident
- * set. `frame:ready` fires inside `GSplatManager.update()` after `world.bake()` and after the
- * engine's own render prep (both in 2.22.4 and on main), so a listener sees the baked state of
- * the current frame and can replace that prep.
- */
-class EngineResidentSetProvider {
-    app;
-    camera;
-    layer;
-    handles = [];
-    callbacks = new Set();
-    set = null;
-    // the engine renderers this provider has switched off, with their original prep function
-    takenOver = new Map();
-    // while false the engine keeps rendering the splats itself (XR), and the hook stays quiet
-    active = true;
-    constructor(app, camera, layer) {
-        this.app = app;
-        this.camera = camera;
-        this.layer = layer;
-        const system = app.systems.gsplat;
-        // fires when a manager is created for a camera and layer, before its first update:
-        // the earliest point to switch the engine's own renderer off, so it never allocates
-        // its projector, sort and draw resources
-        this.handles.push(system.on('material:created', (material, cam, lyr) => {
-            if (cam === this.camera && lyr === this.layer && this.active) {
-                const manager = this.manager();
-                if (manager)
-                    this.takeOver(manager);
-            }
-        }));
-        this.handles.push(system.on('frame:ready', (cam, lyr) => {
-            if (cam !== this.camera || lyr !== this.layer || !this.active)
-                return;
-            const manager = this.manager();
-            if (!manager)
-                return;
-            this.takeOver(manager);
-            const state = manager.world.currentState;
-            if (!state)
-                return;
-            const changed = !this.set || this.set.version !== state.version;
-            if (changed) {
-                this.set = buildResidentSet(state);
-            }
-            for (const cb of this.callbacks) {
-                cb(this.set, changed, manager);
-            }
-        }));
-    }
-    /** The engine manager for this camera and layer, once the engine has created it. */
-    manager() {
-        const director = this.app.renderer.gsplatDirector;
-        // the director keys its cameras by the scene camera, not the component
-        const cameraData = director?.camerasMap.get(this.camera.camera);
-        return cameraData?.layersMap.get(this.layer)?.gsplatManager ?? null;
-    }
-    /** Hand the splats back to the engine's renderer (false), or take them over again (true). */
-    setActive(value) {
-        if (this.active === value)
-            return;
-        this.active = value;
-        if (value) {
-            const manager = this.manager();
-            if (manager)
-                this.takeOver(manager);
-        }
-        else {
-            this.restore();
-        }
-    }
-    onFrame(cb) {
-        this.callbacks.add(cb);
-        return () => this.callbacks.delete(cb);
-    }
-    /**
-     * Switch the engine's own splat rendering off for this manager: its render prep returns
-     * false (so the hybrid renderer never builds its projector, sorter or cache) and its mesh
-     * instance is hidden. The world (LOD, streaming, allocation, the work-buffer copy) keeps
-     * running. Reversed by {@link restore}.
-     */
-    takeOver(manager) {
-        const renderer = manager.renderer;
-        if (!this.takenOver.has(renderer)) {
-            this.takenOver.set(renderer, renderer.prepareRenderView);
-            renderer.prepareRenderView = () => false;
-        }
-        if (renderer.meshInstance)
-            renderer.meshInstance.visible = false;
-        // The manager's first update runs its render prep before frame:ready fires, and
-        // material:created fires before the layer data holds the manager, so the engine's
-        // projector, sorter and compaction get allocated once (32 bytes a splat and more).
-        // Release them; the engine recreates them lazily if it renders again (XR, restore)
-        // or picks through its sorted path.
-        for (const key of ['gpuSorter', 'projector', 'intervalCompaction']) {
-            const resource = renderer[key];
-            if (resource) {
-                resource.destroy();
-                renderer[key] = null;
-            }
-        }
-    }
-    restore() {
-        for (const [renderer, original] of this.takenOver) {
-            renderer.prepareRenderView = original;
-            if (renderer.meshInstance)
-                renderer.meshInstance.visible = true;
-        }
-        this.takenOver.clear();
-    }
-    destroy() {
-        this.restore();
-        for (const handle of this.handles)
-            handle.off();
-        this.handles.length = 0;
-        this.callbacks.clear();
-        this.set = null;
-    }
-}
-// Flatten the engine world state into files and nodes with world-space bounds.
-const buildResidentSet = (state) => {
-    const files = [];
-    const nodes = [];
-    const spheres = [];
-    const pushNode = (node, cx, cy, cz, radius) => {
-        nodes.push(node);
-        spheres.push(cx, cy, cz, radius);
-    };
-    state.splats.forEach((info, fileIndex) => {
-        const modelMatrix = info.node.getWorldTransform().clone();
-        const scale = modelMatrix.getScale(tmpVec2$1);
-        const maxScale = Math.max(Math.abs(scale.x), Math.abs(scale.y), Math.abs(scale.z));
-        const file = {
-            fileIndex,
-            lodIndex: info.lodIndex,
-            nodes: [],
-            modelMatrix,
-            resource: info.resource
-        };
-        const numIntervals = info.intervals.length / 2;
-        if (numIntervals === 0) {
-            // a single-file resource: one range covering it whole, bounded by its aabb
-            const node = {
-                fileIndex,
-                nodeIndex: nodes.length,
-                lodIndex: info.lodIndex,
-                sourceBase: 0,
-                count: info.activeSplats,
-                slotBase: info.intervalOffsets[0] ?? 0,
-                allocId: info.allocId
-            };
-            modelMatrix.transformPoint(info.aabb.center, tmpVec);
-            const he = info.aabb.halfExtents;
-            pushNode(node, tmpVec.x, tmpVec.y, tmpVec.z, he.length() * maxScale);
-            file.nodes.push(node);
-        }
-        else {
-            for (let j = 0; j < numIntervals; j++) {
-                const start = info.intervals[j * 2];
-                const end = info.intervals[j * 2 + 1];
-                const nodeIndex = info.intervalNodeIndices[j];
-                const node = {
-                    fileIndex,
-                    nodeIndex: nodes.length,
-                    lodIndex: info.lodIndex,
-                    sourceBase: start,
-                    count: end - start,
-                    slotBase: info.intervalOffsets[j] ?? 0,
-                    allocId: info.intervalAllocIds[j]
-                };
-                const sphere = info.octreeNodes?.[nodeIndex]?.boundingSphere;
-                if (sphere) {
-                    tmpVec.set(sphere.x, sphere.y, sphere.z);
-                    modelMatrix.transformPoint(tmpVec, tmpVec);
-                    pushNode(node, tmpVec.x, tmpVec.y, tmpVec.z, sphere.w * maxScale);
-                }
-                else {
-                    // no bounds: never culled
-                    pushNode(node, 0, 0, 0, Infinity);
-                }
-                file.nodes.push(node);
-            }
-        }
-        files.push(file);
-    });
-    return {
-        version: state.version,
-        activeSplats: state.totalActiveSplats,
-        slotCapacity: state.textureSize * state.textureSize,
-        fullRebuild: state.fullRebuild,
-        changedAllocIds: state.needsUploadIds,
-        files,
-        nodes,
-        nodeSpheres: new Float32Array(spheres)
-    };
-};
-
-// Single-thread pass turning the projector's survivor count into the indexed indirect draw
-// arguments for the raster pass and the indirect dispatch size of the order scatter. Nothing
-// comes back to the cpu, so a frame never stalls on the count. Entry layouts match the engine's
-// indirect draw buffer (5 u32 per slot) and indirect dispatch buffer (3 u32 per slot).
-const argsWGSL = /* wgsl */ `
-struct DrawIndexedIndirectArgs {
-    indexCount: u32,
-    instanceCount: u32,
-    firstIndex: u32,
-    baseVertex: i32,
-    firstInstance: u32
-}
-
-struct ArgsUniforms {
-    drawSlot: u32,
-    indexCount: u32,
-    quadsPerInstance: u32,
-    dispatchSlot: u32,
-    scatterWorkgroupSize: u32
-}
-
-@group(0) @binding(0) var<storage, read> counter: array<u32>;
-@group(0) @binding(1) var<storage, read_write> indirectDrawArgs: array<DrawIndexedIndirectArgs>;
-@group(0) @binding(2) var<storage, read_write> indirectDispatchArgs: array<u32>;
-@group(0) @binding(3) var<uniform> uniforms: ArgsUniforms;
-
-@compute @workgroup_size(1)
-fn main() {
-    let count = counter[0];
-    indirectDrawArgs[uniforms.drawSlot] = DrawIndexedIndirectArgs(
-        uniforms.indexCount,
-        (count + uniforms.quadsPerInstance - 1u) / uniforms.quadsPerInstance,
-        0u,
-        0,
-        0u
-    );
-    // the scatter: one workgroup per scatterWorkgroupSize survivors, 2D past the 65535 limit
-    let groups = (count + uniforms.scatterWorkgroupSize - 1u) / uniforms.scatterWorkgroupSize;
-    let x = max(min(groups, 65535u), 1u);
-    let base = uniforms.dispatchSlot * 3u;
-    indirectDispatchArgs[base] = x;
-    indirectDispatchArgs[base + 1u] = (groups + x - 1u) / x;
-    indirectDispatchArgs[base + 2u] = 1u;
-}
-`;
-
-// Temporal accumulation for the stochastic frame. Each frame the raster leaves one sample per
-// pixel (a colour where a splat's fragment survived its coverage test, nothing otherwise) and
-// the nearest surviving depth; this pass folds it into a per-pixel history of premultiplied
-// colour and coverage, so a still camera converges to the expected image over a few hundred
-// frames and a moving one keeps most of that history by reprojecting it.
-//
-// Reprojection uses the sample's own depth: the pixel's world point is carried into the
-// previous view and the history is fetched there, clamped to the colours this frame's
-// neighbourhood holds so a stale colour cannot survive a disocclusion. A pixel with no sample
-// this frame reprojects through the mean depth its own history remembers, so coverage fades out
-// where a surface has moved away rather than smearing into the background.
-//
-// The history is 12 bytes a pixel (24 with the ping-pong). The colour is the running mean as
-// 16-bit fixed point: a half float cannot hold it, since its steps in [0.5, 1) are 1 / 2048 and
-// the 1 / N step of a 256-sample mean rounds away once a sample lies within 1 / 16 of the mean
-// (an error floor of about 5 rms in 8-bit units), while fixed point steps by 1 / 65535
-// everywhere, so the same step only rounds away within half an 8-bit level of the mean. The
-// depth record is the mean view depth of the pixel's samples and their count in one 32-bit word.
-// the most samples the history's count field holds
-const TAA_MAX_COUNT = 511;
-const taaVertexWGSL = /* wgsl */ `
-attribute vertex_position: vec2f;
-
-@vertex
-fn vertexMain(input: VertexInput) -> VertexOutput {
-    var output: VertexOutput;
-    output.position = vec4f(vertex_position, 0.0, 1.0);
-    return output;
-}
-`;
-// The history's encoding, shared with the compose that reads it
-const taaHistoryWGSL = /* wgsl */ `
-const TAA_COLOR_SCALE = 65535.0;
-
-fn decodeColor(v: vec4u) -> vec4f {
-    return vec4f(v) / TAA_COLOR_SCALE;
-}
-
-// premultiplied colour and coverage: coverage in [0, 1] and colour within it (the Catmull-Rom
-// fetch over- and undershoots both), rounded to the nearest step
-fn encodeColor(c: vec4f) -> vec4u {
-    let a = clamp(c.a, 0.0, 1.0);
-    return vec4u(round(vec4f(clamp(c.rgb, vec3f(0.0), vec3f(a)), a) * TAA_COLOR_SCALE));
-}
-
-struct HistoryInfo {
-    depth: f32,
-    count: f32
-}
-
-// The mean view depth keeps the float's exponent and top 15 mantissa bits, rounded: a relative
-// step of 2^-15, which stalls a 256-sample mean only within 0.4 % of the depth (the depth steers
-// the reprojection, where that is far below a pixel). The count takes the low 9 bits
-fn decodeInfo(v: u32) -> HistoryInfo {
-    var info: HistoryInfo;
-    info.depth = bitcast<f32>((v >> 9u) << 8u);
-    info.count = f32(v & ${TAA_MAX_COUNT}u);
-    return info;
-}
-
-fn encodeInfo(depth: f32, count: f32) -> u32 {
-    let bits = bitcast<u32>(max(depth, 0.0));
-    return (((bits + 0x80u) >> 8u) << 9u) | min(u32(count), ${TAA_MAX_COUNT}u);
-}
-`;
-const taaFragmentWGSL = /* wgsl */ `
-var curColor: texture_2d<f32>;
-var curColorSampler: sampler;
-var curDepth: texture_depth_2d;
-// premultiplied colour and coverage, unorm16 (decodeColor)
-var histColor: texture_2d<u32>;
-// the mean view depth of the pixel's samples and their count, in the previous frame's view
-// depths (decodeInfo)
-var histInfo: texture_2d<u32>;
-
-// the camera's world transform (the inverse view), and its projection's x and y terms: x, y the
-// scales, z, w the offsets (the column that multiplies view z for a perspective camera, the
-// translation for an orthographic one)
-uniform cameraWorld: mat4x4f;
-uniform unproject: vec4f;
-uniform prevViewProj: mat4x4f;
-uniform prevView: mat4x4f;
-// clip z = a * viewDepth + b over w = viewDepth (x, y); z: 1 for an orthographic camera
-uniform clipZParams: vec4f;
-// x: sample cap, y: 1 when the history holds the previous frame, z: 1 when the camera moved
-// since that frame, w: the frames the camera has rested, this one included (0 on a frame whose
-// resident set changed)
-uniform taaParams: vec4f;
-// width, height, 1 / width, 1 / height
-uniform taaViewport: vec4f;
-// x: -1 when the target's rows run bottom-up (an offscreen target), else 1; y: the colour
-// clamp width in neighbourhood standard deviations (0: no clamp); z: 1 when the raster's
-// thresholds are quad-stratified
-uniform taaControl: vec4f;
-// x: 1 for a Catmull-Rom history fetch while moving (0: bilinear); y: 1 to reproject through
-// the pixel's accumulated mean depth rather than this frame's sample depth; z: image motion in
-// pixels a frame that halves the moving sample cap (0: fixed cap)
-uniform taaFilter: vec4f;
-// 1: write the accumulation state instead of colour (r: count / cap, g: history accepted,
-// b: the camera moved since the previous frame)
-uniform taaDebug: f32;
-
-${taaHistoryWGSL}
-
-fn viewDepthOf(z: f32) -> f32 {
-    let p = uniform.clipZParams;
-    let dz = z - p.x;
-    let safeDz = select(dz, sign(dz) * 1e-9 + 1e-12, abs(dz) < 1e-9);
-    return select(p.y / safeDz, (z - p.y) / p.x, p.z != 0.0);
-}
-
-struct Reprojected {
-    valid: bool,
-    uv: vec2f,
-    prevDepth: f32
-}
-
-// The previous frame's view depth and texture coordinate of this pixel's point at a view
-// depth. The point is built in view space from the depth and the projection's x and y terms,
-// then moved by the camera's rigid transform: through the inverse view-projection instead, a
-// near plane at 1e-4 of the depth (the viewer's floor once the camera is inside the scene
-// bound) leaves a 32-bit float about three digits of the point, a pixel of error that changes
-// with every frame's sample depths and shakes the history.
-fn reproject(pix: vec2i, viewDepth: f32) -> Reprojected {
-    var r: Reprojected;
-    let flip = uniform.taaControl.x;
-    let uv = (vec2f(pix) + vec2f(0.5)) * uniform.taaViewport.zw;
-    let ndc = vec2f(uv.x * 2.0 - 1.0, flip * (1.0 - 2.0 * uv.y));
-    let u = uniform.unproject;
-    let viewXY = select((ndc + u.zw) * viewDepth, ndc - u.zw, uniform.clipZParams.z != 0.0) / u.xy;
-    let world = (uniform.cameraWorld * vec4f(viewXY, -viewDepth, 1.0)).xyz;
-    let prevClip = uniform.prevViewProj * vec4f(world, 1.0);
-    r.prevDepth = -(uniform.prevView * vec4f(world, 1.0)).z;
-    r.valid = prevClip.w > 0.0;
-    let prevNdc = prevClip.xy / max(prevClip.w, 1e-9);
-    r.uv = vec2f(prevNdc.x * 0.5 + 0.5, 0.5 - prevNdc.y * flip * 0.5);
-    r.valid = r.valid && all(r.uv >= vec2f(0.0)) && all(r.uv <= vec2f(1.0));
-    return r;
-}
-
-// the premultiplied sample at a texel: its colour where a fragment landed, nothing otherwise
-fn sampleAt(pix: vec2i, dims: vec2i) -> vec4f {
-    let p = clamp(pix, vec2i(0), dims - vec2i(1));
-    let c = textureLoad(curColor, p, 0);
-    let z = textureLoad(curDepth, p, 0);
-    return select(vec4f(0.0), vec4f(c.rgb, 1.0), c.a > 0.0 && z < 1.0);
-}
-
-// The mean of the 2x2 quad's samples, bilinear between quad centres (the compose's resolve of
-// the raster's quad-stratified thresholds): four samples a pixel, at a little sharpness, for
-// the frames where the history is too short to carry the noise on its own
-fn quadSample(pix: vec2i, dims: vec2i) -> vec4f {
-    let size = vec2f(dims);
-    let u = (vec2f(pix) - vec2f(0.5)) * 0.5;
-    let q0 = floor(u);
-    let f = u - q0;
-    let uv = (q0 * 2.0 + vec2f(1.0)) / size;
-    let step = vec2f(2.0) / size;
-    let a = textureSampleLevel(curColor, curColorSampler, uv, 0.0);
-    let b = textureSampleLevel(curColor, curColorSampler, uv + vec2f(step.x, 0.0), 0.0);
-    let c = textureSampleLevel(curColor, curColorSampler, uv + vec2f(0.0, step.y), 0.0);
-    let d = textureSampleLevel(curColor, curColorSampler, uv + step, 0.0);
-    let m = mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
-    // the raster leaves empty texels transparent black, so the mean is premultiplied coverage
-    return vec4f(m.rgb, m.a);
-}
-
-fn historyTexel(p: vec2i, dims: vec2i) -> vec4f {
-    return decodeColor(textureLoad(histColor, clamp(p, vec2i(0), dims - vec2i(1)), 0));
-}
-
-// Catmull-Rom fetch of the history: sharper than bilinear, whose blur compounds over the
-// frames a moving history lives. Its lobes over- and undershoot; the encoding clamps both
-fn historyCubicAt(uv: vec2f, dims: vec2i) -> vec4f {
-    let p = uv * vec2f(dims) - vec2f(0.5);
-    let i0 = vec2i(floor(p));
-    let f = p - floor(p);
-    let f2 = f * f;
-    let f3 = f2 * f;
-    // Catmull-Rom weights for taps at -1, 0, 1, 2
-    let w0 = -0.5 * f3 + f2 - 0.5 * f;
-    let w1 = 1.5 * f3 - 2.5 * f2 + vec2f(1.0);
-    let w2 = -1.5 * f3 + 2.0 * f2 + 0.5 * f;
-    let w3 = 0.5 * f3 - 0.5 * f2;
-    let wx = array<f32, 4>(w0.x, w1.x, w2.x, w3.x);
-    let wy = array<f32, 4>(w0.y, w1.y, w2.y, w3.y);
-    var sum = vec4f(0.0);
-    for (var y = 0; y < 4; y++) {
-        for (var x = 0; x < 4; x++) {
-            sum += historyTexel(i0 + vec2i(x - 1, y - 1), dims) * (wx[x] * wy[y]);
-        }
-    }
-    return sum;
-}
-
-// bilinear fetch of the history
-fn historyAt(uv: vec2f, dims: vec2i) -> vec4f {
-    let p = uv * vec2f(dims) - vec2f(0.5);
-    let i0 = vec2i(floor(p));
-    let f = p - floor(p);
-    let a = historyTexel(i0, dims);
-    let b = historyTexel(i0 + vec2i(1, 0), dims);
-    let c = historyTexel(i0 + vec2i(0, 1), dims);
-    let d = historyTexel(i0 + vec2i(1, 1), dims);
-    return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
-}
-
-@fragment
-fn fragmentMain(input: FragmentInput) -> FragmentOutput {
-    var output: FragmentOutput;
-    let pix = vec2i(pcPosition.xy);
-    let dims = vec2i(textureDimensions(curColor));
-    let cur = textureLoad(curColor, pix, 0);
-    let z = textureLoad(curDepth, pix, 0);
-    let hit = cur.a > 0.0 && z < 1.0;
-    let d = viewDepthOf(z);
-
-    let own = decodeInfo(textureLoad(histInfo, pix, 0).x);
-    let maxCount = uniform.taaParams.x;
-    let historyValid = uniform.taaParams.y > 0.5;
-    let moving = uniform.taaParams.z > 0.5;
-    // still: this pixel's own sample, so the history converges to full resolution; moving:
-    // the quad's four
-    var sample = select(vec4f(0.0), vec4f(cur.rgb, 1.0), hit);
-    if (moving && uniform.taaControl.z > 0.5) {
-        sample = quadSample(pix, dims);
-    }
-
-    // Where to look in the history: through this frame's sample, or, with no sample, through
-    // the depth this pixel's own history remembers, so an emptied pixel fades rather than
-    // holding a stale colour
-    var r: Reprojected;
-    r.valid = false;
-    var carryDepth = 0.0;
-    if (!moving) {
-        // a resting camera maps every pixel onto itself: the exact texel, not the round trip
-        // through the matrices, whose rounding would blur the history a little every frame
-        r.valid = true;
-        r.uv = (vec2f(pix) + vec2f(0.5)) * uniform.taaViewport.zw;
-        r.prevDepth = select(own.depth, d, hit);
-        carryDepth = r.prevDepth;
-    } else if (uniform.taaFilter.y > 0.5 && own.count > 0.5) {
-        // through the depth the pixel's history has settled on: one stochastic sample's depth
-        // is one layer of the mixture the history holds, and reprojecting the mixture through
-        // a different layer every frame smears it by their parallax
-        r = reproject(pix, own.depth);
-        carryDepth = own.depth;
-    } else if (hit) {
-        r = reproject(pix, d);
-        carryDepth = d;
-    } else if (own.count > 0.5) {
-        r = reproject(pix, own.depth);
-        carryDepth = own.depth;
-    }
-    r.valid = r.valid && historyValid;
-
-    var hist = vec4f(0.0);
-    var info: HistoryInfo;
-    var accepted = false;
-    if (r.valid) {
-        // at rest the exact texel; moving, a filtered fetch of the reprojected position
-        if (!moving) {
-            hist = decodeColor(textureLoad(histColor, pix, 0));
-            info = own;
-        } else {
-            if (uniform.taaFilter.x > 0.5) {
-                hist = historyCubicAt(r.uv, dims);
-            } else {
-                hist = historyAt(r.uv, dims);
-            }
-            info = decodeInfo(textureLoad(histInfo, clamp(vec2i(r.uv * vec2f(dims)), vec2i(0), dims - vec2i(1)), 0).x);
-        }
-        // a resting camera cannot disocclude anything, so every sample is accepted and the
-        // pixel converges; moving, the colour clamp below keeps a disoccluded history out
-        accepted = info.count > 0.5;
-    }
-
-    var color: vec4f;
-    var mean: f32;
-    var count: f32;
-    if (!accepted) {
-        color = sample;
-        mean = d;
-        count = select(0.0, 1.0, hit);
-        // at rest a pixel with no hit yet has still been sampled on every rest frame, so its
-        // first hit is one of that many samples: at full weight a rare hit would flash to full
-        // coverage, and freeze there once the viewer stops rendering. Its depth is the hit's
-        if (hit && !moving && historyValid) {
-            count = clamp(uniform.taaParams.w, 1.0, maxCount);
-            color = sample / count;
-        }
-    } else {
-        // moving, the history is clamped to the colours this frame's neighbourhood holds, so a
-        // stale colour cannot survive where nothing like it is drawn any more
-        if (moving && uniform.taaControl.y > 0.0) {
-            var m1 = vec4f(0.0);
-            var m2 = vec4f(0.0);
-            for (var dy = -1; dy <= 1; dy++) {
-                for (var dx = -1; dx <= 1; dx++) {
-                    let n = sampleAt(pix + vec2i(dx, dy), dims);
-                    m1 += n;
-                    m2 += n * n;
-                }
-            }
-            let mu = m1 / 9.0;
-            let sd = sqrt(max(m2 / 9.0 - mu * mu, vec4f(0.0)));
-            let halfWidth = sd * uniform.taaControl.y;
-            hist = clamp(hist, mu - halfWidth, mu + halfWidth);
-        }
-        // the faster the image moves, the shorter the history: a stochastic pixel's layers
-        // reproject through one layer's depth, so their parallax smears the history by an
-        // amount that grows with the motion, and a raw frame is the better estimate past it
-        var cap = maxCount;
-        if (moving && uniform.taaFilter.z > 0.0) {
-            let speed = length(r.uv * vec2f(dims) - vec2f(pix) - vec2f(0.5));
-            cap = max(2.0, maxCount / (1.0 + speed / uniform.taaFilter.z));
-        }
-        count = min(info.count + 1.0, cap);
-        let w = 1.0 / count;
-        color = mix(hist, sample, w);
-        // an empty sample takes at least a step off the coverage: rounded to the nearest, a
-        // decay of less than half a step holds (below cap / 2 steps, about 0.002 at the default
-        // cap), so a faint pixel would keep its coverage, and the depth the compose writes for
-        // it, forever. The colour follows, since the encoding keeps it within the coverage
-        if (sample.a == 0.0) {
-            color.a = min(color.a, max(hist.a - 1.0 / TAA_COLOR_SCALE, 0.0));
-        }
-        // carry the mean depth into this view: the point moved along the ray by the change in
-        // its depth, then the sample joins it
-        let shifted = info.depth + (carryDepth - r.prevDepth);
-        mean = select(shifted, shifted + w * (d - shifted), hit);
-    }
-
-    if (uniform.taaDebug > 1.5) {
-        // the reprojection offset in pixels, 8 px full scale, centred on 0.5
-        let mv = select(vec2f(0.0), r.uv * vec2f(dims) - vec2f(pix) - vec2f(0.5), r.valid);
-        color = vec4f(mv / 16.0 + vec2f(0.5), select(0.0, 1.0, r.valid), 1.0);
-    } else if (uniform.taaDebug > 0.5) {
-        color = vec4f(count / maxCount, select(0.0, 1.0, accepted), select(0.0, 1.0, moving), 1.0);
-    }
-    output.color = encodeColor(color);
-    output.color1 = encodeInfo(mean, count);
-    return output;
-}
-`;
-
-// The compose: a fullscreen quad in the World layer's transparent sublayer that blends the
-// stochastic target over the camera's target (after the skybox and opaque meshes) and writes
-// its depth, so everything drawn later depth-tests against the splats. The colour transform
-// the engine's own splat shader applies (gsplatOutputVS: tonemap and gamma, or the viewer's
-// pass-through patch under CameraFrame) runs here, once per pixel instead of once per splat.
-const composeVertexWGSL = /* wgsl */ `
-attribute vertex_position: vec2f;
-
-@vertex
-fn vertexMain(input: VertexInput) -> VertexOutput {
-    var output: VertexOutput;
-    output.position = vec4f(vertex_position, 0.0, 1.0);
-    return output;
-}
-`;
-const composeFragmentWGSL = /* wgsl */ `
-#include "gsplatOutputVS"
-
-var splatColor: texture_2d<f32>;
-var splatColorSampler: sampler;
-var splatDepth: texture_depth_2d;
-// the temporally accumulated frame (premultiplied colour, coverage), when taa ran this frame
-var taaColor: texture_2d<u32>;
-// its depth record: the mean view depth of the pixel's samples and their count
-var taaInfo: texture_2d<u32>;
-// x: 1 when the splat target's rows run the other way to the camera target's; y: 1 for an
-// orthographic camera; z: 1 to read the taa history instead of the raw frame
-uniform composeParams: vec4f;
-// the splat target's depth: clip z = a * viewDepth + b over w = viewDepth (x, y), and the
-// camera's near and far (z, w) for the depth view
-uniform depthViewParams: vec4f;
-// the camera's own depth, the one written for the rest of the scene: clip z = a * viewDepth + b
-// (x, y). The splat target's far plane is at infinity where the camera's is fitted to the scene
-uniform cameraClipZ: vec4f;
-
-${taaHistoryWGSL}
-
-const FAR_DEPTH = 0.999999;
-
-// the splat target's depth texel of a view depth, just inside its far plane at most: the
-// raster clamps there too, since a depth of 1 reads as no sample
-fn clipZOf(viewDepth: f32) -> f32 {
-    let p = uniform.depthViewParams;
-    let w = select(viewDepth, 1.0, uniform.composeParams.y > 0.5);
-    return min(clamp(p.x * viewDepth + p.y, 0.0, w) / w, FAR_DEPTH);
-}
-
-// the view depth of a splat target depth texel
-fn viewDepthOf(z: f32) -> f32 {
-    let p = uniform.depthViewParams;
-    let dz = z - p.x;
-    let safeDz = select(dz, sign(dz) * 1e-9 + 1e-12, abs(dz) < 1e-9);
-    return select(p.y / safeDz, (z - p.y) / p.x, uniform.composeParams.y > 0.5);
-}
-
-// A splat target depth in the camera's depth, clamped just inside the camera's far plane as the
-// engine clamps its splats: splats beyond it stay behind everything the scene draws
-fn cameraDepthOf(z: f32) -> f32 {
-    let viewDepth = viewDepthOf(z);
-    let c = uniform.cameraClipZ;
-    let w = select(viewDepth, 1.0, uniform.composeParams.y > 0.5);
-    return min(clamp(c.x * viewDepth + c.y, 0.0, w) / w, FAR_DEPTH);
-}
-
-@fragment
-fn fragmentMain(input: FragmentInput) -> FragmentOutput {
-    var output: FragmentOutput;
-    let dims = vec2i(textureDimensions(splatColor));
-    var pix = vec2i(pcPosition.xy);
-    if (uniform.composeParams.x > 0.5) {
-        pix.y = dims.y - 1 - pix.y;
-    }
-    pix = clamp(pix, vec2i(0), dims - vec2i(1));
-
-    var depth = textureLoad(splatDepth, pix, 0);
-    var color: vec4f;
-    if (uniform.composeParams.z > 0.5) {
-        // the accumulated history: coverage in alpha, colour premultiplied by it
-        color = decodeColor(textureLoad(taaColor, pix, 0));
-        if (depth >= 1.0 && color.a > 0.001) {
-            // covered by the history but no sample this frame, which a faint pixel sees on
-            // most frames: the mean depth of the pixel's own samples, or, for a history this
-            // frame started (moving, from the quad's samples), the nearest sampled neighbour's,
-            // so the pixel still occludes what is behind the splats
-            let info = decodeInfo(textureLoad(taaInfo, pix, 0).x);
-            if (info.count > 0.5) {
-                depth = clipZOf(info.depth);
-            } else {
-                for (var dy = -1; dy <= 1; dy++) {
-                    for (var dx = -1; dx <= 1; dx++) {
-                        depth = min(depth, textureLoad(splatDepth, clamp(pix + vec2i(dx, dy), vec2i(0), dims - vec2i(1)), 0));
-                    }
-                }
-            }
-        }
-    } else {
-        #ifdef SSE_SPP_QUAD
-            // the mean of each 2x2 quad, bilinearly interpolated between quad centres: the four
-            // strata of the raster's thresholds average out to the splat's coverage. Empty texels
-            // are transparent black, so the result is premultiplied coverage
-            let size = vec2f(dims);
-            let u = (vec2f(pix) - vec2f(0.5)) * 0.5;
-            let q0 = floor(u);
-            let f = u - q0;
-            let uv = (q0 * 2.0 + vec2f(1.0)) / size;
-            let step = vec2f(2.0) / size;
-            let a = textureSampleLevel(splatColor, splatColorSampler, uv, 0.0);
-            let b = textureSampleLevel(splatColor, splatColorSampler, uv + vec2f(step.x, 0.0), 0.0);
-            let c = textureSampleLevel(splatColor, splatColorSampler, uv + vec2f(0.0, step.y), 0.0);
-            let d = textureSampleLevel(splatColor, splatColorSampler, uv + step, 0.0);
-            color = mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
-            if (depth >= 1.0) {
-                // no sample at this pixel but coverage from its quad: the quad's nearest depth
-                let quad = (pix >> vec2u(1u)) << vec2u(1u);
-                depth = min(
-                    min(textureLoad(splatDepth, quad, 0), textureLoad(splatDepth, min(quad + vec2i(1, 0), dims - 1), 0)),
-                    min(textureLoad(splatDepth, min(quad + vec2i(0, 1), dims - 1), 0), textureLoad(splatDepth, min(quad + vec2i(1, 1), dims - 1), 0))
-                );
-            }
-        #else
-            color = textureLoad(splatColor, pix, 0);
-        #endif
-    }
-    if (color.a <= 0.001) {
-        discard;
-    }
-    // coverage with no depth anywhere near: shown, behind everything the scene drew
-    depth = min(depth, FAR_DEPTH);
-
-    #ifdef SSE_SHOW_DEPTH
-        // the nearest sample's view depth, log-spaced between near and far, as grey
-        let p = uniform.depthViewParams;
-        let viewDepth = viewDepthOf(depth);
-        let t = clamp(log(max(viewDepth, p.z) / p.z) / log(p.w / p.z), 0.0, 1.0);
-        // 24-bit fixed point across rgb (high byte in red), so a capture can read it precisely
-        let fixed = floor(t * 16777215.0);
-        let hi = floor(fixed / 65536.0);
-        let mid = floor((fixed - hi * 65536.0) / 256.0);
-        let lo = fixed - hi * 65536.0 - mid * 256.0;
-        output.color = vec4f(vec3f(hi, mid, lo) / 255.0, 1.0);
-        output.fragDepth = cameraDepthOf(depth);
-        return output;
-    #endif
-
-    // un-premultiply for the output transform, then premultiply for the blend
-    let gamma = color.rgb / color.a;
-    let rgb = prepareOutputFromGamma(gamma, 0.0);
-    output.color = vec4f(rgb * color.a, color.a);
-    output.fragDepth = cameraDepthOf(depth);
-    return output;
-}
-`;
-
-// The projector: one 256-thread workgroup per chunk of the resident set. Each thread reads one
-// splat through the source's read code, projects it, applies the culls, and survivors append
-// themselves to a dense cache with one global atomic per workgroup. The chunk table and node
-// visibility come from the cpu (resident-set rebuild on version change, frustum cull per frame).
-/** Words per cache entry. See the layout in the plan: ndc, depth, axis1, len2|alpha|flags, rgb, popless, id. */
-const CACHE_WORDS = 7;
-const PROJECTOR_WORKGROUP_SIZE = 256;
-/** Buckets of the counting order (order:bucket); the workgroup size, so each thread owns one. */
-const ORDER_BUCKETS = PROJECTOR_WORKGROUP_SIZE;
-/** Splats per chunk-table entry; a chunk is one workgroup. */
-const CHUNK_SIZE = PROJECTOR_WORKGROUP_SIZE;
-const projectorWGSL = (readChunk, occlusion, order) => /* wgsl */ `
-struct ProjectorUniforms {
-    view: mat4x4f,
-    viewProj: mat4x4f,
-    // the previous frame, for the occlusion cull: its view and view-projection, its clip-z
-    // mapping (a, b, isOrtho, 0), viewport and focal length
-    prevViewProj: mat4x4f,
-    prevView: mat4x4f,
-    prevClipZ: vec4f,
-    viewport: vec2f,
-    focal: vec2f,
-    prevViewport: vec2f,
-    prevFocal: vec2f,
-    numChunks: u32,
-    splatTextureSize: u32,
-    isOrtho: u32,
-    minPixelSize: f32,
-    alphaClip: f32,
-    minContribution: f32,
-    // the occlusion grid: level 1 (8 px) and level 2 (32 px) block counts
-    occBlocksX1: u32,
-    occBlocksY1: u32,
-    occBlocksX2: u32,
-    occBlocksY2: u32,
-    // 0 off, 1 level 1 only, 2 both levels
-    occlusionMode: u32,
-    // -1 when the previous depth texture's rows run bottom-up (an offscreen target), else 1
-    prevFlip: f32,
-    // the order key: bucket = (log(depth) - keyLogNear) * keyInvLogRange, over [0, 1)
-    keyLogNear: f32,
-    keyInvLogRange: f32,
-    // first chunk-table entry of this dispatch (per-file sources dispatch one run each)
-    chunkBase: u32,
-    // the file's model transform, for sources that read splats in the file's own space
-    model: mat4x4f,
-    modelRotation: vec4f,
-    modelScale: vec4f,
-    cameraPosition: vec4f,
-    // colour ceiling per channel: 8 keeps the cache's range, 1 clamps like the engine's 8-bit cache
-    colorMax: f32,
-    // 1: covariance in true pixels. 2: the engine's convention (its focal is viewport * proj[0][0],
-    // twice the pixel focal), which makes its 0.3 dilation 0.075 px^2 and scales its culls
-    unitScale: f32,
-    // the view depths of the near plane and of the raster's far clamp
-    depthNear: f32,
-    depthFar: f32
-}
-
-// chunk table entry: slotBase, count, node, lod | file << 16
-@group(0) @binding(0) var<storage, read> chunks: array<vec4u>;
-// one bit per node: 1 = inside the frustum this frame
-@group(0) @binding(1) var<storage, read> nodeVisible: array<u32>;
-@group(0) @binding(2) var<storage, read_write> cache: array<u32>;
-// [0] survivors this frame, [1] splats the occlusion cull removed
-@group(0) @binding(3) var<storage, read_write> counter: array<atomic<u32>>;
-@group(0) @binding(4) var<uniform> uniforms: ProjectorUniforms;
-// the previous frame's farthest depth per block, as f32 bits (see shaders/reduce.ts)
-@group(0) @binding(5) var<storage, read> occL1: array<u32>;
-@group(0) @binding(6) var<storage, read> occL2: array<u32>;
-// order:bucket: survivors per depth bucket (see shaders/order.ts)
-@group(0) @binding(7) var<storage, read_write> buckets: array<atomic<u32>>;
-
-struct Splat {
-    index: u32,
-    uv: vec2i
-}
-var<private> splat: Splat;
-fn setSplat(idx: u32) {
-    splat.index = idx;
-    splat.uv = vec2i(i32(idx % uniforms.splatTextureSize), i32(idx / uniforms.splatTextureSize));
-}
-
-${readChunk}
-
-// quaternion (x, y, z, w) to a rotation matrix (columns)
-fn rotationMatrix(qIn: vec4f) -> mat3x3f {
-    let q = normalize(qIn);
-    let x = q.x;
-    let y = q.y;
-    let z = q.z;
-    let w = q.w;
-    return mat3x3f(
-        vec3f(1.0 - 2.0 * (y * y + z * z), 2.0 * (x * y + w * z), 2.0 * (x * z - w * y)),
-        vec3f(2.0 * (x * y - w * z), 1.0 - 2.0 * (x * x + z * z), 2.0 * (y * z + w * x)),
-        vec3f(2.0 * (x * z + w * y), 2.0 * (y * z - w * x), 1.0 - 2.0 * (x * x + y * y))
-    );
-}
-
-struct Projected {
-    valid: bool,
-    occluded: bool,
-    words: array<u32, ${CACHE_WORDS}>
-}
-
-// The farthest depth over the (2g+1)^2 blocks around a block, on one grid level.
-fn farthestL1(block: vec2i, gather: i32, blocks: vec2i) -> u32 {
-    var farthest = 0u;
-    for (var dy = -gather; dy <= gather; dy++) {
-        for (var dx = -gather; dx <= gather; dx++) {
-            farthest = max(farthest, occL1[u32((block.y + dy) * blocks.x + block.x + dx)]);
-        }
-    }
-    return farthest;
-}
-
-fn farthestL2(block: vec2i, gather: i32, blocks: vec2i) -> u32 {
-    var farthest = 0u;
-    for (var dy = -gather; dy <= gather; dy++) {
-        for (var dx = -gather; dx <= gather; dx++) {
-            farthest = max(farthest, occL2[u32((block.y + dy) * blocks.x + block.x + dx)]);
-        }
-    }
-    return farthest;
-}
-
-fn project(slot: u32, file: u32) -> Projected {
-    var result: Projected;
-    result.valid = false;
-    result.occluded = false;
-
-    setSplat(slot);
-    let center = srcCenter();
-    let opacity = srcOpacity();
-    if (opacity < uniforms.alphaClip) {
-        return result;
-    }
-
-    let viewCenter = uniforms.view * vec4f(center, 1.0);
-    let depth = -viewCenter.z;
-    if (uniforms.isOrtho == 0u && depth <= 0.0) {
-        return result;
-    }
-    let clip = uniforms.viewProj * vec4f(center, 1.0);
-    if (clip.w == 0.0) {
-        return result;
-    }
-
-    let viewport = uniforms.viewport;
-    let focal = uniforms.focal;
-
-    // the work buffer holds world-space splats, so the view matrix is the model-view
-    let rot = srcRotation();
-    let scale = srcScale();
-    let linear = mat3x3f(uniforms.view[0].xyz, uniforms.view[1].xyz, uniforms.view[2].xyz);
-    let gaussian = linear * rotationMatrix(vec4f(rot.yzw, rot.x)) * mat3x3f(
-        vec3f(scale.x, 0.0, 0.0),
-        vec3f(0.0, scale.y, 0.0),
-        vec3f(0.0, 0.0, scale.z)
-    );
-    let row0 = vec3f(gaussian[0].x, gaussian[1].x, gaussian[2].x);
-    let row1 = vec3f(gaussian[0].y, gaussian[1].y, gaussian[2].y);
-    let row2 = vec3f(gaussian[0].z, gaussian[1].z, gaussian[2].z);
-    let c00 = dot(row0, row0);
-    let c01 = dot(row0, row1);
-    let c02 = dot(row0, row2);
-    let c11 = dot(row1, row1);
-    let c12 = dot(row1, row2);
-    let c22 = dot(row2, row2);
-
-    var cov00: f32;
-    var cov01: f32;
-    var cov11: f32;
-    if (uniforms.isOrtho != 0u) {
-        cov00 = focal.x * focal.x * c00;
-        cov01 = focal.x * focal.y * c01;
-        cov11 = focal.y * focal.y * c11;
-    } else {
-        let safeDepth = max(depth, 0.001);
-        let invDepth = 1.0 / safeDepth;
-        let jx0 = focal.x * invDepth;
-        let jx2 = focal.x * viewCenter.x * invDepth * invDepth;
-        let jy1 = focal.y * invDepth;
-        let jy2 = focal.y * viewCenter.y * invDepth * invDepth;
-        let u00 = jx0 * c00 + jx2 * c02;
-        let u01 = jx0 * c01 + jx2 * c12;
-        let u02 = jx0 * c02 + jx2 * c22;
-        let u11 = jy1 * c11 + jy2 * c12;
-        let u12 = jy1 * c12 + jy2 * c22;
-        cov00 = u00 * jx0 + u02 * jx2;
-        cov01 = u01 * jy1 + u02 * jy2;
-        cov11 = u11 * jy1 + u12 * jy2;
-    }
-
-    // the low-pass dilation every splat renderer applies, 0.3 in the chosen units
-    let us2 = uniforms.unitScale * uniforms.unitScale;
-    cov00 += 0.3 / us2;
-    cov11 += 0.3 / us2;
-    let determinant = cov00 * cov11 - cov01 * cov01;
-    if (determinant <= 0.0) {
-        return result;
-    }
-
-    let mid = 0.5 * (cov00 + cov11);
-    let radius = length(vec2f(0.5 * (cov00 - cov11), cov01));
-    let lambda1 = mid + radius;
-    let lambda2 = max(mid - radius, 0.1 / us2);
-
-    // size cull on the footprint's radius in pixels. minPixelSize is a diameter: the engine's
-    // projector is dispatched with half of it, and its quad path tests the full extent
-    // (2 sqrt(2 lambda)) against the whole value, so both cut at the same place
-    if (uniforms.unitScale * sqrt(2.0 * lambda1) < 0.5 * uniforms.minPixelSize) {
-        return result;
-    }
-
-    // contribution cull: the splat's alpha mass in pixels (the engine's minContribution rule)
-    if (opacity * 6.283185 * sqrt(determinant) * us2 < uniforms.minContribution) {
-        return result;
-    }
-
-    // principal axis; a circular footprint has no defined eigenvector, any axis is right
-    let eigenVec = vec2f(cov01, lambda1 - cov00);
-    let eigenLen = length(eigenVec);
-    let direction = select(vec2f(1.0, 0.0), eigenVec / eigenLen, eigenLen > 1e-9);
-    let maxRadius = min(1024.0, min(viewport.x, viewport.y));
-    let len1 = 2.0 * sqrt(2.0 * lambda1);
-    let radiusScale = min(1.0, maxRadius / len1);
-    let axis1 = len1 * radiusScale * direction;
-    let len2 = 2.0 * sqrt(2.0 * lambda2) * radiusScale;
-    let axis2 = len2 * vec2f(direction.y, -direction.x);
-
-    let ndc = clip.xy / clip.w;
-    let extent = abs(axis1) + abs(axis2);
-    let centerPixels = (ndc * 0.5 + 0.5) * viewport;
-    if (centerPixels.x + extent.x < 0.0 || centerPixels.x - extent.x > viewport.x
-        || centerPixels.y + extent.y < 0.0 || centerPixels.y - extent.y > viewport.y) {
-        return result;
-    }
-
-${occlusion
-    ? `
-    // Occlusion cull against the previous frame. Each stored depth is the nearest sample that
-    // survived there, so the farthest depth over the blocks a splat covered bounds what could
-    // still have shown behind it; a splat whose front (its centre less 2 sqrt(2) sigma along the
-    // view, the same cut-off as the quad's edge) lies beyond that bound was invisible last
-    // frame, up to sampling. Static splats reproject exactly through the previous view, so only
-    // true disocclusions arrive a frame late. The footprint the splat had last frame bounds the
-    // gather; footprints up to 16 px use the 8 px grid, up to 64 px the 32 px grid, larger ones
-    // skip the test.
-    if (uniforms.occlusionMode != 0u) {
-        let prevClip = uniforms.prevViewProj * vec4f(center, 1.0);
-        let prevDepth = -(uniforms.prevView * vec4f(center, 1.0)).z;
-        let prevOrtho = uniforms.prevClipZ.z != 0.0;
-        if (prevClip.w > 0.0 && (prevOrtho || prevDepth > 0.0)) {
-            let prevNdc = prevClip.xy / prevClip.w;
-            let halfExtent = len1 * radiusScale;
-            let prevHalfExtent = halfExtent * (uniforms.prevFocal.x / focal.x)
-                * select(depth / max(prevDepth, 0.001), 1.0, prevOrtho);
-            let footprint = max(halfExtent, prevHalfExtent);
-            var level = 1u;
-            var blockSize = 8.0;
-            var blocks = vec2i(i32(uniforms.occBlocksX1), i32(uniforms.occBlocksY1));
-            if (footprint > 16.0) {
-                level = 2u;
-                blockSize = 32.0;
-                blocks = vec2i(i32(uniforms.occBlocksX2), i32(uniforms.occBlocksY2));
-            }
-            if (footprint <= 64.0 && level <= uniforms.occlusionMode) {
-                let gather = max(i32(ceil(footprint / blockSize)), 1);
-                let prevPixel = vec2f(prevNdc.x * 0.5 + 0.5, 0.5 - prevNdc.y * uniforms.prevFlip * 0.5) * uniforms.prevViewport;
-                let block = vec2i(floor(prevPixel / blockSize));
-                if (block.x >= gather && block.y >= gather && block.x < blocks.x - gather && block.y < blocks.y - gather) {
-                    let front = prevDepth - 2.8284 * sqrt(c22);
-                    let w = select(front, 1.0, prevOrtho);
-                    if (w > 0.0) {
-                        let frontZ = clamp(uniforms.prevClipZ.x * front + uniforms.prevClipZ.y, 0.0, w) / w;
-                        // the block under the centre first: the neighbourhood's maximum is at
-                        // least its maximum, so a splat that block alone cannot cull is visible,
-                        // and most splats leave here after one load
-                        let centreIndex = u32(block.y * blocks.x + block.x);
-                        var farthest = select(occL1[centreIndex], occL2[centreIndex], level == 2u);
-                        if (frontZ > bitcast<f32>(farthest)) {
-                            if (level == 1u) {
-                                farthest = farthestL1(block, gather, blocks);
-                            } else {
-                                farthest = farthestL2(block, gather, blocks);
-                            }
-                            if (frontZ > bitcast<f32>(farthest)) {
-                                result.occluded = true;
-                                return result;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-`
-    : ''}
-    let color = clamp(srcColor(), vec3f(0.0), vec3f(uniforms.colorMax));
-
-    // rgb: 10/10/10 unorm with a 2-bit shared exponent (scale 1/2/4/8, range [0, 8])
-    let maxChannel = max(color.r, max(color.g, color.b));
-    var exponent = 0u;
-    if (maxChannel > 4.0) {
-        exponent = 3u;
-    } else if (maxChannel > 2.0) {
-        exponent = 2u;
-    } else if (maxChannel > 1.0) {
-        exponent = 1u;
-    }
-    let rgb = vec3u(clamp(color / f32(1u << exponent), vec3f(0.0), vec3f(1.0)) * 1023.0 + 0.5);
-
-    // centre as snorm16 over the range the offscreen cull bounds visible centres to; the
-    // raster shader derives the same range from its viewport
-    let ndcRange = vec2f(1.0) + vec2f(4.0 * maxRadius) / viewport;
-
-    result.valid = true;
-    result.words[0] = pack2x16snorm(ndc / ndcRange);
-    result.words[1] = bitcast<u32>(depth);
-    result.words[2] = pack2x16float(axis1);
-    result.words[3] = pack2x16float(vec2f(len2, 0.0)) | (u32(clamp(opacity, 0.0, 1.0) * 255.0 + 0.5) << 16u);
-${order
-    ? `
-    // the depth bucket, log-spaced from the near plane, in the flags byte
-    let key = clamp((log(max(depth, 1e-6)) - uniforms.keyLogNear) * uniforms.keyInvLogRange, 0.0, 0.999) * ${ORDER_BUCKETS}.0;
-    result.words[3] |= u32(key) << 24u;
-`
-    : ''}
-    result.words[4] = rgb.r | (rgb.g << 10u) | (rgb.b << 20u) | (exponent << 30u);
-    // Popless depth (StochasticSplats 3.4): the quad is tilted onto the plane through the
-    // centre with normal adj(Sigma) mu (view space; adj rather than the inverse, so a flat
-    // splat needs no division by its tiny determinant), and the raster gives each corner the
-    // depth where its own view ray meets that plane, so hardware interpolation hands every
-    // fragment the depth of the Gaussian's peak along its ray instead of the centre's. Stored
-    // as g = n.xy / (n . mu): a corner at view offset d (in the plane z = -depth) lands at
-    // depth / (1 + g . d). Orthographic rays are parallel, so there n = adj(Sigma) e_z and
-    // the corner depth is depth + g . d with g = n.xy / n.z. Bounded so every corner stays
-    // within 2 sqrt(2) sigma_z of the centre (the occlusion cull's front margin) and the
-    // perspective scale stays positive, and so no corner crosses the near plane or the
-    // raster's far clamp: a corner clamped there while the others are not bends the quad, whose
-    // two triangles then take different depths and show as polygons (large far splats, the
-    // sky, sit right at a far plane fitted to the scene). A centre beyond the clamp stays flat.
-    let ortho = uniforms.isOrtho != 0u;
-    let a00 = c11 * c22 - c12 * c12;
-    let a01 = c02 * c12 - c01 * c22;
-    let a02 = c01 * c12 - c02 * c11;
-    let a11 = c00 * c22 - c02 * c02;
-    let a12 = c01 * c02 - c00 * c12;
-    let a22 = c00 * c11 - c01 * c01;
-    let toward = select(viewCenter.xyz, vec3f(0.0, 0.0, -1.0), ortho);
-    let n = vec3f(
-        a00 * toward.x + a01 * toward.y + a02 * toward.z,
-        a01 * toward.x + a11 * toward.y + a12 * toward.z,
-        a02 * toward.x + a12 * toward.y + a22 * toward.z
-    );
-    let denom = select(dot(n, viewCenter.xyz), n.z, ortho);
-    var g = vec2f(0.0);
-    if (abs(denom) > 1e-20) {
-        g = n.xy / denom;
-        // view units per pixel at the centre's depth, and the quad's half extents in them
-        let viewScale = select(depth, 1.0, ortho) / focal;
-        let ext = (abs(axis1) + abs(axis2)) * viewScale;
-        let bound = abs(g.x) * ext.x + abs(g.y) * ext.y;
-        let margin = 2.8284 * sqrt(max(c22, 0.0));
-        let inRange = select(
-            min(1.0 - depth / uniforms.depthFar, depth / max(uniforms.depthNear, 1e-6) - 1.0),
-            min(uniforms.depthFar - depth, depth - uniforms.depthNear),
-            ortho
-        );
-        let limit = max(0.0, min(select(min(0.25, margin / max(depth, 1e-6)), margin, ortho), 0.999 * inRange));
-        if (bound > limit) {
-            g *= limit / max(bound, 1e-20);
-        }
-    }
-    result.words[5] = pack2x16float(g);
-    // the stable id the coverage hash seeds from: the slot, salted by the file for sources
-    // whose indices restart per file
-    result.words[6] = slot ^ (file * 2654435761u);
-    return result;
-}
-
-var<workgroup> wgCount: atomic<u32>;
-var<workgroup> wgOccluded: atomic<u32>;
-var<workgroup> wgBase: u32;
-${order ? `var<workgroup> wgBuckets: array<atomic<u32>, ${ORDER_BUCKETS}>;` : ''}
-
-@compute @workgroup_size(${PROJECTOR_WORKGROUP_SIZE})
-fn main(
-    @builtin(workgroup_id) wg: vec3u,
-    @builtin(num_workgroups) numWorkgroups: vec3u,
-    @builtin(local_invocation_index) local: u32
-) {
-    // no early returns: the barriers below need every thread of the workgroup
-    let chunkIndex = wg.x + wg.y * numWorkgroups.x;
-${order ? `    atomicStore(&wgBuckets[local], 0u);` : ''}
-    var projected: Projected;
-    projected.valid = false;
-    projected.occluded = false;
-    if (chunkIndex < uniforms.numChunks) {
-        let chunk = chunks[uniforms.chunkBase + chunkIndex];
-        let visible = (nodeVisible[chunk.z >> 5u] >> (chunk.z & 31u)) & 1u;
-        if (visible != 0u && local < chunk.y) {
-            projected = project(chunk.x + local, chunk.w >> 16u);
-        }
-    }
-
-    // survivors claim consecutive slots: one workgroup-local count, one global atomic
-    var localSlot = 0u;
-    if (projected.valid) {
-        localSlot = atomicAdd(&wgCount, 1u);
-    }
-    if (projected.occluded) {
-        atomicAdd(&wgOccluded, 1u);
-    }
-    workgroupBarrier();
-    if (local == 0u) {
-        let n = atomicLoad(&wgCount);
-        wgBase = select(0u, atomicAdd(&counter[0], n), n > 0u);
-        let o = atomicLoad(&wgOccluded);
-        if (o > 0u) {
-            atomicAdd(&counter[1], o);
-        }
-    }
-    workgroupBarrier();
-    if (projected.valid) {
-        let base = (wgBase + localSlot) * ${CACHE_WORDS}u;
-        for (var i = 0u; i < ${CACHE_WORDS}u; i++) {
-            cache[base + i] = projected.words[i];
-        }
-${order ? `        atomicAdd(&wgBuckets[projected.words[3] >> 24u], 1u);` : ''}
-    }
-${order
-    ? `
-    // a chunk's splats are spatially coherent, so few of its buckets are non-empty: one
-    // workgroup count each, then one global atomic per non-empty bucket
-    workgroupBarrier();
-    let bucketCount = atomicLoad(&wgBuckets[local]);
-    if (bucketCount > 0u) {
-        atomicAdd(&buckets[local], bucketCount);
-    }
-`
-    : ''}
-}
-`;
-
-// The ordering passes (variant order:bucket): the projector counts its survivors into 256
-// depth buckets, front to back; a one-workgroup scan turns the counts into bucket offsets, and
-// the scatter writes each survivor's cache slot into the ordered list the raster then follows.
-// Splats inside a bucket land in append order, so a bucket keeps its chunks' locality.
-// exclusive prefix sum of the bucket counts into the bucket offsets, in one workgroup
-const orderScanWGSL = /* wgsl */ `
-// [0, ${ORDER_BUCKETS}) counts, [${ORDER_BUCKETS}, ${2 * ORDER_BUCKETS}) offsets
-@group(0) @binding(0) var<storage, read_write> buckets: array<u32>;
-
-var<workgroup> partial: array<u32, ${ORDER_BUCKETS}>;
-
-@compute @workgroup_size(${ORDER_BUCKETS})
-fn main(@builtin(local_invocation_index) local: u32) {
-    partial[local] = buckets[local];
-    for (var stride = 1u; stride < ${ORDER_BUCKETS}u; stride <<= 1u) {
-        workgroupBarrier();
-        let value = select(0u, partial[local - stride], local >= stride);
-        workgroupBarrier();
-        partial[local] += value;
-    }
-    // inclusive to exclusive
-    buckets[${ORDER_BUCKETS}u + local] = partial[local] - buckets[local];
-}
-`;
-// One thread per cache slot, one workgroup per 256 consecutive slots. Consecutive slots come
-// from one chunk, so a workgroup touches few buckets: it counts them locally, claims each
-// bucket's range with one global atomic, and places its splats in append order inside it.
-const orderScatterWGSL = /* wgsl */ `
-@group(0) @binding(0) var<storage, read> counter: array<u32>;
-@group(0) @binding(1) var<storage, read> cache: array<u32>;
-@group(0) @binding(2) var<storage, read_write> buckets: array<atomic<u32>>;
-@group(0) @binding(3) var<storage, read_write> ordered: array<u32>;
-
-var<workgroup> wgCounts: array<atomic<u32>, ${ORDER_BUCKETS}>;
-var<workgroup> wgBase: array<u32, ${ORDER_BUCKETS}>;
-
-@compute @workgroup_size(${ORDER_BUCKETS})
-fn main(
-    @builtin(workgroup_id) wg: vec3u,
-    @builtin(num_workgroups) numWorkgroups: vec3u,
-    @builtin(local_invocation_index) local: u32
-) {
-    // no early returns: the barriers need every thread
-    atomicStore(&wgCounts[local], 0u);
-    let slot = (wg.x + wg.y * numWorkgroups.x) * ${ORDER_BUCKETS}u + local;
-    let live = slot < counter[0];
-    var key = 0u;
-    var rank = 0u;
-    workgroupBarrier();
-    if (live) {
-        key = cache[slot * ${CACHE_WORDS}u + 3u] >> 24u;
-        rank = atomicAdd(&wgCounts[key], 1u);
-    }
-    workgroupBarrier();
-    let count = atomicLoad(&wgCounts[local]);
-    if (count > 0u) {
-        wgBase[local] = atomicAdd(&buckets[${ORDER_BUCKETS}u + local], count);
-    }
-    workgroupBarrier();
-    if (live) {
-        ordered[wgBase[key] + rank] = slot;
-    }
-}
-`;
-
-// The raster pass: an indirect instanced draw of 128-quad meshes over the projector's
-// survivors, into the renderer's own colour + depth target. Fragments keep themselves with
-// probability alpha (StochasticSplats, Listing 1) and write opaque colour with hardware depth,
-// so no sort is needed and the depth buffer holds the nearest surviving sample per pixel.
-/** Quads per draw instance; the mesh holds this many quads. */
-const QUADS_PER_INSTANCE = 128;
-/** The raster's far clamp in normalised depth: just inside 1, which the compose reads as empty. */
-const FAR_CLIP_Z = 0.999999;
-const rasterVertexWGSL = /* wgsl */ `
-attribute vertex_position: vec3f;
-
-// width, height, 2 / width, 2 / height
-uniform viewportSize: vec4f;
-// clip z = a * viewDepth + b (x, y); z = 1 for an orthographic camera
-uniform clipZParams: vec4f;
-// set by the engine's forward renderer for the target being rendered
-uniform projectionFlipY: f32;
-// focal length in pixels (x, y), for the popless corner depths
-uniform focalParams: vec4f;
-
-var<storage, read> splatCache: array<u32>;
-var<storage, read> splatCount: array<u32>;
-#ifdef SSE_ORDERED
-    // cache slots in draw order (variant order:bucket)
-    var<storage, read> orderedSlots: array<u32>;
-#endif
-
-// screen-linear: the corners share one screen footprint whatever depth they carry
-varying @interpolate(linear) gaussianUV: vec2f;
-varying @interpolate(flat, either) packedColor: u32;
-varying @interpolate(flat, either) packedAlpha: u32;
-varying @interpolate(flat, either) splatId: u32;
-
-const discardPosition = vec4f(0.0, 0.0, 2.0, 1.0);
-
-@vertex
-fn vertexMain(input: VertexInput) -> VertexOutput {
-    var output: VertexOutput;
-    let order = pcInstanceIndex * ${QUADS_PER_INSTANCE}u + u32(vertex_position.z);
-    // the indirect instance count rounds up to whole instances; the tail is discarded here
-    if (order >= splatCount[0]) {
-        output.position = discardPosition;
-        return output;
-    }
-
-    #ifdef SSE_ORDERED
-        let base = orderedSlots[order] * ${CACHE_WORDS}u;
-    #else
-        let base = order * ${CACHE_WORDS}u;
-    #endif
-    let maxRadius = min(1024.0, min(uniform.viewportSize.x, uniform.viewportSize.y));
-    let ndcRange = vec2f(1.0) + vec2f(4.0 * maxRadius) / uniform.viewportSize.xy;
-    let ndc = unpack2x16snorm(splatCache[base]) * ndcRange;
-    let depth = bitcast<f32>(splatCache[base + 1u]);
-    let ortho = uniform.clipZParams.z != 0.0;
-
-    let axis1 = unpack2x16float(splatCache[base + 2u]);
-    let word3 = splatCache[base + 3u];
-    let len2 = unpack2x16float(word3).x;
-    let axis2 = len2 * normalize(vec2f(axis1.y, -axis1.x));
-
-    let corner = vertex_position.xy;
-    let pixelOffset = corner.x * axis1 + corner.y * axis2;
-    #ifdef SSE_POPLESS
-        // the corner's depth on the splat's plane (see the projector): its view-space offset
-        // at the centre's depth, times the stored gradient
-        let g = unpack2x16float(splatCache[base + 5u]);
-        let shift = dot(g, pixelOffset * select(depth, 1.0, ortho) / uniform.focalParams.xy);
-        let cornerDepth = select(depth / (1.0 + shift), depth + shift, ortho);
-    #else
-        let cornerDepth = depth;
-    #endif
-    let w = select(cornerDepth, 1.0, ortho);
-    let ndcCorner = ndc + pixelOffset * uniform.viewportSize.zw;
-    // clip z clamped into range like the engine's splat shader, so splats beyond the far plane
-    // still draw; just inside it, since the compose and the accumulation read depth 1 as empty
-    let pos = vec4f(ndcCorner * w, clamp(uniform.clipZParams.x * cornerDepth + uniform.clipZParams.y, 0.0, w * ${FAR_CLIP_Z}), w);
-    output.position = vec4f(pos.x, pos.y * uniform.projectionFlipY, pos.z, pos.w);
-    output.gaussianUV = corner;
-    output.packedColor = splatCache[base + 4u];
-    output.packedAlpha = word3 >> 16u;
-    output.splatId = splatCache[base + 6u];
-    return output;
-}
-`;
-const rasterFragmentWGSL = /* wgsl */ `
-varying @interpolate(linear) gaussianUV: vec2f;
-varying @interpolate(flat, either) packedColor: u32;
-varying @interpolate(flat, either) packedAlpha: u32;
-varying @interpolate(flat, either) splatId: u32;
-
-uniform sseAlphaClip: f32;
-// 0 while the camera rests, so a still frame reproduces itself; the frame index once TAA
-// accumulates
-uniform frameSeed: u32;
-
-const EXP4 = exp(-4.0);
-const INV_EXP4 = 1.0 / (1.0 - EXP4);
-
-// the engine's falloff: zero at the quad edge, which sits at 2 sqrt(2) sigma
-fn normExp(x: f32) -> f32 {
-    return (exp(x * -4.0) - EXP4) * INV_EXP4;
-}
-
-// integer hash (Wellons' prospector mix)
-fn hashU32(x: u32) -> u32 {
-    var v = x;
-    v ^= v >> 16u;
-    v *= 0x7feb352du;
-    v ^= v >> 15u;
-    v *= 0x846ca68bu;
-    v ^= v >> 16u;
-    return v;
-}
-
-@fragment
-fn fragmentMain(input: FragmentInput) -> FragmentOutput {
-    var output: FragmentOutput;
-    let radius = dot(gaussianUV, gaussianUV);
-    if (radius > 1.0) {
-        discard;
-    }
-    let opacity = f32(packedAlpha & 0xffu) / 255.0;
-    let alpha = normExp(radius) * opacity;
-    if (alpha < uniform.sseAlphaClip) {
-        discard;
-    }
-
-    let pix = vec2u(pcPosition.xy);
-    #ifdef SSE_SPP_QUAD
-        // one sample per pixel, thresholds stratified over each 2x2 pixel quad: the quad's four
-        // pixels take the four strata of [0, 1) in a per-(quad, splat) scrambled order, so a
-        // splat with alpha a covers 4a +- 1 of its quad and the compose's quad mean is nearly
-        // exact. Hashing quad and splat keeps overlapping splats decorrelated
-        let quad = pix >> vec2u(1u);
-        let h = hashU32((quad.x * 1973u) ^ (quad.y * 9277u) ^ ((splatId + 1u) * 26699u) ^ uniform.frameSeed);
-        let stratum = ((pix.y & 1u) * 2u + (pix.x & 1u)) ^ (h & 3u);
-        let rnd = (f32(stratum) + f32(h >> 8u) * (1.0 / 16777216.0)) * 0.25;
-    #else
-        let h = hashU32((pix.x * 1973u) ^ (pix.y * 9277u) ^ ((splatId + 1u) * 26699u) ^ uniform.frameSeed);
-        let rnd = f32(h >> 8u) * (1.0 / 16777216.0);
-    #endif
-    if (rnd >= alpha) {
-        discard;
-    }
-
-    let bits = packedColor;
-    let color = vec3f(vec3u(bits, bits >> 10u, bits >> 20u) & vec3u(1023u)) * (f32(1u << (bits >> 30u)) / 1023.0);
-    // opaque coverage: the compose reads alpha 1 as "a sample landed here"
-    output.color = vec4f(color, 1.0);
-    return output;
-}
-`;
-
-// The occlusion grid: the previous frame's depth texture reduced to the farthest depth per 8x8
-// pixel block (level 1), and the farthest of each 4x4 group of those (level 2, 32 px). Each
-// pixel's depth is the nearest surviving sample there, so a block's maximum bounds what could
-// still have shown behind it; a splat whose front lies beyond that bound over every block it
-// covers was invisible last frame. Depths are hardware z in [0, 1], stored as their f32 bits
-// (non-negative floats order the same as their bits, so atomicMax works on them).
-const reduceL1WGSL = /* wgsl */ `
-struct ReduceUniforms {
-    width: u32,
-    height: u32,
-    blocksX: u32,
-    blocksY: u32
-}
-
-@group(0) @binding(0) var prevDepth: texture_depth_2d;
-@group(0) @binding(1) var<storage, read_write> blockMax: array<u32>;
-@group(0) @binding(2) var<uniform> uniforms: ReduceUniforms;
-
-var<workgroup> wgMax: atomic<u32>;
-
-@compute @workgroup_size(8, 8)
-fn main(
-    @builtin(workgroup_id) wg: vec3u,
-    @builtin(local_invocation_id) lid: vec3u,
-    @builtin(local_invocation_index) li: u32
-) {
-    let pixel = wg.xy * 8u + lid.xy;
-    // pixels off the texture count as far, so an edge block never culls
-    var depth = 1.0;
-    if (pixel.x < uniforms.width && pixel.y < uniforms.height) {
-        depth = textureLoad(prevDepth, vec2i(pixel), 0);
-    }
-    atomicMax(&wgMax, bitcast<u32>(depth));
-    workgroupBarrier();
-    if (li == 0u) {
-        blockMax[wg.y * uniforms.blocksX + wg.x] = atomicLoad(&wgMax);
-    }
-}
-`;
-const reduceL2WGSL = /* wgsl */ `
-struct ReduceUniforms {
-    blocksX1: u32,
-    blocksY1: u32,
-    blocksX2: u32,
-    blocksY2: u32
-}
-
-@group(0) @binding(0) var<storage, read> level1: array<u32>;
-@group(0) @binding(1) var<storage, read_write> level2: array<u32>;
-@group(0) @binding(2) var<uniform> uniforms: ReduceUniforms;
-
-@compute @workgroup_size(64)
-fn main(@builtin(global_invocation_id) gid: vec3u) {
-    let index = gid.x;
-    if (index >= uniforms.blocksX2 * uniforms.blocksY2) {
-        return;
-    }
-    let bx = index % uniforms.blocksX2;
-    let by = index / uniforms.blocksX2;
-    var farthest = 0u;
-    for (var dy = 0u; dy < 4u; dy++) {
-        for (var dx = 0u; dx < 4u; dx++) {
-            let x = bx * 4u + dx;
-            let y = by * 4u + dy;
-            if (x < uniforms.blocksX1 && y < uniforms.blocksY1) {
-                farthest = max(farthest, level1[y * uniforms.blocksX1 + x]);
-            } else {
-                farthest = max(farthest, bitcast<u32>(1.0));
-            }
-        }
-    }
-    level2[index] = farthest;
-}
-`;
-
-// Data path (ii): the projector reads each resident file's own textures (sog, ply or
-// compressed ply) through the engine's format read chunks, so nothing is copied into a work
-// buffer: no decoded 24-byte copy per splat, no re-copy when a node's lod changes, no
-// colour refresh when the camera turns. The price is one dispatch per resident file, the
-// model transform and the sh evaluation per splat per frame.
-//
-// Interim: the engine still allocates its work buffer and would keep copying into it, so the
-// copy passes are switched off on the work buffer this source sees; the textures themselves
-// stay until engine change E2 (no work buffer in external mode) lands.
-const tmpScale = new Vec3();
-const tmpRotation = new Quat();
-class DirectSplatSource {
-    kind = 'direct';
-    device;
-    resource = null;
-    set = null;
-    constants = new Map();
-    patched = null;
-    constructor(device) {
-        this.device = device;
-    }
-    update(set, manager) {
-        // one format per scene: a sog lod set shares its format across files. The first file's
-        // format compiles the projector; a file of another format is skipped by dispatchPlan
-        this.resource = set.files[0]?.resource ?? this.resource;
-        this.set = set;
-        this.constants.clear();
-        for (const file of set.files) {
-            const m = file.modelMatrix;
-            m.getScale(tmpScale);
-            tmpRotation.setFromMat4(m);
-            if (tmpRotation.w < 0)
-                tmpRotation.mulScalar(-1);
-            this.constants.set(file.fileIndex, {
-                rotation: [tmpRotation.x, tmpRotation.y, tmpRotation.z, tmpRotation.w],
-                scale: [tmpScale.x, tmpScale.y, tmpScale.z, 0]
-            });
-        }
-        this.patchWorkBuffer(manager.world.workBuffer);
-    }
-    // the engine's copy into the work buffer is wasted work for this path
-    patchWorkBuffer(workBuffer) {
-        if (this.patched?.workBuffer === workBuffer)
-            return;
-        this.restoreWorkBuffer();
-        this.patched = { workBuffer, render: workBuffer.render, renderColor: workBuffer.renderColor };
-        const skip = () => undefined;
-        workBuffer.render = skip;
-        workBuffer.renderColor = skip;
-    }
-    restoreWorkBuffer() {
-        if (!this.patched)
-            return;
-        const { workBuffer, render, renderColor } = this.patched;
-        workBuffer.render = render;
-        workBuffer.renderColor = renderColor;
-        this.patched = null;
-    }
-    readChunk(bindingBase) {
-        const format = this.require().format;
-        // The format's read chunk reads the file's own space and returns sh0 colour + alpha;
-        // the adapter below applies the file's model transform and evaluates its sh for this
-        // camera. Its loose `uniform` and texture declarations (dequantisation constants, the
-        // compressed format's chunk texture) are reflected by the engine into a second bind
-        // group and set by name like any other parameter.
-        // The engine writes its 32-bit float streams (the sog v2 codebook) as `texture_2d<uff>`,
-        // an alias only its reflection of loose declarations resolves; explicit bindings need
-        // the wgsl type, and the matching unfilterable sample type in bindFormats()
-        const declarations = format
-            .getComputeInputDeclarations(bindingBase)
-            .replace(/texture_2d<uff>/g, 'texture_2d<f32>');
-        return /* wgsl */ `
-#include "halfTypesCS"
-#include "gsplatEvalSHVS"
-${declarations}
-${format.getReadCode()}
-
-var<private> srcWorldCenter: vec3f;
-var<private> srcColorCache: vec4f;
-
-fn quatMulF(a: vec4f, b: vec4f) -> vec4f {
-    return vec4f(a.w * b.xyz + b.w * a.xyz + cross(a.xyz, b.xyz), a.w * b.w - dot(a.xyz, b.xyz));
-}
-
-// v rotated by the inverse of q (x, y, z, w)
-fn quatRotateInvF(q: vec4f, v: vec3f) -> vec3f {
-    let u = -q.xyz;
-    return v + 2.0 * cross(u, cross(u, v) + q.w * v);
-}
-
-fn srcCenter() -> vec3f {
-    srcWorldCenter = (uniforms.model * vec4f(getCenter(), 1.0)).xyz;
-    return srcWorldCenter;
-}
-
-fn srcOpacity() -> f32 {
-    srcColorCache = getColor();
-    return srcColorCache.a;
-}
-
-// the format returns (w, x, y, z); world = model * source
-fn srcRotation() -> vec4f {
-    let q = quatMulF(uniforms.modelRotation, getRotation().yzwx);
-    return q.wxyz;
-}
-
-fn srcScale() -> vec3f {
-    return uniforms.modelScale.xyz * getScale();
-}
-
-fn srcColor() -> vec3f {
-    var color = srcColorCache.rgb;
-    #if SH_BANDS > 0
-        // the view direction in the file's space; orthographic rays all run along the camera forward
-        let view = uniforms.view;
-        let orthoDir = vec3f(0.0, 0.0, -1.0) * mat3x3f(view[0].xyz, view[1].xyz, view[2].xyz);
-        let viewDir = select(srcWorldCenter - uniforms.cameraPosition.xyz, orthoDir, uniforms.isOrtho != 0u);
-        let dir = normalize(quatRotateInvF(uniforms.modelRotation, viewDir));
-        var sh: array<half3, SH_COEFFS>;
-        var shScale: f32;
-        readSHData(&sh, &shScale);
-        color += vec3f(evalSH(&sh, dir) * half(shScale));
-    #endif
-    return color;
-}
-`;
-    }
-    bindFormats() {
-        const format = this.require().format;
-        const entries = format.getComputeBindFormats();
-        for (const entry of entries) {
-            const stream = format.streams.find((s) => s.name === entry.name);
-            if (stream?.format === PIXELFORMAT_RGBA32F)
-                entry.sampleType = SAMPLETYPE_UNFILTERABLE_FLOAT;
-        }
-        return entries;
-    }
-    shaderIncludes() {
-        // the read chunks include the engine's own gsplat chunks by name
-        return new Map(ShaderChunks.get(this.device, SHADERLANGUAGE_WGSL));
-    }
-    shaderDefines() {
-        const defines = new Map();
-        this.require().configureMaterialDefines(defines);
-        return defines;
-    }
-    chunkBase(node) {
-        return node.sourceBase;
-    }
-    dispatchPlan(set) {
-        // one run of the chunk table per file (the table is built file by file)
-        const groups = [];
-        let chunkBase = 0;
-        const hash = this.resource?.format.hash;
-        for (const file of set.files) {
-            let chunkCount = 0;
-            for (const node of file.nodes)
-                chunkCount += Math.ceil(node.count / 256);
-            if (chunkCount > 0 && file.resource.format.hash === hash) {
-                groups.push({ fileIndex: file.fileIndex, chunkBase, chunkCount });
-            }
-            chunkBase += chunkCount;
-        }
-        return groups;
-    }
-    bind(compute, group, set) {
-        const file = set.files[group.fileIndex];
-        const { resource } = file;
-        for (const [name, texture] of resource.streams.textures) {
-            compute.setParameter(name, texture);
-        }
-        for (const [name, value] of resource.parameters) {
-            compute.setParameter(name, value);
-        }
-        const constants = this.constants.get(file.fileIndex);
-        compute.setParameter('model', file.modelMatrix.data);
-        compute.setParameter('modelRotation', constants.rotation);
-        compute.setParameter('modelScale', constants.scale);
-    }
-    textureSize(group) {
-        return this.set?.files[group.fileIndex].resource.textureDimensions.x ?? 0;
-    }
-    gpuBytes() {
-        // the file textures belong to the engine and are counted by app.stats.vram
-        return 0;
-    }
-    shaderKey() {
-        const resource = this.resource;
-        if (!resource)
-            return 'direct:';
-        const defines = this.shaderDefines();
-        return `direct:${resource.format.hash}:${[...defines].map(([k, v]) => `${k}=${v}`).join(',')}`;
-    }
-    destroy() {
-        this.restoreWorkBuffer();
-        this.resource = null;
-        this.set = null;
-        this.constants.clear();
-    }
-    require() {
-        if (!this.resource)
-            throw new Error('DirectSplatSource: update() has not run');
-        return this.resource;
-    }
-}
-
-class WorkBufferSplatSource {
-    kind = 'workbuffer';
-    workBuffer = null;
-    update(set, manager) {
-        this.workBuffer = manager.world.workBuffer;
-    }
-    readChunk(bindingBase) {
-        const format = this.require().format;
-        // the engine's declarations bind one texture per stream from bindingBase and define
-        // loadDataX(); its read code decodes them into getCenter() and friends, already in
-        // world space with the sh colour baked for this camera
-        return /* wgsl */ `
-${format.getComputeInputDeclarations(bindingBase)}
-${format.getReadCode()}
-fn srcCenter() -> vec3f { return getCenter(); }
-fn srcOpacity() -> f32 { return getOpacity(); }
-fn srcRotation() -> vec4f { return getRotation(); }
-fn srcScale() -> vec3f { return getScale(); }
-fn srcColor() -> vec3f { return getColor(); }
-`;
-    }
-    bindFormats() {
-        return this.require().format.getComputeBindFormats();
-    }
-    shaderIncludes() {
-        return undefined;
-    }
-    shaderDefines() {
-        return undefined;
-    }
-    chunkBase(node) {
-        return node.slotBase;
-    }
-    dispatchPlan(set, numChunks) {
-        return [{ fileIndex: -1, chunkBase: 0, chunkCount: numChunks }];
-    }
-    bind(compute) {
-        const workBuffer = this.require();
-        for (const stream of workBuffer.format.streams) {
-            compute.setParameter(stream.name, workBuffer.getTexture(stream.name));
-        }
-    }
-    textureSize() {
-        return this.require().textureSize;
-    }
-    gpuBytes() {
-        // the work buffer belongs to the engine and is counted by app.stats.vram
-        return 0;
-    }
-    shaderKey() {
-        const workBuffer = this.workBuffer;
-        return workBuffer ? `wb:${workBuffer.format.streams.map((s) => s.name).join(',')}` : 'wb:';
-    }
-    destroy() {
-        this.workBuffer = null;
-    }
-    require() {
-        if (!this.workBuffer)
-            throw new Error('WorkBufferSplatSource: update() has not run');
-        return this.workBuffer;
-    }
-}
-
-// The stochastic splat renderer (WebGPU, opt-in). The engine keeps LOD, streaming and the
-// work-buffer copy; this owns everything after: per frame it culls nodes on the cpu, projects
-// the resident splats in a compute pass into a dense cache, writes the indirect draw arguments,
-// rasterises the survivors as opaque depth-tested quads into its own colour + depth target
-// (StochasticSplats: keep a fragment with probability alpha, no sort), and composes that target
-// over the camera's target from a fullscreen quad in the World layer that also writes depth.
-//
-// Frame flow: the compute runs inside the engine's gsplat update (the `frame:ready` hook, before
-// the frame graph), the raster pass runs from `camera.beforePasses`, and the compose is an
-// ordinary mesh instance in the camera's forward pass. See docs/stochastic-renderer.md.
-const defaultVariant = () => ({
-    spp: 'quad',
-    compose: 'blend',
-    cull: 'auto',
-    order: 'bucket',
-    contribution: 0,
-    popless: 'on',
-    taa: 'on',
-    taaMax: 256,
-    taaMoveMax: 16,
-    taaClip: 1.25,
-    taaFilter: 'cubic',
-    taaReproj: 'sample',
-    taaMotion: 4,
-    taaDebug: 0,
-    taaFlip: 0,
-    colorMax: 8,
-    units: 'engine'
-});
-const taaCount = (value) => Math.min(TAA_MAX_COUNT, Math.max(1, Math.round(value)));
-const parseVariant = (text) => {
-    const variant = defaultVariant();
-    for (const part of (text ?? '').split(',')) {
-        const [key, value] = part.split(':').map((s) => s.trim());
-        if (!key || value === undefined)
-            continue;
-        if (key === 'spp' && (value === '1' || value === 'quad'))
-            variant.spp = value;
-        if (key === 'compose' && (value === 'blend' || value === 'none' || value === 'depth'))
-            variant.compose = value;
-        if (key === 'popless' && (value === 'on' || value === 'off'))
-            variant.popless = value;
-        if (key === 'taa' && (value === 'on' || value === 'off'))
-            variant.taa = value;
-        if (key === 'taaMax' && Number.isFinite(Number(value)))
-            variant.taaMax = taaCount(Number(value));
-        if (key === 'taaMoveMax' && Number.isFinite(Number(value)))
-            variant.taaMoveMax = taaCount(Number(value));
-        if (key === 'taaDebug' && Number.isFinite(Number(value)))
-            variant.taaDebug = Number(value);
-        if (key === 'taaClip' && Number.isFinite(Number(value)))
-            variant.taaClip = Math.max(0, Number(value));
-        if (key === 'taaFilter' && (value === 'linear' || value === 'cubic'))
-            variant.taaFilter = value;
-        if (key === 'taaReproj' && (value === 'sample' || value === 'history'))
-            variant.taaReproj = value;
-        if (key === 'taaMotion' && Number.isFinite(Number(value)))
-            variant.taaMotion = Math.max(0, Number(value));
-        if (key === 'taaFlip' && Number.isFinite(Number(value)))
-            variant.taaFlip = Number(value);
-        if (key === 'colorMax' && Number.isFinite(Number(value)))
-            variant.colorMax = Math.max(0, Number(value));
-        if (key === 'units' && (value === 'px' || value === 'engine'))
-            variant.units = value;
-        if (key === 'cull' && (value === 'off' || value === 'l1' || value === 'l2' || value === 'auto')) {
-            variant.cull = value;
-        }
-        if (key === 'order' && (value === 'append' || value === 'bucket'))
-            variant.order = value;
-        if (key === 'contribution' && Number.isFinite(Number(value)))
-            variant.contribution = Math.max(0, Number(value));
-    }
-    return variant;
-};
-// Renders an explicit mesh-instance list into the renderer's own target (the raster and the
-// taa resolve). Not a layer: a layer in camera.layers is culled once and drawn by every pass
-// for the camera, so the scene pass would draw the splats into the camera target as well.
-class SplatRasterPass extends RenderPass {
-    forward;
-    camera;
-    instances;
-    constructor(device, forward, camera, instances, name = 'sse-splat-raster') {
-        super(device);
-        this.forward = forward;
-        this.camera = camera;
-        this.instances = instances;
-        this.name = name;
-    }
-    execute() {
-        this.forward.renderForwardLayer(this.camera.camera, this.renderTarget, null, undefined, SHADER_FORWARD, {
-            meshInstances: this.instances
-        });
-    }
-}
-const createQuadMesh = (device, quads) => {
-    const positions = new Float32Array(quads * 4 * 3);
-    const indices = new Uint32Array(quads * 6);
-    for (let i = 0; i < quads; ++i) {
-        // z carries the quad's index within the instance
-        positions.set([-1, -1, i, 1, -1, i, 1, 1, i, -1, 1, i], i * 12);
-        const v = i * 4;
-        indices.set([v, v + 1, v + 2, v, v + 2, v + 3], i * 6);
-    }
-    const mesh = new Mesh(device);
-    mesh.setPositions(positions, 3);
-    mesh.setIndices(indices);
-    mesh.update(PRIMITIVE_TRIANGLES);
-    return mesh;
-};
-const createFullscreenMesh = (device) => {
-    const mesh = new Mesh(device);
-    mesh.setPositions(new Float32Array([-1, -1, 1, -1, 1, 1, -1, 1]), 2);
-    mesh.setIndices(new Uint16Array([0, 1, 2, 0, 2, 3]));
-    mesh.update(PRIMITIVE_TRIANGLES);
-    return mesh;
-};
-const tmpVec2 = new Vec2();
-class StochasticSplatRenderer {
-    variant;
-    source;
-    app;
-    device;
-    camera;
-    worldLayer;
-    provider;
-    unsubscribe;
-    enabled = true;
-    // the resident set and its chunk table
-    set = null;
-    numChunks = 0;
-    chunkData = new Uint32Array(0);
-    chunkBuffer = null;
-    nodeVisibleData = new Uint32Array(0);
-    nodeVisibleBuffer = null;
-    cacheBuffer = null;
-    cacheSlots = 0;
-    counter;
-    // compute
-    // one projector shader per source and occlusion / order specialisation: the test's code
-    // costs a little even when a uniform disables it, so a disabled or suspended cull runs
-    // without it. One compute per shader and dispatch group, since a compute owns the uniform
-    // buffer its dispatch reads and per-file sources dispatch once per file
-    projectorShaders = new Map();
-    projectorComputes = new Map();
-    projectorBindGroupFormat = null;
-    projectorSourceKey = '';
-    args;
-    argsBindGroupFormat;
-    // order:bucket: bucket counts then offsets, the ordered slot list, and its two passes
-    orderBuckets;
-    orderedBuffer = null;
-    orderScan;
-    orderScatter;
-    orderFormats = [];
-    // the occlusion grid: farthest depth per 8 px block (level 1) and per 32 px block (level 2)
-    occL1;
-    occL2;
-    occBlocks = { x1: 0, y1: 0, x2: 0, y2: 0 };
-    reduceL1;
-    reduceL2;
-    reduceFormats = [];
-    // the previous frame the grid and the reprojection describe; valid only when that frame
-    // rendered to the same target at the same size from the same world state
-    prevValid = false;
-    prevViewProjection = new Mat4();
-    prevView = new Mat4();
-    prevProjection = new Mat4();
-    prevClipZ = [0, 0, 0, 0];
-    prevViewport = [0, 0];
-    prevFocal = [0, 0];
-    prevFlip = 1;
-    prevWidth = 0;
-    prevHeight = 0;
-    prevVersion = -1;
-    // the allocations resident when the previous frame drew, and whether any of them has gone
-    // since: only a removed splat can make the previous depth wrong (it may have hidden what is
-    // now behind it), so arrivals leave the cull on while a scene streams in
-    residentAllocIds = new Set();
-    nodesRemoved = false;
-    prevOrtho = false;
-    /** Whether the last frame ran the occlusion cull, for the debug panel and the harness. */
-    culling = false;
-    /** Whether cull:auto currently has the test switched off for culling too little. */
-    get cullSuspended() {
-        return this.variant.cull === 'auto' && (!this.cullActive || this.cullSuspendedFrames > 0);
-    }
-    // cull:auto bookkeeping. The last decision holds while a readback is in flight: while the
-    // test is active every culled frame's counts are read back and a poor one suspends it;
-    // while suspended the frames count down, then one probe frame runs the test and the rest
-    // wait for its counts
-    cullActive = true;
-    cullSuspendedFrames = 0;
-    cullStatsPending = false;
-    /** Frames the test stays off after culling too little (cull:auto). */
-    /**
-     * Whether the projected cache for `splats` resident splats fits one storage binding on this
-     * device. The cache reserves 25% over the resident count; adapters differ in the limit
-     * (128 MiB is the WebGPU default), so a viewer checks before opting in.
-     */
-    static cacheFits(device, splats) {
-        const limit = device.wgpu?.limits
-            ?.maxStorageBufferBindingSize;
-        return !limit || Math.ceil(splats * 1.25) * CACHE_WORDS * 4 <= limit;
-    }
-    static CULL_SUSPEND_FRAMES = 60;
-    /** The culled fraction below which cull:auto suspends the test. */
-    static CULL_MIN_FRACTION = 0.08;
-    /**
-     * Let a capture (query) frame cull against the previous on-screen frame when it renders at
-     * the same size. Off by default: a query frame is not culled, since its cull thins what a
-     * pick or a thumbnail should see. The harness turns it on to photograph culled frames.
-     */
-    allowQueryCull = false;
-    // raster
-    colorTexture;
-    depthTexture;
-    target;
-    rasterMesh;
-    rasterMaterial;
-    rasterInstance;
-    rasterPass;
-    // taa: ping-pong history (premultiplied colour + coverage as unorm16, and the depth mean and
-    // sample count packed in 32 bits; shaders/taa.ts), resolved by a fullscreen pass after the
-    // raster. Sized with the target on the first accumulating frame, and shrunk back while taa is off
-    taaColor = [];
-    taaInfo = [];
-    taaTargets = [];
-    taaWrite = 0;
-    taaMesh;
-    taaMaterial;
-    taaInstance;
-    taaPass;
-    // whether the history holds the previous on-screen frame at the current size
-    taaHistoryValid = false;
-    // the previous taa frame's matrices as the pass reads them, and this frame's, copied over
-    // at the start of the next frame: the material holds the data arrays by reference and
-    // uploads them when it draws, after this hook has run
-    taaPrevViewProjection = new Mat4();
-    taaPrevView = new Mat4();
-    taaLastViewProjection = new Mat4();
-    taaLastView = new Mat4();
-    taaWidth = 0;
-    taaHeight = 0;
-    // the camera's world transform, for the accumulation's reprojection
-    cameraWorld = new Mat4();
-    // frames since the camera or the scene last changed, for converging at rest
-    restFrames = 0;
-    /** The frame the depth texture holds, null while it holds a capture's or nothing. */
-    depthFrame = null;
-    depthFrameCount = 0;
-    depthFrameCamera = createPickCameraSnapshot();
-    // a frame requested from inside the render: the engine clears app.renderNextFrame right
-    // after render(), so the request is applied on frameend instead
-    frameWanted = false;
-    onFrameEnd = () => {
-        if (this.frameWanted) {
-            this.frameWanted = false;
-            this.app.renderNextFrame = true;
-        }
-    };
-    frameIndex = 0;
-    // the seed the harness sets; the frame index replaces it while taa accumulates
-    userSeed = 0;
-    /** Whether the last frame ran the temporal accumulation, for the debug panel. */
-    taaActive = false;
-    /**
-     * Let a capture (query) frame at the on-screen size run the accumulation over the on-screen
-     * history, so the harness can photograph converged and moving frames. Off by default.
-     */
-    allowQueryTaa = false;
-    // compose
-    composeMesh;
-    composeMaterial;
-    composeInstance;
-    frustum = new Frustum();
-    sphere = new BoundingSphere();
-    shaderProjection = new Mat4();
-    viewProjection = new Mat4();
-    frameSeed = 0;
-    ready = false;
-    /** Byte sizes of the buffers this renderer owns, for the bench harness and the debug panel. */
-    /** The renderer's depth texture: the nearest surviving sample per pixel of `depthFrame`. */
-    get frameDepthTexture() {
-        return this.depthTexture;
-    }
-    get gpuBytes() {
-        const buffers = [
-            this.chunkBuffer,
-            this.nodeVisibleBuffer,
-            this.cacheBuffer,
-            this.orderedBuffer,
-            this.counter,
-            this.orderBuckets,
-            this.occL1,
-            this.occL2
-        ];
-        let bytes = 0;
-        for (const buffer of buffers)
-            bytes += buffer?.byteSize ?? 0;
-        bytes += this.colorTexture.gpuSize + this.depthTexture.gpuSize;
-        for (const texture of [...this.taaColor, ...this.taaInfo])
-            bytes += texture.gpuSize;
-        return bytes + this.source.gpuBytes();
-    }
-    /**
-     * The seed mixed into every coverage hash. 0 makes a still camera reproduce its frame;
-     * the harness varies it to measure the sampling noise floor, and TAA will animate it.
-     */
-    get seed() {
-        return this.frameSeed;
-    }
-    set seed(value) {
-        this.userSeed = value >>> 0;
-        this.frameSeed = this.userSeed;
-        this.app.renderNextFrame = true;
-    }
-    /** The last projected frame's survivor count and occlusion-culled count, read back from the gpu. */
-    async readStats() {
-        // without a typed array the engine hands back bytes
-        const data = new Uint32Array(2);
-        await this.counter.read(0, 8, data, true);
-        return { survivors: data[0], occluded: data[1] };
-    }
-    // reduce the previous frame's depth into the two grid levels
-    reduceDepth(width, height) {
-        const { device } = this;
-        const x1 = Math.ceil(width / 8);
-        const y1 = Math.ceil(height / 8);
-        const x2 = Math.ceil(x1 / 4);
-        const y2 = Math.ceil(y1 / 4);
-        if (this.occBlocks.x1 !== x1 || this.occBlocks.y1 !== y1) {
-            this.occL1.destroy();
-            this.occL2.destroy();
-            this.occL1 = new StorageBuffer(device, x1 * y1 * 4, BUFFERUSAGE_COPY_DST);
-            this.occL2 = new StorageBuffer(device, x2 * y2 * 4, BUFFERUSAGE_COPY_DST);
-            this.occBlocks = { x1, y1, x2, y2 };
-        }
-        const l1 = this.reduceL1;
-        l1.setParameter('prevDepth', this.depthTexture);
-        l1.setParameter('blockMax', this.occL1);
-        l1.setParameter('width', width);
-        l1.setParameter('height', height);
-        l1.setParameter('blocksX', x1);
-        l1.setParameter('blocksY', y1);
-        l1.setupDispatch(x1, y1, 1);
-        const l2 = this.reduceL2;
-        l2.setParameter('level1', this.occL1);
-        l2.setParameter('level2', this.occL2);
-        l2.setParameter('blocksX1', x1);
-        l2.setParameter('blocksY1', y1);
-        l2.setParameter('blocksX2', x2);
-        l2.setParameter('blocksY2', y2);
-        Compute.calcDispatchSize(Math.ceil((x2 * y2) / 64), tmpVec2);
-        l2.setupDispatch(tmpVec2.x, tmpVec2.y, 1);
-        device.computeDispatch([l1], 'sse-splat-reduce1');
-        device.computeDispatch([l2], 'sse-splat-reduce2');
-    }
-    /** Survivors of the last frame's projection are only known to the gpu; this is the resident count. */
-    activeSplats = 0;
-    constructor(app, camera, worldLayer, options = {}) {
-        this.app = app;
-        this.device = app.graphicsDevice;
-        this.camera = camera;
-        this.worldLayer = worldLayer;
-        this.variant = parseVariant(options.variant);
-        const { device } = this;
-        if (options.source === 'direct') {
-            this.source = new DirectSplatSource(device);
-        }
-        else {
-            if (options.source && options.source !== 'workbuffer') {
-                console.warn(`StochasticSplatRenderer: splat source '${options.source}' is not implemented yet, using the work buffer`);
-            }
-            this.source = new WorkBufferSplatSource();
-        }
-        this.counter = new StorageBuffer(device, 16, BUFFERUSAGE_COPY_DST | BUFFERUSAGE_COPY_SRC);
-        // indirect draw arguments
-        this.argsBindGroupFormat = new BindGroupFormat(device, [
-            new BindStorageBufferFormat('counter', SHADERSTAGE_COMPUTE, true),
-            new BindStorageBufferFormat('indirectDrawArgs', SHADERSTAGE_COMPUTE),
-            new BindStorageBufferFormat('indirectDispatchArgs', SHADERSTAGE_COMPUTE),
-            new BindUniformBufferFormat('uniforms', SHADERSTAGE_COMPUTE)
-        ]);
-        this.args = new Compute(device, new Shader(device, {
-            name: 'sse-splat-args',
-            shaderLanguage: SHADERLANGUAGE_WGSL,
-            cshader: argsWGSL,
-            computeUniformBufferFormats: {
-                uniforms: new UniformBufferFormat(device, [
-                    new UniformFormat('drawSlot', UNIFORMTYPE_UINT),
-                    new UniformFormat('indexCount', UNIFORMTYPE_UINT),
-                    new UniformFormat('quadsPerInstance', UNIFORMTYPE_UINT),
-                    new UniformFormat('dispatchSlot', UNIFORMTYPE_UINT),
-                    new UniformFormat('scatterWorkgroupSize', UNIFORMTYPE_UINT)
-                ])
-            },
-            computeBindGroupFormat: this.argsBindGroupFormat
-        }), 'sse-splat-args');
-        // the ordering passes
-        this.orderBuckets = new StorageBuffer(device, 2 * ORDER_BUCKETS * 4, BUFFERUSAGE_COPY_DST);
-        const scanFormat = new BindGroupFormat(device, [new BindStorageBufferFormat('buckets', SHADERSTAGE_COMPUTE)]);
-        const scatterFormat = new BindGroupFormat(device, [
-            new BindStorageBufferFormat('counter', SHADERSTAGE_COMPUTE, true),
-            new BindStorageBufferFormat('cache', SHADERSTAGE_COMPUTE, true),
-            new BindStorageBufferFormat('buckets', SHADERSTAGE_COMPUTE),
-            new BindStorageBufferFormat('ordered', SHADERSTAGE_COMPUTE)
-        ]);
-        this.orderFormats = [scanFormat, scatterFormat];
-        this.orderScan = new Compute(device, new Shader(device, {
-            name: 'sse-splat-order-scan',
-            shaderLanguage: SHADERLANGUAGE_WGSL,
-            cshader: orderScanWGSL,
-            computeBindGroupFormat: scanFormat
-        }), 'sse-splat-order-scan');
-        this.orderScatter = new Compute(device, new Shader(device, {
-            name: 'sse-splat-order-scatter',
-            shaderLanguage: SHADERLANGUAGE_WGSL,
-            cshader: orderScatterWGSL,
-            computeBindGroupFormat: scatterFormat
-        }), 'sse-splat-order-scatter');
-        // the occlusion grid and its two reduce passes
-        this.occL1 = new StorageBuffer(device, 4, BUFFERUSAGE_COPY_DST);
-        this.occL2 = new StorageBuffer(device, 4, BUFFERUSAGE_COPY_DST);
-        const reduceL1Format = new BindGroupFormat(device, [
-            new BindTextureFormat('prevDepth', SHADERSTAGE_COMPUTE, TEXTUREDIMENSION_2D, SAMPLETYPE_DEPTH, false),
-            new BindStorageBufferFormat('blockMax', SHADERSTAGE_COMPUTE),
-            new BindUniformBufferFormat('uniforms', SHADERSTAGE_COMPUTE)
-        ]);
-        const reduceL2Format = new BindGroupFormat(device, [
-            new BindStorageBufferFormat('level1', SHADERSTAGE_COMPUTE, true),
-            new BindStorageBufferFormat('level2', SHADERSTAGE_COMPUTE),
-            new BindUniformBufferFormat('uniforms', SHADERSTAGE_COMPUTE)
-        ]);
-        this.reduceFormats = [reduceL1Format, reduceL2Format];
-        this.reduceL1 = new Compute(device, new Shader(device, {
-            name: 'sse-splat-reduce1',
-            shaderLanguage: SHADERLANGUAGE_WGSL,
-            cshader: reduceL1WGSL,
-            computeUniformBufferFormats: {
-                uniforms: new UniformBufferFormat(device, [
-                    new UniformFormat('width', UNIFORMTYPE_UINT),
-                    new UniformFormat('height', UNIFORMTYPE_UINT),
-                    new UniformFormat('blocksX', UNIFORMTYPE_UINT),
-                    new UniformFormat('blocksY', UNIFORMTYPE_UINT)
-                ])
-            },
-            computeBindGroupFormat: reduceL1Format
-        }), 'sse-splat-reduce1');
-        this.reduceL2 = new Compute(device, new Shader(device, {
-            name: 'sse-splat-reduce2',
-            shaderLanguage: SHADERLANGUAGE_WGSL,
-            cshader: reduceL2WGSL,
-            computeUniformBufferFormats: {
-                uniforms: new UniformBufferFormat(device, [
-                    new UniformFormat('blocksX1', UNIFORMTYPE_UINT),
-                    new UniformFormat('blocksY1', UNIFORMTYPE_UINT),
-                    new UniformFormat('blocksX2', UNIFORMTYPE_UINT),
-                    new UniformFormat('blocksY2', UNIFORMTYPE_UINT)
-                ])
-            },
-            computeBindGroupFormat: reduceL2Format
-        }), 'sse-splat-reduce2');
-        // the raster target: colour, and a depth texture the compose, the occlusion cull and
-        // (later) the picker read
-        this.colorTexture = new Texture(device, {
-            name: 'sse-splat-color',
-            width: 4,
-            height: 4,
-            format: PIXELFORMAT_RGBA8,
-            mipmaps: false,
-            minFilter: FILTER_LINEAR,
-            magFilter: FILTER_LINEAR,
-            addressU: ADDRESS_CLAMP_TO_EDGE,
-            addressV: ADDRESS_CLAMP_TO_EDGE
-        });
-        this.depthTexture = new Texture(device, {
-            name: 'sse-splat-depth',
-            width: 4,
-            height: 4,
-            format: PIXELFORMAT_DEPTH,
-            mipmaps: false,
-            addressU: ADDRESS_CLAMP_TO_EDGE,
-            addressV: ADDRESS_CLAMP_TO_EDGE
-        });
-        this.target = new RenderTarget({
-            name: 'sse-splat-target',
-            colorBuffer: this.colorTexture,
-            depthBuffer: this.depthTexture,
-            samples: 1
-        });
-        this.rasterMesh = createQuadMesh(device, QUADS_PER_INSTANCE);
-        this.rasterMaterial = new ShaderMaterial({
-            uniqueName: 'sse-splat-raster',
-            vertexWGSL: rasterVertexWGSL,
-            fragmentWGSL: rasterFragmentWGSL,
-            attributes: { vertex_position: SEMANTIC_POSITION }
-        });
-        this.rasterMaterial.blendType = BLEND_NONE;
-        this.rasterMaterial.depthWrite = true;
-        this.rasterMaterial.depthTest = true;
-        this.rasterMaterial.cull = CULLFACE_NONE;
-        // the forward renderer reads the instance's node for its cull setup and world transform
-        this.rasterInstance = new MeshInstance(this.rasterMesh, this.rasterMaterial, new GraphNode('sse-splat-raster'));
-        this.rasterInstance.cull = false;
-        this.rasterInstance.castShadow = false;
-        this.rasterInstance.receiveShadow = false;
-        this.rasterPass = new SplatRasterPass(device, app.renderer, camera, [
-            this.rasterInstance
-        ]);
-        this.rasterPass.init(this.target);
-        this.rasterPass.setClearColor(new Color(0, 0, 0, 0));
-        this.rasterPass.setClearDepth(1);
-        // nothing to draw, and no buffers bound, until the first populated frame
-        this.rasterPass.enabled = false;
-        // the taa resolve: a fullscreen pass from the raster target and the previous history
-        // into the other history, sized with the target on its first frame
-        for (let i = 0; i < 2; i++) {
-            this.taaColor.push(new Texture(device, {
-                name: `sse-splat-taa-color-${i}`,
-                width: 4,
-                height: 4,
-                format: PIXELFORMAT_RGBA16U,
-                mipmaps: false,
-                minFilter: FILTER_NEAREST,
-                magFilter: FILTER_NEAREST,
-                addressU: ADDRESS_CLAMP_TO_EDGE,
-                addressV: ADDRESS_CLAMP_TO_EDGE
-            }));
-            this.taaInfo.push(new Texture(device, {
-                name: `sse-splat-taa-info-${i}`,
-                width: 4,
-                height: 4,
-                format: PIXELFORMAT_R32U,
-                mipmaps: false,
-                minFilter: FILTER_NEAREST,
-                magFilter: FILTER_NEAREST,
-                addressU: ADDRESS_CLAMP_TO_EDGE,
-                addressV: ADDRESS_CLAMP_TO_EDGE
-            }));
-            this.taaTargets.push(new RenderTarget({
-                name: `sse-splat-taa-${i}`,
-                colorBuffers: [this.taaColor[i], this.taaInfo[i]],
-                depth: false,
-                samples: 1
-            }));
-        }
-        this.taaMesh = createFullscreenMesh(device);
-        this.taaMaterial = new ShaderMaterial({
-            uniqueName: 'sse-splat-taa',
-            vertexWGSL: taaVertexWGSL,
-            fragmentWGSL: taaFragmentWGSL,
-            attributes: { vertex_position: SEMANTIC_POSITION },
-            fragmentOutputTypes: ['uvec4', 'uint']
-        });
-        this.taaMaterial.blendType = BLEND_NONE;
-        this.taaMaterial.depthWrite = false;
-        this.taaMaterial.depthTest = false;
-        this.taaMaterial.cull = CULLFACE_NONE;
-        this.taaInstance = new MeshInstance(this.taaMesh, this.taaMaterial, new GraphNode('sse-splat-taa'));
-        this.taaInstance.cull = false;
-        this.taaInstance.castShadow = false;
-        this.taaInstance.receiveShadow = false;
-        this.taaPass = new SplatRasterPass(device, app.renderer, camera, [this.taaInstance], 'sse-splat-taa');
-        this.taaPass.init(this.taaTargets[0]);
-        this.taaPass.enabled = false;
-        // the compose quad, blended over the skybox and opaque meshes with the splat depth
-        this.composeMesh = createFullscreenMesh(device);
-        this.composeMaterial = new ShaderMaterial({
-            uniqueName: 'sse-splat-compose',
-            vertexWGSL: composeVertexWGSL,
-            fragmentWGSL: composeFragmentWGSL,
-            attributes: { vertex_position: SEMANTIC_POSITION }
-        });
-        this.composeMaterial.blendType = BLEND_PREMULTIPLIED;
-        this.composeMaterial.depthWrite = true;
-        this.composeMaterial.depthTest = true;
-        this.composeMaterial.cull = CULLFACE_NONE;
-        this.composeMaterial.setParameter('splatColor', this.colorTexture);
-        this.composeMaterial.setParameter('splatDepth', this.depthTexture);
-        // always bound, even while taa is off: a declared texture without a value makes the
-        // engine create and upload a placeholder inside the forward pass, which submits the
-        // command buffer mid-pass on WebGPU
-        this.composeMaterial.setParameter('taaColor', this.taaColor[0]);
-        this.composeMaterial.setParameter('taaInfo', this.taaInfo[0]);
-        this.composeInstance = new MeshInstance(this.composeMesh, this.composeMaterial, new GraphNode('sse-splat-compose'));
-        this.composeInstance.cull = false;
-        this.composeInstance.castShadow = false;
-        this.composeInstance.receiveShadow = false;
-        // the picker pass draws every pickable instance of the layer into a target without a
-        // depth attachment; this shader writes frag_depth, which makes that pipeline invalid
-        // and drops the whole submit, the frame's command buffer included
-        this.composeInstance.pick = false;
-        // first among the transparents, whichever way the layer sorts them
-        this.composeInstance.drawOrder = -1e3;
-        this.composeInstance.calculateSortDistance = () => Number.MAX_VALUE;
-        this.applyVariant();
-        this.provider = new EngineResidentSetProvider(app, camera, worldLayer);
-        this.unsubscribe = this.provider.onFrame((set, changed, manager) => this.frame(set, changed, manager));
-        app.on('frameend', this.onFrameEnd);
-        this.attach();
-    }
-    /** Switch the renderer off and hand the splats back to the engine's renderer (XR), or on again. */
-    setEnabled(value) {
-        if (this.enabled === value)
-            return;
-        this.enabled = value;
-        if (value) {
-            this.attach();
-        }
-        else {
-            this.detach();
-        }
-        this.app.renderNextFrame = true;
-    }
-    /** Replace the experiment switches from a `key:value,key:value` string (unset keys reset). */
-    setVariant(text) {
-        Object.assign(this.variant, parseVariant(text));
-        // the cull decides afresh under new switches
-        this.cullActive = true;
-        this.cullSuspendedFrames = 0;
-        this.applyVariant();
-    }
-    /**
-     * Drop the temporal history; the next frame starts accumulating from its own sample. The
-     * coverage seeds restart too, so a variant accumulates the same samples every time (the
-     * harness compares builds image for image).
-     */
-    resetHistory() {
-        this.taaHistoryValid = false;
-        this.restFrames = 0;
-        this.frameIndex = 0;
-    }
-    /** Re-read {@link variant} after a field changed. */
-    applyVariant() {
-        // a switch changes what the frames hold; an old history would leak into the new ones
-        this.resetHistory();
-        const quad = this.variant.spp === 'quad';
-        this.rasterMaterial.setDefine('SSE_SPP_QUAD', quad ? '' : undefined);
-        this.rasterMaterial.setDefine('SSE_ORDERED', this.variant.order === 'bucket' ? '' : undefined);
-        this.rasterMaterial.setDefine('SSE_POPLESS', this.variant.popless === 'on' ? '' : undefined);
-        this.composeMaterial.setDefine('SSE_SHOW_DEPTH', this.variant.compose === 'depth' ? '' : undefined);
-        this.composeMaterial.setDefine('SSE_SPP_QUAD', quad ? '' : undefined);
-        this.rasterMaterial.update();
-        this.composeMaterial.update();
-        this.setReady(this.ready);
-        this.app.renderNextFrame = true;
-    }
-    // the raster pass and the compose only run once a frame has bound the buffers they read
-    setReady(value) {
-        this.ready = value;
-        this.rasterPass.enabled = value;
-        this.composeInstance.visible = value && this.variant.compose !== 'none';
-    }
-    attach() {
-        const passes = this.camera.camera.beforePasses;
-        if (!passes.includes(this.rasterPass))
-            passes.push(this.rasterPass);
-        if (!passes.includes(this.taaPass))
-            passes.push(this.taaPass);
-        this.worldLayer.addMeshInstances([this.composeInstance]);
-        this.provider.setActive(true);
-    }
-    detach() {
-        const passes = this.camera.camera.beforePasses;
-        for (const pass of [this.rasterPass, this.taaPass]) {
-            const index = passes.indexOf(pass);
-            if (index >= 0)
-                passes.splice(index, 1);
-        }
-        this.resetHistory();
-        this.depthFrame = null;
-        this.worldLayer.removeMeshInstances([this.composeInstance]);
-        this.provider.setActive(false);
-    }
-    frame(set, changed, manager) {
-        if (!this.enabled)
-            return;
-        const { device, camera } = this;
-        const cam = camera.camera;
-        this.nodesRemoved = false;
-        if (changed || this.set !== set) {
-            const ids = new Set(set.nodes.map((node) => node.allocId));
-            for (const id of this.residentAllocIds) {
-                if (!ids.has(id)) {
-                    this.nodesRemoved = true;
-                    break;
-                }
-            }
-            this.residentAllocIds = ids;
-            this.source.update(set, manager);
-            this.rebuildChunkTable(set);
-            this.ensureCache(set.activeSplats);
-            this.activeSplats = set.activeSplats;
-            this.pruneProjectorComputes(set);
-            // recorded last, so a rebuild that throws is retried next frame
-            this.set = set;
-        }
-        if (this.numChunks === 0) {
-            // nothing resident: draw nothing
-            this.setReady(false);
-            return;
-        }
-        // the target follows whatever the camera renders into this frame: the backbuffer, or a
-        // capture's render target at another size
-        const rt = camera.renderTarget;
-        const width = rt ? rt.width : device.width;
-        const height = rt ? rt.height : device.height;
-        if (this.target.width !== width || this.target.height !== height) {
-            this.target.resize(width, height);
-        }
-        const view = cam.viewMatrix;
-        const projection = cam.projectionMatrix;
-        const isOrtho = cam.projection === PROJECTION_ORTHOGRAPHIC;
-        // the clip z the raster shader reconstructs must match the engine's WebGPU depth range
-        const shaderProjection = Camera$1.applyShaderProjectionTransform(projection, this.shaderProjection, false, true);
-        this.viewProjection.mul2(shaderProjection, view);
-        // The splats' own depth: clip z = a * depth + b (over w = depth for a perspective
-        // camera). The camera's far plane is fitted to the scene bound, which can leave a sky
-        // outside it, and splats clamped there share one depth and lose their order; so a
-        // perspective raster puts its far plane at infinity (z = 1 - near / depth), with the same
-        // near plane and, near where precision matters, the same resolution. The compose converts
-        // back to the camera's depth where the splats meet the rest of the scene. An orthographic
-        // camera keeps its own mapping: a linear depth has no far plane at infinity.
-        const cameraClipZ = [-shaderProjection.data[10], shaderProjection.data[14]];
-        const clipZ = isOrtho ? cameraClipZ : [1, cameraClipZ[1] / cameraClipZ[0]];
-        const clipZParams = [clipZ[0], clipZ[1], isOrtho ? 1 : 0, 0];
-        this.cullNodes(set, this.viewProjection);
-        const focal = [Math.abs(projection.data[0]) * width * 0.5, Math.abs(projection.data[5]) * height * 0.5];
-        const gsplat = this.app.scene.gsplat;
-        // the moving-camera contribution cull: a raised threshold while the view changes, then
-        // one more frame at the scene's threshold once it has stopped
-        const moved = this.viewMoved(view, projection);
-        const raised = moved && this.variant.contribution > 0;
-        const minContribution = raised
-            ? Math.max(gsplat.minContribution, this.variant.contribution)
-            : gsplat.minContribution;
-        if (raised)
-            this.frameWanted = true;
-        // Temporal accumulation runs on on-screen frames (and, for the harness, on a capture at
-        // the same size); the history is only trusted when it holds the previous such frame at
-        // this size. While it runs the coverage seed changes every frame, and a resting camera
-        // keeps requesting frames until the history has filled its cap
-        const isQuery = !!rt;
-        const taaOn = this.variant.taa === 'on' &&
-            (!isQuery || (this.allowQueryTaa && width === this.taaWidth && height === this.taaHeight));
-        if (taaOn) {
-            if (this.taaWidth !== width || this.taaHeight !== height) {
-                this.resizeHistory(width, height);
-                this.taaWidth = width;
-                this.taaHeight = height;
-                this.taaHistoryValid = false;
-                this.restFrames = 0;
-            }
-            this.frameSeed = this.frameIndex++ >>> 0;
-            if (moved || changed)
-                this.restFrames = 0;
-            else
-                this.restFrames++;
-            if (this.restFrames < this.variant.taaMax + 2)
-                this.frameWanted = true;
-        }
-        else {
-            this.frameSeed = this.userSeed;
-            // a capture at another size does not accumulate; the next on-screen frame starts over
-            this.taaHistoryValid = false;
-            this.restFrames = 0;
-            // switched off: the history goes back to its placeholder size until it is wanted
-            if (this.variant.taa === 'off' && this.taaWidth !== 0) {
-                this.resizeHistory(4, 4);
-                this.taaWidth = 0;
-                this.taaHeight = 0;
-            }
-        }
-        this.taaActive = taaOn;
-        // The occlusion cull reads the depth texture as the previous frame left it, so it needs
-        // that frame to have drawn to this target at this size (a resize loses the texture, a
-        // capture draws elsewhere), with no splat removed since (its depth would hide what is
-        // now behind it; arrivals are safe) and the same projection type. A capture frame is
-        // never culled and never becomes the previous frame.
-        // a new world state can change what is occluded: try the test again
-        if (this.prevVersion !== set.version) {
-            this.cullSuspendedFrames = 0;
-            this.cullActive = true;
-        }
-        const cullMode = this.variant.cull;
-        let wanted = cullMode !== 'off';
-        let probe = false;
-        if (cullMode === 'auto' && !isQuery) {
-            if (this.cullSuspendedFrames > 0) {
-                // a moving camera changes what is occluded, so the probe comes sooner
-                const moved = this.viewMoved(view, projection);
-                this.cullSuspendedFrames = Math.max(0, this.cullSuspendedFrames - (moved ? 4 : 1));
-                wanted = false;
-            }
-            else if (!this.cullActive) {
-                // suspended and due: one probe frame, then wait for its counts
-                probe = !this.cullStatsPending;
-                wanted = probe;
-            }
-        }
-        const culling = wanted &&
-            (!isQuery || this.allowQueryCull) &&
-            this.prevValid &&
-            this.prevWidth === width &&
-            this.prevHeight === height &&
-            !this.nodesRemoved &&
-            this.prevOrtho === isOrtho;
-        this.culling = culling;
-        if (culling) {
-            this.reduceDepth(width, height);
-        }
-        this.counter.clear();
-        const ordered = this.variant.order === 'bucket';
-        if (ordered)
-            this.orderBuckets.clear();
-        // the order key spans the fitted clip range, log-spaced
-        const logNear = Math.log(Math.max(cam.nearClip, 1e-6));
-        const invLogRange = 1 / Math.max(Math.log(Math.max(cam.farClip, 1e-6)) - logNear, 1e-6);
-        // the view depths where the raster's clip z reaches 0 and its far clamp (FAR_CLIP_Z), from
-        // clip z = a * depth + b (over w = depth for a perspective camera)
-        const [clipA, clipB] = clipZ;
-        const depthNear = -clipB / clipA;
-        const depthFar = isOrtho ? (FAR_CLIP_Z - clipB) / clipA : clipB / (FAR_CLIP_Z - clipA);
-        const cameraPosition = camera.entity.getPosition();
-        const groups = this.source.dispatchPlan(set, this.numChunks);
-        for (const group of groups) {
-            // a file with no node in the frustum has nothing to dispatch
-            if (group.fileIndex >= 0 && !this.anyNodeVisible(set.files[group.fileIndex].nodes))
-                continue;
-            const projector = this.ensureProjector(culling, ordered, group);
-            this.source.bind(projector, group, set);
-            projector.setParameter('chunks', this.chunkBuffer);
-            projector.setParameter('nodeVisible', this.nodeVisibleBuffer);
-            projector.setParameter('cache', this.cacheBuffer);
-            projector.setParameter('counter', this.counter);
-            projector.setParameter('occL1', this.occL1);
-            projector.setParameter('occL2', this.occL2);
-            projector.setParameter('buckets', this.orderBuckets);
-            projector.setParameter('view', view.data);
-            projector.setParameter('viewProj', this.viewProjection.data);
-            projector.setParameter('prevViewProj', this.prevViewProjection.data);
-            projector.setParameter('prevView', this.prevView.data);
-            projector.setParameter('prevClipZ', this.prevClipZ);
-            projector.setParameter('viewport', [width, height]);
-            projector.setParameter('focal', focal);
-            projector.setParameter('prevViewport', this.prevViewport);
-            projector.setParameter('prevFocal', this.prevFocal);
-            projector.setParameter('numChunks', group.chunkCount);
-            projector.setParameter('chunkBase', group.chunkBase);
-            projector.setParameter('cameraPosition', [cameraPosition.x, cameraPosition.y, cameraPosition.z, 0]);
-            projector.setParameter('splatTextureSize', this.source.textureSize(group));
-            projector.setParameter('isOrtho', isOrtho ? 1 : 0);
-            projector.setParameter('minPixelSize', gsplat.minPixelSize);
-            projector.setParameter('alphaClip', gsplat.alphaClipForward);
-            projector.setParameter('minContribution', minContribution);
-            projector.setParameter('colorMax', this.variant.colorMax);
-            projector.setParameter('unitScale', this.variant.units === 'engine' ? 2 : 1);
-            projector.setParameter('occBlocksX1', this.occBlocks.x1);
-            projector.setParameter('occBlocksY1', this.occBlocks.y1);
-            projector.setParameter('occBlocksX2', this.occBlocks.x2);
-            projector.setParameter('occBlocksY2', this.occBlocks.y2);
-            projector.setParameter('occlusionMode', culling ? (cullMode === 'l1' ? 1 : 2) : 0);
-            projector.setParameter('prevFlip', this.prevFlip);
-            projector.setParameter('keyLogNear', logNear);
-            projector.setParameter('keyInvLogRange', invLogRange);
-            projector.setParameter('depthNear', depthNear);
-            projector.setParameter('depthFar', depthFar);
-            Compute.calcDispatchSize(group.chunkCount, tmpVec2);
-            projector.setupDispatch(tmpVec2.x, tmpVec2.y, 1);
-            device.computeDispatch([projector], 'sse-splat-project');
-        }
-        // indirect draw arguments for the raster and dispatch size for the scatter; slots are
-        // per frame
-        const drawSlot = device.getIndirectDrawSlot(1);
-        const dispatchSlot = device.getIndirectDispatchSlot(1);
-        this.args.setParameter('counter', this.counter);
-        this.args.setParameter('indirectDrawArgs', device.indirectDrawBuffer);
-        this.args.setParameter('indirectDispatchArgs', device.indirectDispatchBuffer);
-        this.args.setParameter('drawSlot', drawSlot);
-        this.args.setParameter('indexCount', QUADS_PER_INSTANCE * 6);
-        this.args.setParameter('quadsPerInstance', QUADS_PER_INSTANCE);
-        this.args.setParameter('dispatchSlot', dispatchSlot);
-        this.args.setParameter('scatterWorkgroupSize', ORDER_BUCKETS);
-        this.args.setupDispatch(1, 1, 1);
-        device.computeDispatch([this.args], 'sse-splat-args');
-        this.rasterInstance.setIndirect(null, drawSlot, 1);
-        if (ordered) {
-            // bucket offsets, then every survivor claims its place in its bucket
-            this.orderScan.setParameter('buckets', this.orderBuckets);
-            this.orderScan.setupDispatch(1, 1, 1);
-            device.computeDispatch([this.orderScan], 'sse-splat-order-scan');
-            const scatter = this.orderScatter;
-            scatter.setParameter('counter', this.counter);
-            scatter.setParameter('cache', this.cacheBuffer);
-            scatter.setParameter('buckets', this.orderBuckets);
-            scatter.setParameter('ordered', this.orderedBuffer);
-            scatter.setupIndirectDispatch(dispatchSlot);
-            device.computeDispatch([scatter], 'sse-splat-order-scatter');
-        }
-        const material = this.rasterMaterial;
-        material.setParameter('splatCache', this.cacheBuffer);
-        material.setParameter('splatCount', this.counter);
-        if (ordered)
-            material.setParameter('orderedSlots', this.orderedBuffer);
-        material.setParameter('viewportSize', [width, height, 2 / width, 2 / height]);
-        material.setParameter('clipZParams', clipZParams);
-        material.setParameter('focalParams', [focal[0], focal[1], 0, 0]);
-        material.setParameter('sseAlphaClip', gsplat.alphaClipForward);
-        material.setParameter('frameSeed', this.frameSeed);
-        this.taaPass.enabled = taaOn;
-        if (taaOn) {
-            const read = this.taaWrite ^ 1;
-            const taa = this.taaMaterial;
-            this.taaPrevViewProjection.copy(this.taaLastViewProjection);
-            this.taaPrevView.copy(this.taaLastView);
-            this.cameraWorld.copy(view).invert();
-            taa.setParameter('curColor', this.colorTexture);
-            taa.setParameter('curDepth', this.depthTexture);
-            taa.setParameter('histColor', this.taaColor[read]);
-            taa.setParameter('histInfo', this.taaInfo[read]);
-            taa.setParameter('cameraWorld', this.cameraWorld.data);
-            // x_ndc = (m00 x + m02 z) / -z for a perspective camera, m00 x + m03 for an orthographic one
-            const sp = shaderProjection.data;
-            taa.setParameter('unproject', isOrtho ? [sp[0], sp[5], sp[12], sp[13]] : [sp[0], sp[5], sp[8], sp[9]]);
-            taa.setParameter('prevViewProj', this.taaPrevViewProjection.data);
-            taa.setParameter('prevView', this.taaPrevView.data);
-            taa.setParameter('clipZParams', clipZParams);
-            // a changed resident set (detail streamed in) keeps the history but caps its weight,
-            // so the new content shows within taaMoveMax frames rather than 1 / taaMax a frame
-            taa.setParameter('taaParams', [
-                moved || changed ? this.variant.taaMoveMax : this.variant.taaMax,
-                this.taaHistoryValid ? 1 : 0,
-                moved ? 1 : 0,
-                this.restFrames
-            ]);
-            taa.setParameter('taaViewport', [width, height, 1 / width, 1 / height]);
-            taa.setParameter('taaControl', [
-                this.variant.taaFlip || (this.target.flipY ? -1 : 1),
-                this.variant.taaClip,
-                this.variant.spp === 'quad' ? 1 : 0,
-                0
-            ]);
-            taa.setParameter('taaDebug', this.variant.taaDebug);
-            taa.setParameter('taaFilter', [
-                this.variant.taaFilter === 'cubic' ? 1 : 0,
-                this.variant.taaReproj === 'history' ? 1 : 0,
-                this.variant.taaMotion,
-                0
-            ]);
-            this.taaPass.renderTarget = this.taaTargets[this.taaWrite];
-            this.composeMaterial.setParameter('taaColor', this.taaColor[this.taaWrite]);
-            this.composeMaterial.setParameter('taaInfo', this.taaInfo[this.taaWrite]);
-            this.taaLastViewProjection.copy(this.viewProjection);
-            this.taaLastView.copy(view);
-            this.taaHistoryValid = true;
-            this.taaWrite ^= 1;
-        }
-        // an offscreen target's rows run the other way to the backbuffer's on WebGPU
-        const targetFlipY = rt ? rt.flipY : device.backBuffer.flipY;
-        this.composeMaterial.setParameter('composeParams', [
-            this.target.flipY !== targetFlipY ? 1 : 0,
-            isOrtho ? 1 : 0,
-            taaOn ? 1 : 0,
-            0
-        ]);
-        this.composeMaterial.setParameter('depthViewParams', [
-            clipZ[0],
-            clipZ[1],
-            Math.max(cam.nearClip, 1e-4),
-            Math.max(cam.farClip, cam.nearClip * 2)
-        ]);
-        this.composeMaterial.setParameter('cameraClipZ', [cameraClipZ[0], cameraClipZ[1], isOrtho ? 1 : 0, 0]);
-        // cull:auto: read this culled frame's counts back (asynchronously, off the frame) and
-        // keep the test only while it removes enough to pay for itself
-        if (culling && cullMode === 'auto' && !isQuery && !this.cullStatsPending) {
-            this.cullStatsPending = true;
-            const data = new Uint32Array(2);
-            this.counter
-                .read(0, 8, data, false)
-                .then(() => {
-                const total = data[0] + data[1];
-                const worthwhile = total > 0 && data[1] / total >= StochasticSplatRenderer.CULL_MIN_FRACTION;
-                this.cullActive = worthwhile;
-                if (!worthwhile)
-                    this.cullSuspendedFrames = StochasticSplatRenderer.CULL_SUSPEND_FRAMES;
-            })
-                .catch(() => {
-                // a lost device or a destroyed buffer; the next frame tries again
-            })
-                .finally(() => {
-                this.cullStatsPending = false;
-            });
-        }
-        // this frame becomes the previous one, unless it is a capture
-        if (isQuery) {
-            // the capture drew elsewhere; the on-screen depth texture is no longer this frame's
-            this.prevValid = false;
-            this.depthFrame = null;
-            this.setReady(true);
-            return;
-        }
-        captureCameraSnapshot(camera.entity, this.depthFrameCamera);
-        this.depthFrame = {
-            id: ++this.depthFrameCount,
-            camera: this.depthFrameCamera,
-            width,
-            height,
-            clipZ: [clipZ[0], clipZ[1]]
-        };
-        this.prevViewProjection.copy(this.viewProjection);
-        this.prevView.copy(view);
-        this.prevProjection.copy(projection);
-        this.prevClipZ = clipZParams;
-        this.prevViewport = [width, height];
-        this.prevFocal = focal;
-        this.prevFlip = this.target.flipY ? -1 : 1;
-        this.prevWidth = width;
-        this.prevHeight = height;
-        this.prevVersion = set.version;
-        this.prevOrtho = isOrtho;
-        this.prevValid = !isQuery;
-        this.setReady(true);
-    }
-    resizeHistory(width, height) {
-        for (const texture of [...this.taaColor, ...this.taaInfo])
-            texture.resize(width, height);
-        for (const target of this.taaTargets)
-            target.resize(width, height);
-    }
-    // whether the view or the projection differs from the previous on-screen frame's beyond
-    // float noise (the camera controllers settle over many frames; a fov animation moves the
-    // image without moving the camera)
-    viewMoved(view, projection) {
-        for (let i = 0; i < 16; i++) {
-            if (Math.abs(view.data[i] - this.prevView.data[i]) > 1e-6)
-                return true;
-            if (Math.abs(projection.data[i] - this.prevProjection.data[i]) > 1e-6)
-                return true;
-        }
-        return false;
-    }
-    // one chunk-table entry per CHUNK_SIZE splats of every resident node
-    rebuildChunkTable(set) {
-        let count = 0;
-        for (const node of set.nodes)
-            count += Math.ceil(node.count / CHUNK_SIZE);
-        if (this.chunkData.length < count * 4) {
-            this.chunkData = new Uint32Array(Math.ceil(count * 1.25) * 4);
-            this.chunkBuffer?.destroy();
-            this.chunkBuffer = new StorageBuffer(this.device, this.chunkData.byteLength, BUFFERUSAGE_COPY_DST);
-        }
-        const data = this.chunkData;
-        let k = 0;
-        set.nodes.forEach((node, nodeIndex) => {
-            const base = this.source.chunkBase(node);
-            for (let offset = 0; offset < node.count; offset += CHUNK_SIZE) {
-                data[k++] = base + offset;
-                data[k++] = Math.min(CHUNK_SIZE, node.count - offset);
-                data[k++] = nodeIndex;
-                data[k++] = (node.lodIndex & 0xffff) | (node.fileIndex << 16);
-            }
-        });
-        this.numChunks = count;
-        // writeBuffer counts typed-array elements, not bytes
-        if (count > 0)
-            this.chunkBuffer.write(0, data, 0, count * 4);
-        const words = Math.max(1, Math.ceil(set.nodes.length / 32));
-        if (this.nodeVisibleData.length < words) {
-            this.nodeVisibleData = new Uint32Array(words);
-            this.nodeVisibleBuffer?.destroy();
-            this.nodeVisibleBuffer = new StorageBuffer(this.device, words * 4, BUFFERUSAGE_COPY_DST);
-        }
-    }
-    // the cache is dense (indexed by compact slot), so it only needs room for the resident
-    // splats, not the allocator's address space; grown geometrically, never shrunk
-    ensureCache(splats) {
-        if (splats <= this.cacheSlots)
-            return;
-        this.cacheBuffer?.destroy();
-        this.orderedBuffer?.destroy();
-        this.cacheSlots = Math.max(1, Math.ceil(splats * 1.25));
-        this.cacheBuffer = new StorageBuffer(this.device, this.cacheSlots * CACHE_WORDS * 4, BUFFERUSAGE_COPY_SRC);
-        this.orderedBuffer = new StorageBuffer(this.device, this.cacheSlots * 4);
-    }
-    // sphere-frustum test per node on the cpu: thousands of nodes, one bit each
-    cullNodes(set, viewProjection) {
-        const bits = this.nodeVisibleData;
-        bits.fill(0);
-        this.frustum.setFromMat4(viewProjection);
-        const spheres = set.nodeSpheres;
-        const { sphere } = this;
-        for (let i = 0; i < set.nodes.length; i++) {
-            sphere.center.set(spheres[i * 4], spheres[i * 4 + 1], spheres[i * 4 + 2]);
-            sphere.radius = spheres[i * 4 + 3];
-            if (this.frustum.containsSphere(sphere) !== 0) {
-                bits[i >> 5] |= 1 << (i & 31);
-            }
-        }
-        const words = Math.max(1, Math.ceil(set.nodes.length / 32));
-        this.nodeVisibleBuffer.write(0, bits, 0, words);
-    }
-    anyNodeVisible(nodes) {
-        const bits = this.nodeVisibleData;
-        return nodes.some((node) => (bits[node.nodeIndex >> 5] >>> (node.nodeIndex & 31)) & 1);
-    }
-    ensureProjector(occlusion, ordered, group) {
-        const sourceKey = this.source.shaderKey();
-        if (this.projectorSourceKey !== sourceKey) {
-            // a different source: every specialisation and the bind group format go
-            this.destroyProjector();
-            this.projectorSourceKey = sourceKey;
-        }
-        const key = `${occlusion ? 'occlusion' : 'plain'}-${ordered ? 'bucket' : 'append'}`;
-        const computeKey = `${key}:${group.fileIndex}`;
-        const existing = this.projectorComputes.get(computeKey);
-        if (existing)
-            return existing;
-        const shader = this.ensureProjectorShader(key, occlusion, ordered);
-        const compute = new Compute(this.device, shader, 'sse-splat-project');
-        this.projectorComputes.set(computeKey, compute);
-        return compute;
-    }
-    // drop the computes of files that left the resident set
-    pruneProjectorComputes(set) {
-        for (const [key, compute] of this.projectorComputes) {
-            const fileIndex = Number(key.slice(key.lastIndexOf(':') + 1));
-            if (fileIndex >= 0 && !set.files[fileIndex]) {
-                compute.destroy();
-                this.projectorComputes.delete(key);
-            }
-        }
-    }
-    ensureProjectorShader(key, occlusion, ordered) {
-        const existing = this.projectorShaders.get(key);
-        if (existing)
-            return existing;
-        const { device } = this;
-        const fixed = [
-            new BindStorageBufferFormat('chunks', SHADERSTAGE_COMPUTE, true),
-            new BindStorageBufferFormat('nodeVisible', SHADERSTAGE_COMPUTE, true),
-            new BindStorageBufferFormat('cache', SHADERSTAGE_COMPUTE),
-            new BindStorageBufferFormat('counter', SHADERSTAGE_COMPUTE),
-            new BindUniformBufferFormat('uniforms', SHADERSTAGE_COMPUTE),
-            new BindStorageBufferFormat('occL1', SHADERSTAGE_COMPUTE, true),
-            new BindStorageBufferFormat('occL2', SHADERSTAGE_COMPUTE, true),
-            new BindStorageBufferFormat('buckets', SHADERSTAGE_COMPUTE)
-        ];
-        const formats = [...fixed, ...this.source.bindFormats()];
-        this.projectorBindGroupFormat ??= new BindGroupFormat(device, formats);
-        const shader = new Shader(device, {
-            name: `sse-splat-project-${key}`,
-            shaderLanguage: SHADERLANGUAGE_WGSL,
-            cshader: projectorWGSL(this.source.readChunk(fixed.length), occlusion, ordered),
-            cincludes: this.source.shaderIncludes(),
-            cdefines: this.source.shaderDefines(),
-            computeUniformBufferFormats: {
-                // the same order as the wgsl struct; both follow the same alignment rules
-                uniforms: new UniformBufferFormat(device, [
-                    new UniformFormat('view', UNIFORMTYPE_MAT4),
-                    new UniformFormat('viewProj', UNIFORMTYPE_MAT4),
-                    new UniformFormat('prevViewProj', UNIFORMTYPE_MAT4),
-                    new UniformFormat('prevView', UNIFORMTYPE_MAT4),
-                    new UniformFormat('prevClipZ', UNIFORMTYPE_VEC4),
-                    new UniformFormat('viewport', UNIFORMTYPE_VEC2),
-                    new UniformFormat('focal', UNIFORMTYPE_VEC2),
-                    new UniformFormat('prevViewport', UNIFORMTYPE_VEC2),
-                    new UniformFormat('prevFocal', UNIFORMTYPE_VEC2),
-                    new UniformFormat('numChunks', UNIFORMTYPE_UINT),
-                    new UniformFormat('splatTextureSize', UNIFORMTYPE_UINT),
-                    new UniformFormat('isOrtho', UNIFORMTYPE_UINT),
-                    new UniformFormat('minPixelSize', UNIFORMTYPE_FLOAT),
-                    new UniformFormat('alphaClip', UNIFORMTYPE_FLOAT),
-                    new UniformFormat('minContribution', UNIFORMTYPE_FLOAT),
-                    new UniformFormat('occBlocksX1', UNIFORMTYPE_UINT),
-                    new UniformFormat('occBlocksY1', UNIFORMTYPE_UINT),
-                    new UniformFormat('occBlocksX2', UNIFORMTYPE_UINT),
-                    new UniformFormat('occBlocksY2', UNIFORMTYPE_UINT),
-                    new UniformFormat('occlusionMode', UNIFORMTYPE_UINT),
-                    new UniformFormat('prevFlip', UNIFORMTYPE_FLOAT),
-                    new UniformFormat('keyLogNear', UNIFORMTYPE_FLOAT),
-                    new UniformFormat('keyInvLogRange', UNIFORMTYPE_FLOAT),
-                    new UniformFormat('chunkBase', UNIFORMTYPE_UINT),
-                    new UniformFormat('model', UNIFORMTYPE_MAT4),
-                    new UniformFormat('modelRotation', UNIFORMTYPE_VEC4),
-                    new UniformFormat('modelScale', UNIFORMTYPE_VEC4),
-                    new UniformFormat('cameraPosition', UNIFORMTYPE_VEC4),
-                    new UniformFormat('colorMax', UNIFORMTYPE_FLOAT),
-                    new UniformFormat('unitScale', UNIFORMTYPE_FLOAT),
-                    new UniformFormat('depthNear', UNIFORMTYPE_FLOAT),
-                    new UniformFormat('depthFar', UNIFORMTYPE_FLOAT)
-                ])
-            },
-            computeBindGroupFormat: this.projectorBindGroupFormat
-        });
-        this.projectorShaders.set(key, shader);
-        return shader;
-    }
-    destroyProjector() {
-        for (const compute of this.projectorComputes.values())
-            compute.destroy();
-        this.projectorComputes.clear();
-        for (const shader of this.projectorShaders.values())
-            shader.destroy();
-        this.projectorShaders.clear();
-        this.projectorBindGroupFormat?.destroy();
-        this.projectorBindGroupFormat = null;
-        this.projectorSourceKey = '';
-    }
-    destroy() {
-        this.unsubscribe();
-        this.app.off('frameend', this.onFrameEnd);
-        this.detach();
-        this.provider.destroy();
-        this.source.destroy();
-        this.destroyProjector();
-        this.args.shader.destroy();
-        this.args.destroy();
-        this.argsBindGroupFormat.destroy();
-        for (const compute of [this.reduceL1, this.reduceL2]) {
-            compute.shader.destroy();
-            compute.destroy();
-        }
-        for (const format of this.reduceFormats)
-            format.destroy();
-        this.occL1.destroy();
-        this.occL2.destroy();
-        for (const compute of [this.orderScan, this.orderScatter]) {
-            compute.shader.destroy();
-            compute.destroy();
-        }
-        for (const format of this.orderFormats)
-            format.destroy();
-        this.orderBuckets.destroy();
-        this.orderedBuffer?.destroy();
-        this.orderedBuffer = null;
-        this.chunkBuffer?.destroy();
-        this.nodeVisibleBuffer?.destroy();
-        this.cacheBuffer?.destroy();
-        this.counter.destroy();
-        this.chunkBuffer = this.nodeVisibleBuffer = this.cacheBuffer = null;
-        this.rasterPass.destroy();
-        this.rasterInstance.destroy();
-        this.rasterMaterial.destroy();
-        this.rasterMesh.destroy();
-        this.taaPass.destroy();
-        this.taaInstance.destroy();
-        this.taaMaterial.destroy();
-        this.taaMesh.destroy();
-        for (const target of this.taaTargets)
-            target.destroy();
-        for (const texture of [...this.taaColor, ...this.taaInfo])
-            texture.destroy();
-        this.taaTargets.length = 0;
-        this.taaColor.length = 0;
-        this.taaInfo.length = 0;
-        this.target.destroy();
-        this.colorTexture.destroy();
-        this.depthTexture.destroy();
-        this.composeInstance.destroy();
-        this.composeMaterial.destroy();
-        this.composeMesh.destroy();
     }
 }
 
@@ -98510,2499 +106806,6 @@ class VoxelDebugOverlay {
     }
 }
 
-/** @import { XrInputSource } from 'playcanvas' */
-
-/**
- * Automatically loads and displays WebXR controller models (hands or gamepads) based on the
- * WebXR Input Profiles specification. The script fetches controller models from the WebXR
- * Input Profiles asset repository and updates their transforms each frame to match the
- * tracked input sources.
- *
- * Features:
- * - Automatic controller model loading from WebXR Input Profiles repository
- * - Support for both hand tracking and gamepad controllers
- * - Automatic cleanup on input source removal or XR session end, with each model loaded once and
- *   kept for later input sources and sessions until the script is destroyed
- * - Models hidden while their pose is not tracked, such as behind the system menu
- * - Visibility control for integration with other XR scripts
- * - Fires events for controller lifecycle coordination
- *
- * This script should be attached to a parent entity (typically the same entity as XrSession).
- * Use it in conjunction with the `XrNavigation` and `XrMenu` scripts.
- *
- * @example
- * // Add to camera parent entity
- * cameraParent.addComponent('script');
- * cameraParent.script.create(XrControllers, {
- *     properties: {
- *         basePath: 'https://cdn.jsdelivr.net/npm/@webxr-input-profiles/assets/dist/profiles'
- *     }
- * });
- * @category XR
- */
-class XrControllers extends Script {
-    static scriptName = 'xrControllers';
-
-    /**
-     * The base URL for fetching the WebXR input profiles.
-     *
-     * @attribute
-     * @type {string}
-     */
-    basePath = 'https://cdn.jsdelivr.net/npm/@webxr-input-profiles/assets/dist/profiles';
-
-    /**
-     * Map of input sources to their controller data (entity, joint mappings, asset, whether its
-     * pose is tracked, and the enabled state its entity returns to once tracking resumes). The asset
-     * is owned by the script and shared by every input source that uses the same model.
-     *
-     * @type {Map<XrInputSource, { entity: import('playcanvas').Entity, jointMap: Map, asset: import('playcanvas').Asset<'container'>, tracked: boolean, enabledWhenTracked: boolean }>}
-     */
-    controllers = new Map();
-
-    /**
-     * Set of input sources currently being loaded (to handle race conditions).
-     *
-     * @type {Set<XrInputSource>}
-     * @private
-     */
-    _pendingInputSources = new Set();
-
-    /**
-     * Model loads by URL, shared by every input source that uses the model. The asset registry
-     * hands back one asset per URL, so a model is loaded once and only unloaded when the script is
-     * destroyed: unloading it as one input source went away would take it from any other input
-     * source using it, or still waiting for it to load.
-     *
-     * @type {Map<string, { load: Promise<import('playcanvas').Asset<'container'>>, asset: import('playcanvas').Asset<'container'> | null }>}
-     * @private
-     */
-    _models = new Map();
-
-    /**
-     * Whether controller models are currently visible.
-     *
-     * @type {boolean}
-     * @private
-     */
-    _visible = true;
-
-    /**
-     * Bound event handlers for proper cleanup.
-     *
-     * @type {{ onAdd: (inputSource: XrInputSource) => void, onRemove: (inputSource: XrInputSource) => void, onXrEnd: () => void } | null}
-     * @private
-     */
-    _handlers = null;
-
-    initialize() {
-        if (!this.app.xr) {
-            console.error('XrControllers script requires XR to be enabled on the application');
-            return;
-        }
-
-        // Create bound handlers for proper cleanup
-        this._handlers = {
-            onAdd: this._onInputSourceAdd.bind(this),
-            onRemove: this._onInputSourceRemove.bind(this),
-            onXrEnd: this._onXrEnd.bind(this)
-        };
-
-        // Listen for input source changes
-        this.app.xr.input.on('add', this._handlers.onAdd);
-        this.app.xr.input.on('remove', this._handlers.onRemove);
-
-        // Listen for XR session end to clean up all controllers
-        this.app.xr.on('end', this._handlers.onXrEnd);
-
-        // Clean up on script destroy
-        this.once('destroy', () => {
-            this._onDestroy();
-        });
-    }
-
-    /**
-     * Cleans up all resources when the script is destroyed.
-     *
-     * @private
-     */
-    _onDestroy() {
-        if (this._handlers && this.app.xr) {
-            this.app.xr.input.off('add', this._handlers.onAdd);
-            this.app.xr.input.off('remove', this._handlers.onRemove);
-            this.app.xr.off('end', this._handlers.onXrEnd);
-        }
-
-        // Destroy all controller entities
-        this._destroyAllControllers();
-
-        this._handlers = null;
-        this._pendingInputSources.clear();
-
-        // Release the models now, as an application being destroyed drops its asset registry next,
-        // and those still loading once they land
-        for (const model of this._models.values()) {
-            if (model.asset) {
-                this._releaseModel(model.asset);
-            } else {
-                model.load.then(asset => this._releaseModel(asset), () => {});
-            }
-        }
-        this._models.clear();
-    }
-
-    /**
-     * Handles XR session end by cleaning up all controllers.
-     *
-     * @private
-     */
-    _onXrEnd() {
-        this._destroyAllControllers();
-        this._pendingInputSources.clear();
-    }
-
-    /**
-     * Destroys a single controller and its associated resources.
-     *
-     * @param {XrInputSource} inputSource - The input source to destroy.
-     * @private
-     */
-    _destroyController(inputSource) {
-        const controller = this.controllers.get(inputSource);
-        if (!controller) return;
-
-        // the model asset stays loaded for other input sources and later sessions
-        controller.entity.destroy();
-
-        this.controllers.delete(inputSource);
-        this.app.fire('xr:controller:remove', inputSource);
-    }
-
-    /**
-     * Destroys all controller entities and clears the map.
-     *
-     * @private
-     */
-    _destroyAllControllers() {
-        for (const inputSource of this.controllers.keys()) {
-            this._destroyController(inputSource);
-        }
-    }
-
-    /**
-     * Tries to load profiles sequentially, returning the first successful result.
-     *
-     * @param {XrInputSource} inputSource - The input source.
-     * @param {string[]} profiles - Array of profile IDs to try.
-     * @param {number} [index=0] - Current index in the profiles array.
-     * @returns {Promise<{ profileId: string, asset: import('playcanvas').Asset<'container'> } | null>} The result or null.
-     * @private
-     */
-    async _tryLoadProfiles(inputSource, profiles, index = 0) {
-        if (index >= profiles.length) return null;
-        if (!this._pendingInputSources.has(inputSource)) return null;
-
-        const result = await this._loadProfile(inputSource, profiles[index]);
-        if (result) return result;
-
-        return this._tryLoadProfiles(inputSource, profiles, index + 1);
-    }
-
-    /**
-     * Called when an input source is added.
-     *
-     * @param {XrInputSource} inputSource - The input source that was added.
-     * @private
-     */
-    async _onInputSourceAdd(inputSource) {
-        if (!inputSource.profiles?.length) {
-            console.warn('XrControllers: No profiles available for input source');
-            return;
-        }
-
-        // Track this input source as pending to handle race conditions
-        this._pendingInputSources.add(inputSource);
-
-        // Load profiles sequentially and stop on first success
-        const successfulResult = await this._tryLoadProfiles(inputSource, inputSource.profiles);
-
-        // Check if input source was removed during loading. Its model stays loaded, as an input
-        // source added since may be using it
-        if (!this._pendingInputSources.has(inputSource)) {
-            return;
-        }
-
-        // Remove from pending set
-        this._pendingInputSources.delete(inputSource);
-
-        if (successfulResult) {
-            const { asset } = successfulResult;
-            // loaded by _loadProfile, so the resource is present
-            const container = /** @type {import('playcanvas').ContainerResource} */ (asset.resource);
-            const entity = container.instantiateRenderEntity();
-            this.app.root.addChild(entity);
-
-            // Apply current visibility state
-            entity.enabled = this._visible;
-
-            // Build joint map for hand tracking
-            const jointMap = new Map();
-            if (inputSource.hand) {
-                for (const joint of inputSource.hand.joints) {
-                    const jointEntity = entity.findByName(joint.id);
-                    if (jointEntity) {
-                        jointMap.set(joint, jointEntity);
-                    }
-                }
-            }
-
-            this.controllers.set(inputSource, { entity, jointMap, asset, tracked: true, enabledWhenTracked: true });
-
-            // Fire event for other scripts to coordinate
-            this.app.fire('xr:controller:add', inputSource, entity);
-        } else {
-            console.warn('XrControllers: No compatible profiles found for input source');
-        }
-    }
-
-    /**
-     * Loads a single profile and its model.
-     *
-     * @param {XrInputSource} inputSource - The input source.
-     * @param {string} profileId - The profile ID to load.
-     * @returns {Promise<{ profileId: string, asset: import('playcanvas').Asset<'container'> } | null>} The result or null on failure.
-     * @private
-     */
-    async _loadProfile(inputSource, profileId) {
-        const profileUrl = `${this.basePath}/${profileId}/profile.json`;
-
-        try {
-            const response = await fetch(profileUrl);
-            if (!response.ok) {
-                return null;
-            }
-
-            const profile = await response.json();
-            const layoutPath = profile.layouts[inputSource.handedness]?.assetPath || '';
-            const assetPath = `${this.basePath}/${profile.profileId}/${inputSource.handedness}${layoutPath.replace(/^\/?(left|right)/, '')}`;
-
-            // the input source was removed, or the script destroyed, while the profile loaded
-            if (!this._pendingInputSources.has(inputSource)) return null;
-
-            const asset = await this._loadModel(assetPath);
-            return { profileId, asset };
-        } catch (error) {
-            // Silently fail for individual profiles - we'll try the next one
-            return null;
-        }
-    }
-
-    /**
-     * Loads a model, or returns the load already made for its URL.
-     *
-     * @param {string} url - The model URL.
-     * @returns {Promise<import('playcanvas').Asset<'container'>>} The loaded model asset.
-     * @private
-     */
-    _loadModel(url) {
-        const existing = this._models.get(url);
-        if (existing) return existing.load;
-
-        const model = {
-            load: new Promise((resolve, reject) => {
-                this.app.assets.loadFromUrl(url, 'container', (err, asset) => {
-                    if (err) reject(err);
-                    else resolve(asset);
-                });
-            }),
-            asset: null
-        };
-        this._models.set(url, model);
-
-        model.load.then((asset) => {
-            model.asset = asset;
-        }, () => {
-            // forget a failed load, so a later input source can try again
-            if (this._models.get(url) === model) this._models.delete(url);
-        });
-
-        return model.load;
-    }
-
-    /**
-     * Removes a model from the asset registry and unloads it.
-     *
-     * @param {import('playcanvas').Asset<'container'>} asset - The model asset.
-     * @private
-     */
-    _releaseModel(asset) {
-        // a destroyed application has unloaded its assets and dropped its registry
-        const { assets } = this.app;
-        if (!assets) return;
-
-        assets.remove(asset);
-        asset.unload();
-    }
-
-    /**
-     * Called when an input source is removed.
-     *
-     * @param {XrInputSource} inputSource - The input source that was removed.
-     * @private
-     */
-    _onInputSourceRemove(inputSource) {
-        // Remove from pending set if still loading
-        this._pendingInputSources.delete(inputSource);
-        this._destroyController(inputSource);
-    }
-
-    /**
-     * Sets the visibility state of controller models.
-     *
-     * @type {boolean}
-     */
-    set visible(value) {
-        if (this._visible === value) return;
-
-        this._visible = value;
-
-        for (const [, controller] of this.controllers) {
-            // a model hidden while untracked takes the new state once tracking resumes
-            if (controller.tracked) {
-                controller.entity.enabled = value;
-            } else {
-                controller.enabledWhenTracked = value;
-            }
-        }
-    }
-
-    /**
-     * Gets the visibility state of controller models.
-     *
-     * @type {boolean}
-     */
-    get visible() {
-        return this._visible;
-    }
-
-    update(dt) {
-        if (!this.app.xr?.active || !this._visible) return;
-
-        // While the session is not fully visible, such as behind the system menu, the browser
-        // sends no poses, so the models would stay frozen where they were last tracked
-        const sessionVisible = this.app.xr.visibilityState === 'visible';
-
-        for (const [inputSource, controller] of this.controllers) {
-            // a hand also loses tracking when it leaves the view of the headset. A model hidden
-            // while untracked gets back the enabled state it had, so one the app hid stays hidden
-            const tracked = sessionVisible && (!inputSource.hand || inputSource.hand.tracking);
-            if (controller.tracked !== tracked) {
-                controller.tracked = tracked;
-                if (tracked) {
-                    controller.entity.enabled = controller.enabledWhenTracked;
-                } else {
-                    controller.enabledWhenTracked = controller.entity.enabled;
-                    controller.entity.enabled = false;
-                }
-            }
-            if (!tracked) continue;
-
-            const { entity, jointMap } = controller;
-
-            if (inputSource.hand) {
-                // Update hand joint positions
-                for (const [joint, jointEntity] of jointMap) {
-                    jointEntity.setPosition(joint.getPosition());
-                    jointEntity.setRotation(joint.getRotation());
-                }
-            } else {
-                // Update controller position
-                const position = inputSource.getPosition();
-                const rotation = inputSource.getRotation();
-                if (position) entity.setPosition(position);
-                if (rotation) entity.setRotation(rotation);
-            }
-        }
-    }
-}
-
-/** @import { Entity, XrInputSource } from 'playcanvas' */
-/** @import { XrNavigation } from './xr-navigation.mjs' */
-
-// Minimum 3D hand separation (meters) below which the scale solve is held, avoiding division
-// blow-up when the two grip poses (near-)coincide
-const EPS_SEPARATION = 1e-3;
-
-// Minimum XZ-plane projection (meters) of the hand-pair vector below which the yaw heading is
-// degenerate (hands stacked vertically) and the rotation solve is held
-const EPS_XZ = 1e-4;
-
-const tmpHandLeft = new Vec3();
-const tmpHandRight = new Vec3();
-const tmpHandMid = new Vec3();
-const tmpHandDelta = new Vec3();
-const tmpPrevDelta = new Vec3();
-const tmpMidWorld = new Vec3();
-const tmpSolvedPos = new Vec3();
-const tmpScratch = new Vec3();
-const tmpQuat = new Quat();
-const tmpQuatB = new Quat();
-
-/**
- * Rotates a vector in place around the world Y axis. Matches the rotation applied by a
- * yaw-only entity rotation, i.e. `rotateY(v, yaw)` computes `R(yaw) * v`.
- *
- * @param {Vec3} v - The vector to rotate in place.
- * @param {number} angle - The rotation angle in radians.
- * @returns {Vec3} The rotated vector (same object as `v`).
- */
-const rotateY = (v, angle) => {
-    const c = Math.cos(angle);
-    const s = Math.sin(angle);
-    const x = v.x * c + v.z * s;
-    v.z = -v.x * s + v.z * c;
-    v.x = x;
-    return v;
-};
-
-/**
- * Wraps an angle to the (-PI, PI] range.
- *
- * @param {number} angle - The angle in radians.
- * @returns {number} The wrapped angle in radians.
- */
-const wrapPi = (angle) => {
-    angle %= Math.PI * 2;
-    if (angle > Math.PI) {
-        angle -= Math.PI * 2;
-    } else if (angle <= -Math.PI) {
-        angle += Math.PI * 2;
-    }
-    return angle;
-};
-
-/**
- * Lets the user grab the world with both hands to drag, rotate and scale the scene in XR.
- * Squeeze both grip buttons (or make fists with both tracked hands - the engine emulates
- * squeeze from the fist gesture) to grab the world. While grabbing, the world sticks to the
- * hands:
- * - Drag: move both hands together to pull the world in any direction, including vertically
- * - Rotate: swing the hand pair to yaw-rotate the world around the hands (yaw only, so floors
- *   stay level)
- * - Scale: change the distance between the hands to scale the world - spreading them apart
- *   grows it. Horizontally the content follows the hands; vertically the scale pivots at the
- *   user's feet by default ({@link XrManipulation#scalePivot}), so the user stays standing on
- *   the world instead of the floor rising or sinking through them. Separation changes within
- *   {@link XrManipulation#scaleThreshold} of the grab distance are ignored, so the incidental
- *   hand convergence that occurs while pushing or pulling the world does not zoom it
- *
- * The manipulation is applied to the {@link XrManipulation#target} entity, under which the scene
- * content to manipulate should be parented. The camera rig is never modified, so the XR rig
- * keeps its 1:1 real-world mapping - controller models, hand meshes, menus and any user
- * scripts that measure hand-space distances are unaffected by the world being scaled.
- *
- * Hand motion is measured in the camera rig's local space, so rig locomotion (XrNavigation
- * teleports, snap turns) occurring mid-grab does not drag the world along; the grab re-anchors
- * against the moved rig instead.
- *
- * Notes:
- * - {@link XrManipulation#minScale}/{@link XrManipulation#maxScale} bound the target's scale
- *   relative to its scale when the script initialized (1 = authored size).
- * - The target keeps its manipulated transform when the XR session ends. Call
- *   {@link XrManipulation#reset} (or fire {@link XrManipulation#resetEvent}) to restore it.
- * - The target's parent chain should be unrotated and unscaled. The target itself may have
- *   any transform; rotation stays yaw-only relative to its initial rotation.
- * - World-anchored systems do not follow the target: XrNavigation's teleport ground plane
- *   ({@link XrNavigation#groundHeight}) stays where it is, so consider assigning
- *   {@link XrNavigation#castRay} if users can drag the world vertically. Physics colliders
- *   under the target rebuild on scale changes (mesh shapes) or ignore scale entirely
- *   (primitive shapes), so avoid parenting rigidbodies under the target where possible.
- *
- * Fires `xr:manipulation:active` (with a boolean) on the app when a grab starts or ends. Listens
- * for `xr:menu:active` (fired by `XrMenu`) and blocks or ends grabs while a menu is open.
- *
- * The script can be attached to any entity (e.g. the camera rig alongside the other XR
- * scripts). Use it alongside the `XrSession`, `XrControllers` and `XrNavigation` scripts.
- *
- * @example
- * // Parent the scene content under a world root and grab-manipulate it
- * const worldRoot = new Entity('WorldRoot');
- * app.root.addChild(worldRoot);
- * worldRoot.addChild(galleryEntity);
- *
- * cameraParent.addComponent('script');
- * cameraParent.script.create(XrManipulation, {
- *     properties: {
- *         target: worldRoot,
- *         minScale: 0.5,
- *         maxScale: 4
- *     }
- * });
- * @category XR
- */
-class XrManipulation extends Script {
-    static scriptName = 'xrManipulation';
-
-    /**
-     * The entity that is dragged, rotated and scaled by the grab gesture. Parent the scene
-     * content to manipulate under this entity. The camera rig is never modified.
-     * @type {Entity}
-     * @attribute
-     */
-    target = null;
-
-    /**
-     * Enable dragging the world by moving both hands while grabbing.
-     * @attribute
-     */
-    enableTranslate = true;
-
-    /**
-     * Enable yaw-rotating the world by swinging the hand pair while grabbing.
-     * @attribute
-     */
-    enableRotate = true;
-
-    /**
-     * Enable scaling the world by changing the hand separation while grabbing.
-     * @attribute
-     */
-    enableScale = true;
-
-    /**
-     * Dead zone for scale activation, as a fraction of the grab-start hand separation.
-     * Separation changes within this band do not scale the world - hands naturally drift
-     * together or apart while pushing or pulling the world, and without a dead zone that
-     * incidental drift reads as a pinch-zoom. Once the separation leaves the band, scaling
-     * engages continuously from the band's edge (no jump). Set to 0 to scale immediately.
-     * @attribute
-     * @range [0, 0.5]
-     * @precision 0.01
-     * @enabledif {enableScale}
-     */
-    scaleThreshold = 0.15;
-
-    /**
-     * The vertical pivot used while scaling. One of:
-     * - `'feet'`: whatever sits at the user's floor level stays there while scaling - the
-     *   user remains standing on the world, and a scene floor stays aligned with
-     *   XrNavigation's teleport plane (default).
-     * - `'hands'`: the world scales symmetrically about the hand midpoint and sticks to the
-     *   hands vertically - suits tabletop/diorama targets.
-     * Horizontal behavior is identical in both modes: content follows the hands in XZ.
-     * @attribute
-     * @enabledif {enableScale}
-     */
-    scalePivot = 'feet';
-
-    /**
-     * Minimum scale of the target relative to its scale at initialization (1 is authored
-     * size). Grabbing cannot shrink the world below this factor.
-     * @attribute
-     * @range [0.01, 1]
-     * @precision 0.01
-     * @enabledif {enableScale}
-     */
-    minScale = 0.2;
-
-    /**
-     * Maximum scale of the target relative to its scale at initialization (1 is authored
-     * size). Grabbing cannot grow the world beyond this factor.
-     * @attribute
-     * @range [1, 50]
-     * @precision 0.1
-     * @enabledif {enableScale}
-     */
-    maxScale = 5;
-
-    /**
-     * App event that triggers {@link XrManipulation#reset}. Set to an empty string to disable.
-     * Read once at initialization.
-     * @type {string}
-     * @attribute
-     */
-    resetEvent = 'xr:manipulation:reset';
-
-    /** @type {Set<XrInputSource>} */
-    _inputSources = new Set();
-
-    // True while both grips are held and the world is being manipulated
-    _grabbing = false;
-
-    /** @type {XrInputSource | null} */
-    _leftSource = null;
-
-    /** @type {XrInputSource | null} */
-    _rightSource = null;
-
-    /** @type {Entity | null} */
-    _grabTarget = null;
-
-    // Grab frame: the camera rig transform captured at grab start (and refreshed when the rig
-    // moves mid-grab). Hand poses are measured in rig space and mapped to world space through
-    // this frame, so rig locomotion does not move the grabbed world
-    _framePos = new Vec3();
-
-    _frameYaw = 0;
-
-    _frameScale = 1;
-
-    // Target state captured at grab start (or at the last re-anchor)
-    _targetPos0 = new Vec3();
-
-    _targetRot0 = new Quat();
-
-    _targetScale0 = new Vec3();
-
-    // Hand-pair reference captured at grab start (rig space): midpoint, separation, heading
-    _midPose0 = new Vec3();
-
-    _grabDist = 0;
-
-    /** @type {number | null} */
-    _grabHeading = null;
-
-    // Rig-space hand positions from the previous grabbed frame (incremental mode)
-    _prevLeft = new Vec3();
-
-    _prevRight = new Vec3();
-
-    // enableTranslate as of the previous grabbed frame, to detect mid-grab toggle flips
-    _prevTranslateEnabled = true;
-
-    // True while an XrMenu is open (grabs are blocked)
-    _menuActive = false;
-
-    // Event name captured from resetEvent at initialization, for symmetric unsubscription
-    _resetEventName = '';
-
-    // Baseline transform of the target for reset() and the min/max scale bounds, captured
-    // when the target is first seen (tracked so a runtime target swap recaptures it)
-    /** @type {Entity | null} */
-    _baselineTarget = null;
-
-    _initPosition = new Vec3();
-
-    _initRotation = new Quat();
-
-    _initScale = new Vec3(1, 1, 1);
-
-    initialize() {
-        if (!this.app.xr) {
-            console.error('XrManipulation script requires XR to be enabled on the application');
-            return;
-        }
-
-        if (!this.target) {
-            console.warn('XrManipulation: No target entity assigned. Grabbing will not work until one is set.');
-        }
-
-        if (!this.enableTranslate && !this.enableRotate && !this.enableScale) {
-            console.warn('XrManipulation: All manipulation modes are disabled. Grabbing will not work.');
-        }
-
-        this._captureBaseline(this.target);
-
-        const onInputAdd = (inputSource) => {
-            this._inputSources.add(inputSource);
-        };
-        this.app.xr.input.on('add', onInputAdd);
-
-        const onInputRemove = (inputSource) => {
-            this._inputSources.delete(inputSource);
-            if (this._grabbing && (inputSource === this._leftSource || inputSource === this._rightSource)) {
-                this._endGrab();
-            }
-        };
-        this.app.xr.input.on('remove', onInputRemove);
-
-        const onMenuActive = (active) => {
-            this._menuActive = !!active;
-            if (this._menuActive) {
-                this._endGrab();
-            }
-        };
-        this.app.on('xr:menu:active', onMenuActive);
-
-        this._resetEventName = this.resetEvent;
-        if (this._resetEventName) {
-            this.app.on(this._resetEventName, this.reset, this);
-        }
-
-        this.once('destroy', () => {
-            this.app.xr.input.off('add', onInputAdd);
-            this.app.xr.input.off('remove', onInputRemove);
-            this.app.off('xr:menu:active', onMenuActive);
-            if (this._resetEventName) {
-                this.app.off(this._resetEventName, this.reset, this);
-            }
-            this._inputSources.clear();
-            this._endGrab();
-        });
-    }
-
-    /**
-     * Restores the target to the transform it had when the script (or a newly assigned
-     * target) was first seen. Also fired by the {@link XrManipulation#resetEvent} app event.
-     */
-    reset() {
-        this._endGrab();
-        const target = this._baselineTarget;
-        if (!target) return;
-        target.setPosition(this._initPosition);
-        target.setRotation(this._initRotation);
-        target.setLocalScale(this._initScale);
-    }
-
-    /**
-     * Captures the baseline transform of a newly seen target, used by {@link XrManipulation#reset}
-     * and as the reference for the {@link XrManipulation#minScale}/{@link XrManipulation#maxScale}
-     * bounds.
-     *
-     * @param {Entity | null} target - The target entity, or null.
-     * @private
-     */
-    _captureBaseline(target) {
-        this._baselineTarget = target;
-        if (!target) return;
-        this._initPosition.copy(target.getPosition());
-        this._initRotation.copy(target.getRotation());
-        this._initScale.copy(target.getLocalScale());
-    }
-
-    /**
-     * Whether an input source currently provides a usable position for grabbing: a grip pose
-     * for controllers, or a tracked wrist joint for hands.
-     *
-     * @param {XrInputSource} inputSource - The input source to check.
-     * @returns {boolean} True when the input source can be grabbed with.
-     * @private
-     */
-    _hasUsablePose(inputSource) {
-        return inputSource.grip || !!(inputSource.hand && inputSource.hand.tracking && inputSource.hand.wrist);
-    }
-
-    /**
-     * Whether a grabbed input source is still valid to keep grabbing with. Tracking quality is
-     * deliberately not checked here (only at grab start), so transient hand tracking loss
-     * holds the grab on frozen poses instead of dropping it.
-     *
-     * @param {XrInputSource | null} inputSource - The grabbed input source.
-     * @returns {boolean} True when the grab can continue with this input source.
-     * @private
-     */
-    _canContinueGrab(inputSource) {
-        return !!inputSource && this._inputSources.has(inputSource) && inputSource.squeezing &&
-            (inputSource.grip || !!inputSource.hand);
-    }
-
-    /**
-     * Writes the rig-space position of an input source into `out`. Controllers expose this
-     * directly via their grip pose. Tracked hands only expose world space joint positions, so
-     * the wrist position is converted to rig space by inverting the rig's current translation
-     * + yaw + uniform scale (the transform the suite maintains on the rig).
-     *
-     * @param {XrInputSource} inputSource - The input source to read.
-     * @param {Vec3} out - The vector to write the rig-space position into.
-     * @returns {Vec3} The rig-space position (same object as `out`).
-     * @private
-     */
-    _getRigSpacePosition(inputSource, out) {
-        if (inputSource.grip) {
-            out.copy(inputSource.getLocalPosition());
-        } else {
-            out.copy(inputSource.hand.wrist.getPosition());
-            const rig = this.app.xr.camera?.parent;
-            if (rig) {
-                const rigPos = rig.getPosition();
-                const forward = rig.forward;
-                const yaw = Math.atan2(-forward.x, -forward.z);
-                const scale = rig.getLocalScale().x || 1;
-                out.sub(rigPos);
-                rotateY(out, -yaw);
-                out.mulScalar(1 / scale);
-            }
-        }
-        return out;
-    }
-
-    /**
-     * Captures the grab frame from the camera rig's current transform. Rig-space hand
-     * positions are mapped to world space through this frame.
-     *
-     * @private
-     */
-    _captureFrame() {
-        const rig = this.app.xr.camera?.parent;
-        if (rig) {
-            this._framePos.copy(rig.getPosition());
-            const forward = rig.forward;
-            this._frameYaw = Math.atan2(-forward.x, -forward.z);
-            this._frameScale = rig.getLocalScale().x || 1;
-        } else {
-            this._framePos.set(0, 0, 0);
-            this._frameYaw = 0;
-            this._frameScale = 1;
-        }
-    }
-
-    /**
-     * Whether the camera rig has moved since the grab frame was captured (e.g. an XrNavigation
-     * teleport or snap turn happened mid-grab).
-     *
-     * @returns {boolean} True when the rig transform no longer matches the grab frame.
-     * @private
-     */
-    _frameStale() {
-        const rig = this.app.xr.camera?.parent;
-        if (!rig) return false;
-        const forward = rig.forward;
-        const yaw = Math.atan2(-forward.x, -forward.z);
-        // squared distance avoids a per-frame sqrt (1e-12 is the squared 1e-6 threshold)
-        const rigPos = rig.getPosition();
-        const dx = rigPos.x - this._framePos.x;
-        const dy = rigPos.y - this._framePos.y;
-        const dz = rigPos.z - this._framePos.z;
-        return dx * dx + dy * dy + dz * dz > 1e-12 || Math.abs(wrapPi(yaw - this._frameYaw)) > 1e-6;
-    }
-
-    /**
-     * Maps a rig-space position to world space through the grab frame, in place.
-     *
-     * @param {Vec3} v - The rig-space position to map in place.
-     * @returns {Vec3} The world-space position (same object as `v`).
-     * @private
-     */
-    _frameToWorld(v) {
-        rotateY(v, this._frameYaw);
-        v.mulScalar(this._frameScale).add(this._framePos);
-        return v;
-    }
-
-    /**
-     * Captures the grab reference state: the target's current transform and the hand pair's
-     * rig-space midpoint, separation and heading. The solve maps this reference onto the
-     * current hand pair each frame. Recaptured whenever the applied transform deviated from
-     * the raw solve (scale clamped, or a component held due to degeneracy or rig motion),
-     * which prevents rubber-banding and heals degenerate headings.
-     *
-     * @param {Vec3} handLeft - The rig-space position of the first hand.
-     * @param {Vec3} handRight - The rig-space position of the second hand.
-     * @private
-     */
-    _captureGrabState(handLeft, handRight) {
-        const target = this._grabTarget;
-        this._targetPos0.copy(target.getPosition());
-        this._targetRot0.copy(target.getRotation());
-        this._targetScale0.copy(target.getLocalScale());
-
-        this._midPose0.add2(handLeft, handRight).mulScalar(0.5);
-        tmpScratch.sub2(handRight, handLeft);
-        this._grabDist = tmpScratch.length();
-        const xz = Math.sqrt(tmpScratch.x * tmpScratch.x + tmpScratch.z * tmpScratch.z);
-        this._grabHeading = xz > EPS_XZ ? Math.atan2(tmpScratch.x, tmpScratch.z) : null;
-    }
-
-    /**
-     * Starts a two-handed grab with the given pair of input sources.
-     *
-     * @param {Entity} target - The target entity being manipulated.
-     * @param {XrInputSource} left - The first input source (left hand when available).
-     * @param {XrInputSource} right - The second input source (right hand when available).
-     * @private
-     */
-    _startGrab(target, left, right) {
-        this._grabTarget = target;
-        this._leftSource = left;
-        this._rightSource = right;
-
-        this._captureFrame();
-        this._getRigSpacePosition(left, this._prevLeft);
-        this._getRigSpacePosition(right, this._prevRight);
-        this._captureGrabState(this._prevLeft, this._prevRight);
-        this._prevTranslateEnabled = this.enableTranslate;
-
-        this._grabbing = true;
-        this.app.fire('xr:manipulation:active', true);
-    }
-
-    /**
-     * Ends the active grab, if any. The target keeps its last applied transform.
-     *
-     * @private
-     */
-    _endGrab() {
-        if (!this._grabbing) return;
-        this._leftSource = null;
-        this._rightSource = null;
-        this._grabTarget = null;
-        this._grabbing = false;
-        this.app.fire('xr:manipulation:active', false);
-    }
-
-    /**
-     * Applies the scale activation dead zone to a raw separation ratio: ratios within
-     * {@link XrManipulation#scaleThreshold} of 1 map to exactly 1, and ratios beyond the band
-     * are remapped relative to the band's edge so scaling engages without a jump.
-     *
-     * @param {number} ratio - The raw current/grab-start separation ratio.
-     * @returns {number} The dead-zoned scale ratio.
-     * @private
-     */
-    _applyScaleDeadZone(ratio) {
-        const t = math.clamp(this.scaleThreshold, 0, 0.9);
-        if (t <= 0) return ratio;
-        if (ratio > 1 + t) return ratio / (1 + t);
-        if (ratio < 1 - t) return ratio / (1 - t);
-        return 1;
-    }
-
-    /**
-     * Clamps the relative scale factor so the target's total scale stays within
-     * {@link XrManipulation#minScale}/{@link XrManipulation#maxScale} of its baseline scale.
-     *
-     * @param {number} factor - The proposed relative scale factor.
-     * @param {number} currentScale - The target's current local X scale.
-     * @returns {number} The clamped relative factor.
-     * @private
-     */
-    _clampScaleFactor(factor, currentScale) {
-        const base = this._initScale.x || 1;
-        const total = math.clamp((currentScale * factor) / base, this.minScale, this.maxScale);
-        return currentScale > 0 ? (total * base) / currentScale : 1;
-    }
-
-    /**
-     * @param {number} dt - The delta time in seconds.
-     */
-    update(dt) {
-        // Track runtime target swaps regardless of XR state, so reset() always has a baseline
-        const target = this.target;
-        if (target !== this._baselineTarget) {
-            this._captureBaseline(target);
-        }
-
-        if (!this.app.xr?.active) {
-            this._endGrab();
-            return;
-        }
-
-        if (!target || this._menuActive || (!this.enableTranslate && !this.enableRotate && !this.enableScale)) {
-            this._endGrab();
-            return;
-        }
-
-        // Grab pair maintenance: the pair is fixed until broken; extra squeezing sources are
-        // ignored. squeezing is polled - the engine updates it before script update runs. A
-        // runtime target swap also ends the grab (the grab state belongs to the old target)
-        if (this._grabbing && (target !== this._grabTarget ||
-            !this._canContinueGrab(this._leftSource) || !this._canContinueGrab(this._rightSource))) {
-            this._endGrab();
-        }
-
-        if (!this._grabbing) {
-            let left = null;
-            let right = null;
-            let first = null;
-            let second = null;
-            for (const inputSource of this._inputSources) {
-                if (!inputSource.squeezing || !this._hasUsablePose(inputSource)) continue;
-                if (inputSource.handedness === 'left' && !left) {
-                    left = inputSource;
-                } else if (inputSource.handedness === 'right' && !right) {
-                    right = inputSource;
-                }
-                if (!first) {
-                    first = inputSource;
-                } else if (!second) {
-                    second = inputSource;
-                }
-            }
-            if (left && right) {
-                this._startGrab(target, left, right);
-            } else if (first && second) {
-                // Rare devices report 'none' handedness - fall back to the first two sources
-                this._startGrab(target, first, second);
-            }
-            // The first solve would reproduce the grab-start transform exactly - skip it
-            return;
-        }
-
-        this._getRigSpacePosition(this._leftSource, tmpHandLeft);
-        this._getRigSpacePosition(this._rightSource, tmpHandRight);
-
-        tmpHandMid.add2(tmpHandLeft, tmpHandRight).mulScalar(0.5);
-        tmpHandDelta.sub2(tmpHandRight, tmpHandLeft);
-        const sep = tmpHandDelta.length();
-        const sepXz = Math.sqrt(tmpHandDelta.x * tmpHandDelta.x + tmpHandDelta.z * tmpHandDelta.z);
-        const heading = sepXz > EPS_XZ ? Math.atan2(tmpHandDelta.x, tmpHandDelta.z) : null;
-
-        // If the rig moved mid-grab (teleport, snap turn, smooth locomotion), re-anchor
-        // against the new rig transform instead of dragging the world along with the rig
-        if (this._frameStale()) {
-            this._captureFrame();
-            this._captureGrabState(tmpHandLeft, tmpHandRight);
-        }
-
-        // A mid-grab translate toggle flip switches solve modes - re-anchor so the new mode
-        // continues from the applied transform seamlessly
-        if (this.enableTranslate !== this._prevTranslateEnabled) {
-            this._captureGrabState(tmpHandLeft, tmpHandRight);
-            this._prevTranslateEnabled = this.enableTranslate;
-        }
-
-        if (this.enableTranslate) {
-            this._solveAnchored(sep, heading);
-        } else {
-            this._solveIncremental(sep, sepXz);
-        }
-
-        this._prevLeft.copy(tmpHandLeft);
-        this._prevRight.copy(tmpHandRight);
-    }
-
-    /**
-     * Anchor solve: applies the world-space similarity that maps the grab-start hand pair
-     * onto the current hand pair to the target's grab-start transform. Drift-free - the
-     * grabbed content sticks to the hands exactly while unconstrained. Used while
-     * {@link XrManipulation#enableTranslate} is on. Reads the current hand poses from the
-     * module-scope temporaries filled by {@link XrManipulation#update}.
-     *
-     * @param {number} sep - Current 3D hand separation in rig space (meters).
-     * @param {number | null} heading - Current XZ heading of the hand pair, or null when
-     * degenerate (hands stacked vertically).
-     * @private
-     */
-    _solveAnchored(sep, heading) {
-        let deltaYaw = 0;
-        let yawHeld = false;
-        if (this.enableRotate) {
-            if (heading !== null && this._grabHeading !== null) {
-                deltaYaw = wrapPi(heading - this._grabHeading);
-            } else {
-                yawHeld = true;
-            }
-        }
-
-        let scaleRel = 1;
-        let scaleHeld = false;
-        let scaleClamped = false;
-        if (this.enableScale) {
-            if (sep > EPS_SEPARATION && this._grabDist > EPS_SEPARATION) {
-                // Spreading the hands grows the world (pinch-zoom semantics). The dead
-                // zone keeps incidental separation drift during push/pull from zooming;
-                // in-band frames leave the grab reference untouched so a slow deliberate
-                // pinch can still accumulate its way out of the band
-                const effective = this._applyScaleDeadZone(sep / this._grabDist);
-                scaleRel = this._clampScaleFactor(effective, this._targetScale0.x);
-                scaleClamped = scaleRel !== effective;
-            } else {
-                scaleHeld = true;
-            }
-        }
-
-        // World-space grab points through the (frozen) grab frame
-        tmpMidWorld.copy(this._midPose0);
-        this._frameToWorld(tmpMidWorld);
-        tmpScratch.copy(tmpHandMid);
-        this._frameToWorld(tmpScratch);
-
-        // newPos = curMid + scaleRel * R(deltaYaw) * (targetPos0 - grabMid)
-        tmpSolvedPos.sub2(this._targetPos0, tmpMidWorld);
-        rotateY(tmpSolvedPos, deltaYaw);
-        tmpSolvedPos.mulScalar(scaleRel).add(tmpScratch);
-
-        // Feet pivot: pin the scale's vertical pivot to the user's floor level (the rig
-        // origin Y, i.e. the physical floor in local-floor space) so whatever is at the
-        // feet stays there while scaling. Vertical drag still passes through, and with
-        // scaleRel = 1 this is identical to the hands pivot
-        if (this.scalePivot !== 'hands') {
-            const feetY = this._framePos.y;
-            tmpSolvedPos.y = feetY + scaleRel * (this._targetPos0.y - feetY) + (tmpScratch.y - tmpMidWorld.y);
-        }
-
-        tmpQuat.setFromEulerAngles(0, deltaYaw * math.RAD_TO_DEG, 0);
-        tmpQuatB.mul2(tmpQuat, this._targetRot0);
-
-        this._grabTarget.setPosition(tmpSolvedPos);
-        this._grabTarget.setRotation(tmpQuatB);
-        this._grabTarget.setLocalScale(
-            this._targetScale0.x * scaleRel,
-            this._targetScale0.y * scaleRel,
-            this._targetScale0.z * scaleRel
-        );
-
-        // Whenever the applied transform deviated from the raw solve, rebase the grab
-        // reference on it: releasing a clamp responds immediately and degenerate headings
-        // self-heal once the hands regain XZ separation
-        if (yawHeld || scaleHeld || scaleClamped) {
-            this._captureGrabState(tmpHandLeft, tmpHandRight);
-        }
-    }
-
-    /**
-     * Incremental pivot solve: without the translation degree of freedom there is no fixed
-     * anchor - applies each frame's delta rotation/scale about the current world hand
-     * midpoint, so zoom and rotation pivot on the hands without dragging. Used while
-     * {@link XrManipulation#enableTranslate} is off. Reads the current hand poses from the
-     * module-scope temporaries filled by {@link XrManipulation#update}.
-     *
-     * @param {number} sep - Current 3D hand separation in rig space (meters).
-     * @param {number} sepXz - XZ-plane projection of the hand separation (meters).
-     * @private
-     */
-    _solveIncremental(sep, sepXz) {
-        const curScale = this._grabTarget.getLocalScale();
-
-        tmpPrevDelta.sub2(this._prevRight, this._prevLeft);
-        const sepPrevXz = Math.sqrt(tmpPrevDelta.x * tmpPrevDelta.x + tmpPrevDelta.z * tmpPrevDelta.z);
-
-        let deltaYaw = 0;
-        if (this.enableRotate && sepXz > EPS_XZ && sepPrevXz > EPS_XZ) {
-            deltaYaw = wrapPi(Math.atan2(tmpHandDelta.x, tmpHandDelta.z) - Math.atan2(tmpPrevDelta.x, tmpPrevDelta.z));
-        }
-
-        // Scale is solved absolutely against the grab-start separation (so the dead zone
-        // has a stable reference), then converted to a per-frame ratio for the pivot math
-        let scaleRatio = 1;
-        if (this.enableScale && sep > EPS_SEPARATION && this._grabDist > EPS_SEPARATION && curScale.x > 0) {
-            const effective = this._applyScaleDeadZone(sep / this._grabDist);
-            const desired = this._clampScaleFactor(effective, this._targetScale0.x) * this._targetScale0.x;
-            scaleRatio = desired / curScale.x;
-        }
-
-        // Pivot: the current hand midpoint in world space through the grab frame. With
-        // the feet pivot, the vertical component moves to the user's floor level so
-        // scaling never lifts or sinks the floor underfoot
-        tmpMidWorld.copy(tmpHandMid);
-        this._frameToWorld(tmpMidWorld);
-        if (this.scalePivot !== 'hands') {
-            tmpMidWorld.y = this._framePos.y;
-        }
-
-        tmpSolvedPos.sub2(this._grabTarget.getPosition(), tmpMidWorld);
-        rotateY(tmpSolvedPos, deltaYaw);
-        tmpSolvedPos.mulScalar(scaleRatio).add(tmpMidWorld);
-
-        tmpQuat.setFromEulerAngles(0, deltaYaw * math.RAD_TO_DEG, 0);
-        tmpQuatB.mul2(tmpQuat, this._grabTarget.getRotation());
-
-        this._grabTarget.setPosition(tmpSolvedPos);
-        this._grabTarget.setRotation(tmpQuatB);
-        this._grabTarget.setLocalScale(
-            curScale.x * scaleRatio,
-            curScale.y * scaleRatio,
-            curScale.z * scaleRatio
-        );
-    }
-}
-
-/** @import { XrInputSource } from 'playcanvas' */
-
-// Gravitational acceleration (m/s^2) used for the ballistic teleport arc
-const ARC_GRAVITY = 9.81;
-
-const tmpVec2A = new Vec2();
-const tmpVec2B = new Vec2();
-const tmpVec3A = new Vec3();
-const tmpSegDir = new Vec3();
-const tmpToCam = new Vec3();
-const tmpSide = new Vec3();
-const tmpAimOrigin = new Vec3();
-const tmpAimDir = new Vec3();
-const tmpAimPoint = new Vec3();
-const tmpPalm = new Vec3();
-const tmpToHead = new Vec3();
-
-// Milliseconds after the session regains focus during which a select that starts belongs to the
-// system UI being closed rather than the app. On Meta Quest these were seen up to 0.6 s after
-// focus returned, with the palm in any direction
-const FOCUS_SELECT_MS = 1000;
-
-const arcVertexGLSL = /* glsl */ `
-    attribute vec3 vertex_position;
-    attribute vec2 aUv0;
-
-    uniform mat4 matrix_model;
-    uniform mat4 matrix_viewProjection;
-
-    varying vec2 uv0;
-
-    void main(void) {
-        gl_Position = matrix_viewProjection * matrix_model * vec4(vertex_position, 1.0);
-        uv0 = aUv0;
-    }
-`;
-
-const arcFragmentGLSL = /* glsl */ `
-    uniform vec4 uColor;
-
-    varying vec2 uv0;
-
-    void main(void) {
-        float edge = 1.0 - abs(uv0.y * 2.0 - 1.0);
-        edge *= edge;
-        float ends = smoothstep(0.0, 0.1, uv0.x) * (1.0 - smoothstep(0.9, 1.0, uv0.x));
-        gl_FragColor = vec4(uColor.rgb, uColor.a * edge * ends);
-    }
-`;
-
-const arcVertexWGSL = /* wgsl */ `
-    attribute vertex_position: vec3f;
-    attribute aUv0: vec2f;
-
-    uniform matrix_model: mat4x4f;
-    uniform matrix_viewProjection: mat4x4f;
-
-    varying uv0: vec2f;
-
-    @vertex
-    fn vertexMain(input: VertexInput) -> VertexOutput {
-        var output: VertexOutput;
-        output.position = uniform.matrix_viewProjection * uniform.matrix_model * vec4f(input.vertex_position, 1.0);
-        output.uv0 = input.aUv0;
-        return output;
-    }
-`;
-
-const arcFragmentWGSL = /* wgsl */ `
-    uniform uColor: vec4f;
-
-    varying uv0: vec2f;
-
-    @fragment
-    fn fragmentMain(input: FragmentInput) -> FragmentOutput {
-        var output: FragmentOutput;
-        let edgeBase = 1.0 - abs(input.uv0.y * 2.0 - 1.0);
-        let edge = edgeBase * edgeBase;
-        let ends = smoothstep(0.0, 0.1, input.uv0.x) * (1.0 - smoothstep(0.9, 1.0, input.uv0.x));
-        output.color = vec4f(uniform.uColor.rgb, uniform.uColor.a * edge * ends);
-        return output;
-    }
-`;
-
-const ringFragmentGLSL = /* glsl */ `
-    uniform vec4 uColor;
-
-    varying vec2 uv0;
-
-    void main(void) {
-        float d = length(uv0 * 2.0 - 1.0);
-        float ring = smoothstep(0.55, 0.75, d) * (1.0 - smoothstep(0.85, 1.0, d));
-        float fill = (1.0 - smoothstep(0.0, 0.85, d)) * 0.15;
-        gl_FragColor = vec4(uColor.rgb, uColor.a * (ring + fill));
-    }
-`;
-
-const ringFragmentWGSL = /* wgsl */ `
-    uniform uColor: vec4f;
-
-    varying uv0: vec2f;
-
-    @fragment
-    fn fragmentMain(input: FragmentInput) -> FragmentOutput {
-        var output: FragmentOutput;
-        let d = length(input.uv0 * 2.0 - 1.0);
-        let ring = smoothstep(0.55, 0.75, d) * (1.0 - smoothstep(0.85, 1.0, d));
-        let fill = (1.0 - smoothstep(0.0, 0.85, d)) * 0.15;
-        output.color = vec4f(uniform.uColor.rgb, uniform.uColor.a * (ring + fill));
-        return output;
-    }
-`;
-
-/**
- * Handles VR navigation with support for teleportation, smooth locomotion, snap or smooth
- * turning, and snap vertical movement. All methods can be enabled simultaneously, allowing
- * users to choose their preferred navigation method on the fly.
- *
- * Teleportation: Point and teleport using trigger/pinch gestures. The aim is visualized as a
- * ballistic arc rendered as a glowing ribbon, landing on a flat navigation plane at
- * {@link XrNavigation#groundHeight}. Apps with physics or custom picking can override ground
- * detection by assigning {@link XrNavigation#castRay}. Selects that belong to the system do not
- * teleport: a hand pinch made with the palm facing the head, which is how the system menu is
- * opened on Meta Quest, and a select that starts within a second of the session regaining focus
- * from the system UI.
- * Smooth Locomotion: Use left thumbstick for XZ movement
- * Turning: Right thumbstick X-axis — snap turn (default) or continuous smooth turn, selected
- *   via {@link XrNavigation#turnMode}
- * Snap Vertical: Use right thumbstick Y-axis to snap up/down (right grip for larger jumps)
- *
- * This script should be attached to a parent entity of the camera entity used for the XR
- * session. The entity hierarchy should be: XrNavigationEntity > CameraEntity for proper
- * locomotion handling. Use it in conjunction with the `XrControllers` script.
- * @category XR
- */
-class XrNavigation extends Script {
-    static scriptName = 'xrNavigation';
-
-    /**
-     * Enable teleportation navigation using trigger/pinch gestures.
-     * @attribute
-     */
-    enableTeleport = true;
-
-    /**
-     * Enable smooth locomotion using thumbsticks.
-     * @attribute
-     */
-    enableMove = true;
-
-    /**
-     * Speed of smooth locomotion movement in meters per second.
-     * @attribute
-     * @range [0.1, 10]
-     * @enabledif {enableMove}
-     */
-    movementSpeed = 1.5;
-
-    /**
-     * Selects the right-thumbstick turn behavior. One of:
-     * - `'snap'`: discrete rotation of {@link XrNavigation#rotateSpeed} degrees per gesture
-     *   (default; existing behavior).
-     * - `'smooth'`: continuous rotation at {@link XrNavigation#smoothTurnSpeed} degrees/second
-     *   while the thumbstick is past {@link XrNavigation#smoothTurnThreshold}.
-     * - `'none'`: thumbstick X is ignored.
-     * @attribute
-     * @enabledif {enableMove}
-     */
-    turnMode = 'snap';
-
-    /**
-     * Angle in degrees for each snap turn. Used when {@link XrNavigation#turnMode} is `'snap'`.
-     * @attribute
-     * @range [15, 180]
-     * @enabledif {enableMove}
-     */
-    rotateSpeed = 45;
-
-    /**
-     * Thumbstick deadzone threshold for movement.
-     * @attribute
-     * @range [0, 0.5]
-     * @precision 0.01
-     * @enabledif {enableMove}
-     */
-    movementThreshold = 0.1;
-
-    /**
-     * Thumbstick threshold to trigger snap turning.
-     * @attribute
-     * @range [0.1, 1]
-     * @precision 0.01
-     * @enabledif {enableMove}
-     */
-    rotateThreshold = 0.5;
-
-    /**
-     * Thumbstick threshold to reset snap turn state.
-     * @attribute
-     * @range [0.05, 0.5]
-     * @precision 0.01
-     * @enabledif {enableMove}
-     */
-    rotateResetThreshold = 0.25;
-
-    /**
-     * Rotation speed in degrees per second when {@link XrNavigation#turnMode} is `'smooth'`.
-     * @attribute
-     * @range [30, 360]
-     * @enabledif {enableMove}
-     */
-    smoothTurnSpeed = 90;
-
-    /**
-     * Deadzone for the right-thumbstick X-axis when {@link XrNavigation#turnMode} is `'smooth'`.
-     * Below this magnitude the stick is treated as centered.
-     * @attribute
-     * @range [0, 0.5]
-     * @precision 0.01
-     * @enabledif {enableMove}
-     */
-    smoothTurnThreshold = 0.15;
-
-    /**
-     * Maximum distance for teleportation in meters.
-     * @attribute
-     * @range [1, 50]
-     * @enabledif {enableTeleport}
-     */
-    maxTeleportDistance = 10;
-
-    /**
-     * Height in meters of the flat navigation plane used for teleport ground detection.
-     * @attribute
-     * @enabledif {enableTeleport}
-     */
-    groundHeight = 0;
-
-    /**
-     * Initial speed of the ballistic teleport arc in meters per second. Higher values increase
-     * the teleport reach.
-     * @attribute
-     * @range [2, 20]
-     * @precision 0.1
-     * @enabledif {enableTeleport}
-     */
-    teleportArcSpeed = 8;
-
-    /**
-     * Width in meters of the teleport arc ribbon.
-     * @attribute
-     * @range [0.01, 0.3]
-     * @precision 0.01
-     * @enabledif {enableTeleport}
-     */
-    arcWidth = 0.05;
-
-    /**
-     * Number of segments used to tessellate the teleport arc. Read once when the script
-     * initializes; runtime changes have no effect.
-     * @attribute
-     * @range [8, 64]
-     * @enabledif {enableTeleport}
-     */
-    arcSegments = 32;
-
-    /**
-     * Radius of the teleport target indicator ring.
-     * @attribute
-     * @range [0.1, 2]
-     * @precision 0.1
-     * @enabledif {enableTeleport}
-     */
-    teleportIndicatorRadius = 0.2;
-
-    /**
-     * Color for valid teleportation areas. Defaults to a soft cyan-white in the same family as
-     * the `XrMenu` hover color, so pointer feedback reads as one visual system.
-     * @attribute
-     * @enabledif {enableTeleport}
-     */
-    validTeleportColor = new Color(0.5, 0.8, 0.95);
-
-    /**
-     * Color for invalid teleportation areas.
-     * @attribute
-     * @enabledif {enableTeleport}
-     */
-    invalidTeleportColor = new Color(0.9, 0.4, 0.35);
-
-    /**
-     * Enable snap vertical movement using right thumbstick Y (controllers only).
-     * @attribute
-     */
-    enableSnapVertical = true;
-
-    /**
-     * Height in meters for each vertical snap.
-     * @attribute
-     * @range [0.1, 2]
-     * @precision 0.1
-     * @enabledif {enableSnapVertical}
-     */
-    snapVerticalHeight = 0.5;
-
-    /**
-     * Height in meters for each vertical snap when holding right grip (boost).
-     * @attribute
-     * @range [0.5, 10]
-     * @precision 0.5
-     * @enabledif {enableSnapVertical}
-     */
-    snapVerticalBoostHeight = 2.0;
-
-    /**
-     * Thumbstick Y threshold to trigger vertical snap.
-     * @attribute
-     * @range [0.1, 1]
-     * @precision 0.01
-     * @enabledif {enableSnapVertical}
-     */
-    snapVerticalThreshold = 0.5;
-
-    /**
-     * Thumbstick Y threshold to reset vertical snap state.
-     * @attribute
-     * @range [0.05, 0.5]
-     * @precision 0.01
-     * @enabledif {enableSnapVertical}
-     */
-    snapVerticalResetThreshold = 0.25;
-
-    /**
-     * Optional custom ground detection for teleportation. When set, it fully replaces the flat
-     * plane at {@link XrNavigation#groundHeight}: the teleport arc is tested segment by segment
-     * against this callback and only its hits are valid landing points. The callback receives
-     * the world-space start and end of an arc segment and returns the hit point, or null if the
-     * segment hits nothing. Not a script attribute (functions are not serializable) — assign it
-     * from code, e.g. wrap `rigidbody.raycastFirst` or a custom picker.
-     *
-     * @type {((start: Vec3, end: Vec3) => Vec3 | null) | null}
-     */
-    castRay = null;
-
-    /** @type {Set<XrInputSource>} */
-    _inputSources = new Set();
-
-    /** @type {Map<XrInputSource, boolean>} */
-    _activePointers = new Map();
-
-    /** @type {Map<XrInputSource, { handleSelectStart: Function, handleSelectEnd: Function }>} */
-    _inputHandlers = new Map();
-
-    // Hysteresis state for snap turning
-    _rotateSnap = { last: 0 };
-
-    // Hysteresis state for snap vertical movement
-    _verticalSnap = { last: 0 };
-
-    // Camera reference for movement calculations
-    /** @type {import('playcanvas').Entity | null} */
-    _cameraEntity = null;
-
-    // Arc visualization state (created in initialize/lazily per input source)
-
-    /** @type {ShaderMaterial | null} */
-    _arcMaterial = null;
-
-    /** @type {ShaderMaterial | null} */
-    _ringMaterial = null;
-
-    /** @type {Mesh | null} */
-    _ringMesh = null;
-
-    /** @type {Map<XrInputSource, { entity: Entity, meshInstance: MeshInstance, mesh: Mesh, positions: Float32Array, colorParam: Float32Array, ringEntity: Entity }>} */
-    _arcVisuals = new Map();
-
-    /** @type {Map<XrInputSource, { point: Vec3, valid: boolean }>} */
-    _arcHits = new Map();
-
-    /** @type {Vec3[]} */
-    _arcPoints = [];
-
-    // Y of the ground surface the rig currently stands on (groundHeight or last castRay hit)
-    _currentGroundY = 0;
-
-    // Time the session was last seen without focus, such as behind the system menu
-    _unfocusedTime = -Infinity;
-
-    initialize() {
-        if (!this.app.xr) {
-            console.error('XrNavigation script requires XR to be enabled on the application');
-            return;
-        }
-
-        if (!this.enableTeleport && !this.enableMove && !this.enableSnapVertical) {
-            console.warn('XrNavigation: All navigation methods are disabled. Navigation will not work.');
-        }
-
-        // Pre-allocate arc sample points (arcSegments is read once at initialization)
-        for (let i = 0; i <= this.arcSegments; i++) {
-            this._arcPoints.push(new Vec3());
-        }
-
-        this._currentGroundY = this.groundHeight;
-
-        this._arcMaterial = new ShaderMaterial({
-            uniqueName: 'xr-navigation-arc',
-            vertexGLSL: arcVertexGLSL,
-            fragmentGLSL: arcFragmentGLSL,
-            vertexWGSL: arcVertexWGSL,
-            fragmentWGSL: arcFragmentWGSL,
-            attributes: {
-                vertex_position: SEMANTIC_POSITION,
-                aUv0: SEMANTIC_TEXCOORD0
-            }
-        });
-        this._arcMaterial.blendType = BLEND_NORMAL;
-        this._arcMaterial.cull = CULLFACE_NONE;
-        this._arcMaterial.depthWrite = false;
-        this._arcMaterial.update();
-
-        this._ringMaterial = new ShaderMaterial({
-            uniqueName: 'xr-navigation-ring',
-            vertexGLSL: arcVertexGLSL,
-            fragmentGLSL: ringFragmentGLSL,
-            vertexWGSL: arcVertexWGSL,
-            fragmentWGSL: ringFragmentWGSL,
-            attributes: {
-                vertex_position: SEMANTIC_POSITION,
-                aUv0: SEMANTIC_TEXCOORD0
-            }
-        });
-        this._ringMaterial.blendType = BLEND_NORMAL;
-        this._ringMaterial.cull = CULLFACE_NONE;
-        this._ringMaterial.depthWrite = false;
-        this._ringMaterial.update();
-
-        // Unit quad in XZ, shared by all ring mesh instances. Hold an extra reference so
-        // destroying a ring MeshInstance (input sources are transient on some platforms -
-        // e.g. one per pinch on Apple Vision Pro) cannot drop the refcount to zero and
-        // destroy the shared mesh
-        this._ringMesh = Mesh.fromGeometry(this.app.graphicsDevice, new PlaneGeometry());
-        this._ringMesh.incRefCount();
-
-        const onXrEnd = () => {
-            this._destroyAllArcVisuals();
-        };
-        this.app.xr.on('end', onXrEnd);
-
-        // Find camera entity - should be a descendant of this entity
-        this._cameraEntity = this.entity.findComponent('camera')?.entity ?? null;
-        if (!this._cameraEntity) {
-            console.error('XrNavigation: No camera entity found. Movement calculations may not work correctly.');
-        }
-
-        const onInputAdd = (inputSource) => {
-            const handleSelectStart = () => {
-                // a select that belongs to the system neither aims nor teleports
-                if (this._isSystemSelect(inputSource)) return;
-
-                this._activePointers.set(inputSource, true);
-                // Invalidate any hit cached from a previous aim session, so a select that
-                // starts and ends before the next update cannot teleport to a stale target.
-                // tryTeleport recomputes when no cached hit exists; otherwise it commits the
-                // last visualized hit, which is immune to the ray flicking on pinch release
-                this._arcHits.delete(inputSource);
-            };
-
-            const handleSelectEnd = () => {
-                // only a select whose start was accepted teleports
-                if (!this._activePointers.get(inputSource)) return;
-
-                this._activePointers.set(inputSource, false);
-                // Only teleport when teleportation is enabled. Otherwise a select/pinch gesture
-                // (e.g. used to click a UI element) would still snap the rig to the floor point
-                // under the ray.
-                if (this.enableTeleport) {
-                    this.tryTeleport(inputSource);
-                }
-            };
-
-            // Attach the handlers
-            inputSource.on('selectstart', handleSelectStart);
-            inputSource.on('selectend', handleSelectEnd);
-
-            // Store the handlers in the map
-            this._inputHandlers.set(inputSource, { handleSelectStart, handleSelectEnd });
-            this._inputSources.add(inputSource);
-        };
-        this.app.xr.input.on('add', onInputAdd);
-
-        const onInputRemove = (inputSource) => {
-            const handlers = this._inputHandlers.get(inputSource);
-            if (handlers) {
-                inputSource.off('selectstart', handlers.handleSelectStart);
-                inputSource.off('selectend', handlers.handleSelectEnd);
-                this._inputHandlers.delete(inputSource);
-            }
-            this._activePointers.delete(inputSource);
-            this._inputSources.delete(inputSource);
-            this._destroyArcVisual(inputSource);
-        };
-        this.app.xr.input.on('remove', onInputRemove);
-
-        this.once('destroy', () => {
-            this.app.xr.off('end', onXrEnd);
-            this.app.xr.input.off('add', onInputAdd);
-            this.app.xr.input.off('remove', onInputRemove);
-
-            // Detach per-source select handlers
-            for (const [inputSource, handlers] of this._inputHandlers) {
-                inputSource.off('selectstart', handlers.handleSelectStart);
-                inputSource.off('selectend', handlers.handleSelectEnd);
-            }
-            this._inputHandlers.clear();
-            this._activePointers.clear();
-            this._inputSources.clear();
-
-            this._destroyAllArcVisuals();
-            if (this._arcMaterial) {
-                this._arcMaterial.destroy();
-                this._arcMaterial = null;
-            }
-            if (this._ringMaterial) {
-                this._ringMaterial.destroy();
-                this._ringMaterial = null;
-            }
-            if (this._ringMesh) {
-                this._ringMesh.destroy();
-                this._ringMesh = null;
-            }
-        });
-    }
-
-    /**
-     * Computes the world-space aim ray for an input source, writing it into tmpAimOrigin and
-     * tmpAimDir. The arc launches from the handheld grip position when the input source has
-     * one, because the target ray origin sits at the head for gaze/pinch-style input (e.g.
-     * Apple Vision Pro transient pointers). The direction is then re-aimed from the grip
-     * toward the point the target ray indicates - using the raw target ray direction from the
-     * hand would offset the trajectory by the hand-to-head parallax, making the landing depend
-     * on where the hand happened to be when the pinch registered. For tracked-pointer
-     * controllers the grip and ray origin coincide, so this reduces to the target ray itself.
-     *
-     * @param {XrInputSource} inputSource - The aiming input source.
-     * @private
-     */
-    _getAimRay(inputSource) {
-        // Copy immediately: getOrigin()/getDirection()/getPosition() return references to the
-        // input source's internal vectors, which the engine reuses as scratch space on
-        // subsequent calls
-        tmpAimDir.copy(inputSource.getDirection());
-        tmpAimOrigin.copy(inputSource.getOrigin());
-
-        const grip = inputSource.grip ? inputSource.getPosition() : null;
-        if (!grip) return;
-
-        // Aim point: where the target ray meets the navigation plane, or a far point along
-        // the ray when it never descends to it. When castRay replaces plane detection, the
-        // plane is meaningless for aiming, so always use the far point
-        let t = this.maxTeleportDistance;
-        if (!this.castRay && tmpAimDir.y < -1e-3) {
-            const tPlane = (tmpAimOrigin.y - this.groundHeight) / -tmpAimDir.y;
-            if (tPlane > 0 && tPlane < this.maxTeleportDistance * 2) {
-                t = tPlane;
-            }
-        }
-        tmpAimPoint.copy(tmpAimDir).mulScalar(t).add(tmpAimOrigin);
-
-        tmpAimOrigin.copy(grip);
-        tmpAimDir.sub2(tmpAimPoint, tmpAimOrigin).normalize();
-    }
-
-    /**
-     * Computes the ballistic teleport arc for the given aim ray, filling {@link _arcPoints}
-     * with world-space samples and writing the landing result into rec. The landing point is
-     * the arc's intersection with the plane at {@link XrNavigation#groundHeight}, or the first
-     * segment hit reported by {@link XrNavigation#castRay} when that is assigned.
-     *
-     * @param {Vec3} origin - World-space start of the aim ray.
-     * @param {Vec3} direction - Normalized aim direction.
-     * @param {{ point: Vec3, valid: boolean }} rec - Receives the landing point and validity.
-     * @private
-     */
-    _computeArcHit(origin, direction, rec) {
-        const segments = this._arcPoints.length - 1;
-        const g = ARC_GRAVITY;
-        const vx = direction.x * this.teleportArcSpeed;
-        const vy = direction.y * this.teleportArcSpeed;
-        const vz = direction.z * this.teleportArcSpeed;
-
-        rec.valid = false;
-
-        let tFlight;
-        let planeHit = false;
-        if (this.castRay) {
-            // castRay replaces plane detection, so the sampling window must not stop at the
-            // plane (hits below groundHeight would be unreachable). Fly until the arc reaches
-            // the deepest point that could still pass the distance check - that check measures
-            // from the rig position, which sits below the aim origin (the grip), so descend
-            // maxTeleportDistance below the rig, not below the origin
-            const fallDepth = this.maxTeleportDistance +
-                Math.max(0, origin.y - this.entity.getPosition().y);
-            tFlight = (vy + Math.sqrt(vy * vy + 2 * g * fallDepth)) / g;
-        } else {
-            // Closed-form flight time to the navigation plane: larger root of
-            // origin.y + vy*t - 0.5*g*t^2 = groundHeight
-            const disc = vy * vy + 2 * g * (origin.y - this.groundHeight);
-            tFlight = disc >= 0 ? (vy + Math.sqrt(disc)) / g : 0;
-            planeHit = tFlight > 0.001;
-            if (!planeHit) {
-                // Origin below the plane aiming down - draw a plausible full arc instead
-                tFlight = (2 * this.teleportArcSpeed) / g;
-            }
-        }
-
-        for (let i = 0; i <= segments; i++) {
-            const t = (tFlight * i) / segments;
-            this._arcPoints[i].set(
-                origin.x + vx * t,
-                origin.y + vy * t - 0.5 * g * t * t,
-                origin.z + vz * t
-            );
-        }
-
-        if (this.castRay) {
-            // Custom ground detection: the first segment hit wins and truncates the arc there.
-            // Remaining samples collapse onto the hit so the ribbon's quads become degenerate.
-            for (let i = 0; i < segments; i++) {
-                const hit = this.castRay(this._arcPoints[i], this._arcPoints[i + 1]);
-                if (hit) {
-                    rec.point.copy(hit);
-                    for (let j = i + 1; j <= segments; j++) {
-                        this._arcPoints[j].copy(rec.point);
-                    }
-                    rec.valid = this.isValidTeleportDistance(rec.point);
-                    return;
-                }
-            }
-        } else if (planeHit) {
-            rec.point.copy(this._arcPoints[segments]);
-            rec.point.y = this.groundHeight;
-            rec.valid = this.isValidTeleportDistance(rec.point);
-        }
-    }
-
-    /**
-     * Returns the cached arc-hit record for an input source, creating it on first use.
-     *
-     * @param {XrInputSource} inputSource - The aiming input source.
-     * @returns {{ point: Vec3, valid: boolean }} The hit record.
-     * @private
-     */
-    _getOrCreateHit(inputSource) {
-        let rec = this._arcHits.get(inputSource);
-        if (!rec) {
-            rec = { point: new Vec3(), valid: false };
-            this._arcHits.set(inputSource, rec);
-        }
-        return rec;
-    }
-
-    tryTeleport(inputSource) {
-        let rec = this._arcHits.get(inputSource);
-        if (!rec) {
-            rec = this._getOrCreateHit(inputSource);
-            this._getAimRay(inputSource);
-            this._computeArcHit(tmpAimOrigin, tmpAimDir, rec);
-        }
-        if (!rec.valid) return;
-
-        const target = tmpVec3A.copy(rec.point);
-
-        const rigPos = this.entity.getPosition();
-
-        // Adjust for the camera's world-space XZ offset from the rig origin so the user's
-        // head (not the rig origin) ends up at the target - correct under rig yaw, unlike
-        // the raw local offset, which would misplace teleports after any snap/smooth turn
-        if (this._cameraEntity) {
-            const cameraPos = this._cameraEntity.getPosition();
-            target.x -= cameraPos.x - rigPos.x;
-            target.z -= cameraPos.z - rigPos.z;
-        }
-
-        // Preserve the rig's height offset above the ground it currently stands on, so castRay
-        // hits on elevated surfaces step the rig up/down while snap vertical offsets carry over
-        target.y = rigPos.y + (rec.point.y - this._currentGroundY);
-        this._currentGroundY = rec.point.y;
-        this.entity.setPosition(target);
-    }
-
-    update(dt) {
-        // frames keep running while the system menu covers the session, so this stays current
-        if (this.app.xr?.active && this.app.xr.visibilityState !== 'visible') {
-            this._unfocusedTime = now();
-        }
-
-        // Left thumbstick drives movement; right drives turning and vertical snaps
-        for (const inputSource of this._inputSources) {
-            if (!this._hasThumbsticks(inputSource)) continue;
-
-            if (inputSource.handedness === 'left') {
-                if (this.enableMove && this._cameraEntity) {
-                    this._handleMovement(inputSource, dt);
-                }
-            } else if (inputSource.handedness === 'right') {
-                if (this.enableMove && this._cameraEntity) {
-                    if (this.turnMode === 'smooth') {
-                        this._handleSmoothTurning(inputSource, dt);
-                    } else if (this.turnMode === 'snap') {
-                        this._handleSnapTurning(inputSource);
-                    }
-                    // 'none' → thumbstick X is ignored
-                }
-                if (this.enableSnapVertical) {
-                    this._handleSnapVertical(inputSource);
-                }
-            }
-        }
-
-        // Handle teleportation
-        if (this.enableTeleport) {
-            this._handleTeleportation();
-        }
-    }
-
-    /**
-     * Whether a select belongs to the system rather than the app. Browsers report selects made
-     * with the system UI, so such a select would otherwise aim and teleport: the pinch that opens
-     * the Meta Quest system menu, made with the palm facing the head, is reported before the
-     * session loses focus, and selects made while closing it are reported as, or shortly after,
-     * the session regains focus.
-     *
-     * @param {XrInputSource} inputSource - The input source starting the select.
-     * @returns {boolean} True if the select belongs to the system.
-     * @private
-     */
-    _isSystemSelect(inputSource) {
-        if (this.app.xr.visibilityState !== 'visible' || now() - this._unfocusedTime < FOCUS_SELECT_MS) {
-            return true;
-        }
-
-        // the -Y axis of the wrist joint points out of the palm
-        const hand = inputSource.hand;
-        const wrist = hand?.tracking ? hand.wrist : null;
-        if (wrist && this._cameraEntity) {
-            wrist.getRotation().transformVector(tmpPalm.set(0, -1, 0), tmpPalm);
-            tmpToHead.sub2(this._cameraEntity.getPosition(), wrist.getPosition()).normalize();
-            if (tmpPalm.dot(tmpToHead) > 0) return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * Whether an input source has a gamepad with thumbstick axes (axes[2]/[3]). Hand-tracking
-     * sources (e.g. Apple Vision Pro) report a gamepad with no axes, which would read as NaN.
-     *
-     * @param {XrInputSource} inputSource - The input source to check.
-     * @returns {boolean} True when thumbstick axes can be read.
-     * @private
-     */
-    _hasThumbsticks(inputSource) {
-        return !!inputSource.gamepad && inputSource.gamepad.axes.length >= 4;
-    }
-
-    /**
-     * Edge-detects a snap gesture on a thumbstick axis with hysteresis, so one deflection
-     * fires exactly once: fires when the axis crosses `threshold` from neutral, and re-arms
-     * only once it returns within `resetThreshold`.
-     *
-     * @param {{ last: number }} state - Persistent hysteresis state for this axis.
-     * @param {number} value - Current axis value.
-     * @param {number} threshold - Deflection magnitude that fires the snap.
-     * @param {number} resetThreshold - Magnitude the axis must return within to re-arm.
-     * @returns {number} The snap direction (-1 or 1), or 0 when nothing fired.
-     * @private
-     */
-    _snapTrigger(state, value, threshold, resetThreshold) {
-        if (state.last > 0 && value < resetThreshold) {
-            state.last = 0;
-        } else if (state.last < 0 && value > -resetThreshold) {
-            state.last = 0;
-        }
-
-        if (state.last === 0 && Math.abs(value) > threshold) {
-            state.last = Math.sign(value);
-            return state.last;
-        }
-        return 0;
-    }
-
-    /**
-     * Yaw-rotates the rig around the camera's local position, so the view pivots in place
-     * rather than orbiting the rig origin.
-     *
-     * @param {number} degrees - The rotation angle in degrees.
-     * @private
-     */
-    _rotateRigAroundCamera(degrees) {
-        tmpVec3A.copy(this._cameraEntity.getLocalPosition());
-        this.entity.translateLocal(tmpVec3A);
-        this.entity.rotateLocal(0, degrees, 0);
-        this.entity.translateLocal(tmpVec3A.mulScalar(-1));
-    }
-
-    /**
-     * Smooth locomotion: translates the rig in the camera-relative direction of the left
-     * thumbstick at {@link XrNavigation#movementSpeed}.
-     *
-     * @param {XrInputSource} inputSource - The left-hand input source.
-     * @param {number} dt - Frame delta time in seconds.
-     * @private
-     */
-    _handleMovement(inputSource, dt) {
-        // Get thumbstick input (axes[2] = X, axes[3] = Y)
-        tmpVec2A.set(inputSource.gamepad.axes[2], inputSource.gamepad.axes[3]);
-
-        // Check if input exceeds deadzone
-        if (tmpVec2A.length() <= this.movementThreshold) return;
-
-        tmpVec2A.normalize();
-
-        // Calculate camera-relative movement direction
-        const forward = this._cameraEntity.forward;
-        tmpVec2B.x = forward.x;
-        tmpVec2B.y = forward.z;
-        tmpVec2B.normalize();
-
-        // Calculate rotation angle based on camera yaw
-        const rad = Math.atan2(tmpVec2B.x, tmpVec2B.y) - Math.PI / 2;
-
-        // Apply rotation to movement vector
-        const t = tmpVec2A.x * Math.sin(rad) - tmpVec2A.y * Math.cos(rad);
-        tmpVec2A.y = tmpVec2A.y * Math.sin(rad) + tmpVec2A.x * Math.cos(rad);
-        tmpVec2A.x = t;
-
-        // Scale by movement speed and delta time
-        tmpVec2A.mulScalar(this.movementSpeed * dt);
-
-        // Apply movement to camera parent (this entity)
-        this.entity.translate(tmpVec2A.x, 0, tmpVec2A.y);
-    }
-
-    /**
-     * Discrete turn of {@link XrNavigation#rotateSpeed} degrees per right-thumbstick gesture,
-     * with hysteresis so one deflection fires exactly once.
-     *
-     * @param {XrInputSource} inputSource - The right-hand input source.
-     * @private
-     */
-    _handleSnapTurning(inputSource) {
-        // Get rotation input from right thumbstick X-axis
-        const rotate = -inputSource.gamepad.axes[2];
-
-        const dir = this._snapTrigger(this._rotateSnap, rotate, this.rotateThreshold, this.rotateResetThreshold);
-        if (dir) {
-            this._rotateRigAroundCamera(dir * this.rotateSpeed);
-        }
-    }
-
-    /**
-     * Continuous turn at {@link XrNavigation#smoothTurnSpeed} degrees per second while the
-     * right thumbstick X-axis is held past {@link XrNavigation#smoothTurnThreshold}.
-     *
-     * @param {XrInputSource} inputSource - The right-hand input source.
-     * @param {number} dt - Frame delta time in seconds.
-     * @private
-     */
-    _handleSmoothTurning(inputSource, dt) {
-        const turn = -inputSource.gamepad.axes[2];
-        if (Math.abs(turn) <= this.smoothTurnThreshold) return;
-
-        this._rotateRigAroundCamera(turn * this.smoothTurnSpeed * dt);
-    }
-
-    /**
-     * Snap vertical movement on right thumbstick Y, with hysteresis so one deflection fires
-     * exactly once. Hold right grip for the larger {@link XrNavigation#snapVerticalBoostHeight}.
-     *
-     * @param {XrInputSource} inputSource - The right-hand input source.
-     * @private
-     */
-    _handleSnapVertical(inputSource) {
-        // Get vertical input from right thumbstick Y axis (negative = up on stick)
-        const vertical = -inputSource.gamepad.axes[3];
-
-        const dir = this._snapTrigger(this._verticalSnap, vertical, this.snapVerticalThreshold, this.snapVerticalResetThreshold);
-        if (dir) {
-            // Check if right grip is held for boost (positive = up, negative = down)
-            const boost = inputSource.gamepad.buttons[1]?.pressed;
-            this.entity.translate(0, dir * (boost ? this.snapVerticalBoostHeight : this.snapVerticalHeight), 0);
-        }
-    }
-
-    /** @private */
-    _handleTeleportation() {
-        for (const inputSource of this._inputSources) {
-            // Only show the teleport arc while trigger/select is pressed
-            if (!this._activePointers.get(inputSource)) {
-                const visual = this._arcVisuals.get(inputSource);
-                if (visual) {
-                    visual.entity.enabled = false;
-                    visual.ringEntity.enabled = false;
-                }
-                continue;
-            }
-
-            const rec = this._getOrCreateHit(inputSource);
-            this._getAimRay(inputSource);
-            this._computeArcHit(tmpAimOrigin, tmpAimDir, rec);
-
-            const visual = this._getArcVisual(inputSource);
-            visual.entity.enabled = true;
-            this._updateArcVisual(visual, rec.valid);
-
-            visual.ringEntity.enabled = rec.valid;
-            if (rec.valid) {
-                // Slightly above ground to avoid z-fighting
-                visual.ringEntity.setPosition(rec.point.x, rec.point.y + 0.01, rec.point.z);
-                const diameter = this.teleportIndicatorRadius * 2;
-                visual.ringEntity.setLocalScale(diameter, 1, diameter);
-            }
-        }
-    }
-
-    /**
-     * Returns the arc ribbon visual for an input source, creating it on first use.
-     *
-     * @param {XrInputSource} inputSource - The aiming input source.
-     * @returns {{ entity: Entity, meshInstance: MeshInstance, mesh: Mesh, positions: Float32Array, colorParam: Float32Array }} The visual.
-     * @private
-     */
-    _getArcVisual(inputSource) {
-        let visual = this._arcVisuals.get(inputSource);
-        if (visual) return visual;
-
-        const segments = this._arcPoints.length - 1;
-        const vertexCount = (segments + 1) * 2;
-
-        // Positions change per frame; UVs (x along the arc, y across the ribbon) and the
-        // quad-strip index list are static
-        const positions = new Float32Array(vertexCount * 3);
-        const uvs = new Float32Array(vertexCount * 2);
-        const indices = new Uint16Array(segments * 6);
-
-        for (let i = 0; i <= segments; i++) {
-            const u = i / segments;
-            uvs[i * 4 + 0] = u;
-            uvs[i * 4 + 1] = 0;
-            uvs[i * 4 + 2] = u;
-            uvs[i * 4 + 3] = 1;
-        }
-        for (let i = 0; i < segments; i++) {
-            const v = i * 2;
-            indices[i * 6 + 0] = v;
-            indices[i * 6 + 1] = v + 1;
-            indices[i * 6 + 2] = v + 2;
-            indices[i * 6 + 3] = v + 1;
-            indices[i * 6 + 4] = v + 3;
-            indices[i * 6 + 5] = v + 2;
-        }
-
-        const mesh = new Mesh(this.app.graphicsDevice);
-        mesh.clear(true, false);
-        mesh.setPositions(positions);
-        mesh.setUvs(0, uvs);
-        mesh.setIndices(indices);
-        mesh.update(PRIMITIVE_TRIANGLES);
-
-        const meshInstance = new MeshInstance(mesh, this._arcMaterial);
-        meshInstance.pick = false;
-
-        const entity = new Entity('XrNavigationArc');
-        entity.addComponent('render', { castShadows: false });
-        entity.render.meshInstances = [meshInstance];
-        this.app.root.addChild(entity);
-
-        const colorParam = new Float32Array(4);
-
-        // Target indicator: a flat quad whose shader draws a soft glowing ring. Shares the
-        // arc's color parameter array - it is only visible on valid (green) landings anyway
-        const ringMeshInstance = new MeshInstance(this._ringMesh, this._ringMaterial);
-        ringMeshInstance.pick = false;
-        ringMeshInstance.setParameter('uColor', colorParam);
-
-        const ringEntity = new Entity('XrNavigationRing');
-        ringEntity.addComponent('render', { castShadows: false });
-        ringEntity.render.meshInstances = [ringMeshInstance];
-        ringEntity.enabled = false;
-        this.app.root.addChild(ringEntity);
-
-        visual = { entity, meshInstance, mesh, positions, colorParam, ringEntity };
-        this._arcVisuals.set(inputSource, visual);
-        return visual;
-    }
-
-    /**
-     * Rebuilds the ribbon vertices from the current {@link _arcPoints} samples and applies the
-     * valid/invalid color. Each arc point becomes a vertex pair offset sideways, with the
-     * ribbon billboarded toward the camera.
-     *
-     * @param {{ entity: Entity, meshInstance: MeshInstance, mesh: Mesh, positions: Float32Array, colorParam: Float32Array }} visual - The arc visual.
-     * @param {boolean} valid - Whether the current landing point is a valid teleport target.
-     * @private
-     */
-    _updateArcVisual(visual, valid) {
-        const points = this._arcPoints;
-        const segments = points.length - 1;
-        const positions = visual.positions;
-        const camPos = this._cameraEntity ? this._cameraEntity.getPosition() : this.entity.getPosition();
-        const halfWidth = this.arcWidth * 0.5;
-
-        for (let i = 0; i <= segments; i++) {
-            const point = points[i];
-
-            // Segment direction (backward difference at the last point)
-            if (i < segments) {
-                tmpSegDir.sub2(points[i + 1], point);
-            } else {
-                tmpSegDir.sub2(point, points[i - 1]);
-            }
-
-            tmpToCam.sub2(camPos, point);
-            tmpSide.cross(tmpSegDir, tmpToCam);
-            const len = tmpSide.length();
-            if (len > 1e-6) {
-                tmpSide.mulScalar(halfWidth / len);
-            } else {
-                // Degenerate (collapsed samples past a castRay hit) - direction is irrelevant
-                tmpSide.set(halfWidth, 0, 0);
-            }
-
-            const base = i * 6;
-            positions[base + 0] = point.x - tmpSide.x;
-            positions[base + 1] = point.y - tmpSide.y;
-            positions[base + 2] = point.z - tmpSide.z;
-            positions[base + 3] = point.x + tmpSide.x;
-            positions[base + 4] = point.y + tmpSide.y;
-            positions[base + 5] = point.z + tmpSide.z;
-        }
-
-        visual.mesh.setPositions(positions);
-        visual.mesh.update(PRIMITIVE_TRIANGLES);
-
-        // Read the color attributes directly so runtime changes take effect
-        const color = valid ? this.validTeleportColor : this.invalidTeleportColor;
-        visual.colorParam[0] = color.r;
-        visual.colorParam[1] = color.g;
-        visual.colorParam[2] = color.b;
-        visual.colorParam[3] = color.a;
-        visual.meshInstance.setParameter('uColor', visual.colorParam);
-    }
-
-    /**
-     * Destroys the arc visual associated with an input source, if any.
-     *
-     * @param {XrInputSource} inputSource - The input source.
-     * @private
-     */
-    _destroyArcVisual(inputSource) {
-        const visual = this._arcVisuals.get(inputSource);
-        if (!visual) return;
-
-        visual.entity.destroy();
-        visual.ringEntity.destroy();
-        this._arcVisuals.delete(inputSource);
-        this._arcHits.delete(inputSource);
-    }
-
-    /** @private */
-    _destroyAllArcVisuals() {
-        for (const inputSource of this._arcVisuals.keys()) {
-            this._destroyArcVisual(inputSource);
-        }
-    }
-
-    isValidTeleportDistance(hitPoint) {
-        const distance = hitPoint.distance(this.entity.getPosition());
-        return distance <= this.maxTeleportDistance;
-    }
-}
-
-// Standalone headsets run XR on a mobile gpu, which draws every splat once per eye, but their
-// browsers report a desktop platform. Their sessions render with fixed foveation and a 72 Hz
-// target, at 0.8x resolution in performance mode, and the viewer lowers the splat budget.
-const standaloneHeadset = /OculusBrowser|PicoBrowser/.test(globalThis.navigator?.userAgent ?? '');
-// The viewer reconfigures the camera (clear color, post effects) when state.xrMode changes
-const initXr = (global) => {
-    const { app, events, state, camera, renderer, root } = global;
-    const { xr } = app;
-    let destroyed = false;
-    let restoreFrame = null;
-    let rejectStart = null;
-    let rejectEnd = null;
-    const gone = () => new Error('the viewer has been destroyed');
-    // Engine availability is backend-aware (2.20+): under WebGPU a session is only
-    // reported available when it can start on the current device (browser exposes
-    // XRGPUBinding, e.g. Safari on Apple Vision Pro). A session the WebGPU device
-    // can't host may still run after reloading into WebGL, so keep the buttons
-    // visible then — the UI offers that reload when the session can't start directly.
-    let webglAR = false;
-    let webglVR = false;
-    const updateAvailable = () => {
-        if (destroyed)
-            return;
-        state.canStartAR = xr.isAvailable('immersive-ar');
-        state.canStartVR = xr.isAvailable('immersive-vr');
-        state.hasAR = state.canStartAR || webglAR;
-        state.hasVR = state.canStartVR || webglVR;
-    };
-    updateAvailable();
-    const availability = xr.on('available', updateAvailable);
-    if (renderer === 'webgpu') {
-        Promise.all([
-            XrManager.isDeviceSupported(DEVICETYPE_WEBGL2, 'immersive-ar'),
-            XrManager.isDeviceSupported(DEVICETYPE_WEBGL2, 'immersive-vr')
-        ]).then(([ar, vr]) => {
-            if (destroyed)
-                return;
-            webglAR = ar;
-            webglVR = vr;
-            updateAvailable();
-        });
-    }
-    const parent = camera.parent;
-    const parentPosition = new Vec3();
-    const parentRotation = new Quat();
-    const cameraPosition = new Vec3();
-    const cameraRotation = new Quat();
-    parent.addComponent('script');
-    parent.script.create(XrControllers);
-    parent.script.create(XrNavigation);
-    // Grabbing with both hands drags, turns and scales the scene. Created once the splat entity
-    // it moves has loaded, which is before XR can start, and put back when the session ends, as
-    // the viewer's camera, collision and annotations assume the authored placement.
-    let manipulation = null;
-    const started = xr.on('start', () => {
-        if (destroyed)
-            return;
-        app.autoRender = true;
-        // cache original camera rig positions and rotations
-        parentPosition.copy(parent.getPosition());
-        parentRotation.copy(parent.getRotation());
-        cameraPosition.copy(camera.getPosition());
-        cameraRotation.copy(camera.getRotation());
-        // Start the session where the camera is, facing its heading with pitch and roll reset:
-        // where it looks across the ground, or where the top of its view points when it looks
-        // straight up or down. The yaw of getEulerAngles() only covers -90 to 90 degrees, so a
-        // camera facing further round would start the session facing the wrong way.
-        const { forward } = camera;
-        let x = forward.x;
-        let z = forward.z;
-        if (x * x + z * z < 1e-6) {
-            const { up } = camera;
-            const sign = forward.y < 0 ? 1 : -1;
-            x = up.x * sign;
-            z = up.z * sign;
-        }
-        parent.setPosition(cameraPosition.x, 0, cameraPosition.z);
-        parent.setEulerAngles(0, Math.atan2(-x, -z) * math.RAD_TO_DEG, 0);
-        if (standaloneHeadset) {
-            xr.fixedFoveation = 1;
-            if (xr.supportedFrameRates?.includes(72))
-                xr.updateTargetFrameRate(72);
-        }
-        // AR scales about the hands, for content brought to a tabletop; VR about the feet, so
-        // the user stays standing on the scene
-        if (manipulation)
-            manipulation.scalePivot = xr.type === 'immersive-ar' ? 'hands' : 'feet';
-        state.xrMode = xr.type === 'immersive-ar' ? 'ar' : 'vr';
-    });
-    const ended = xr.on('end', () => {
-        if (destroyed)
-            return;
-        app.autoRender = false;
-        // restore camera to pre-XR state
-        parent.setPosition(parentPosition);
-        parent.setRotation(parentRotation);
-        camera.setPosition(cameraPosition);
-        camera.setRotation(cameraRotation);
-        manipulation?.reset();
-        state.xrMode = null;
-        // Restore the canvas to the correct position in the DOM after exiting XR. In
-        // some browsers (e.g. Chrome on Android) the canvas is moved to a new root
-        // during XR, and needs to be moved back on exit.
-        if (restoreFrame !== null)
-            cancelAnimationFrame(restoreFrame);
-        restoreFrame = requestAnimationFrame(() => {
-            restoreFrame = null;
-            if (destroyed)
-                return;
-            root.prepend(app.graphicsDevice.canvas);
-            app.renderNextFrame = true;
-        });
-    });
-    const start = async (mode) => {
-        if (destroyed)
-            throw gone();
-        if (mode !== 'ar' && mode !== 'vr')
-            throw new Error('startXR: mode must be ar or vr');
-        if (rejectStart || rejectEnd || xr.active)
-            throw new Error('startXR: a session is active or pending');
-        const type = mode === 'ar' ? 'immersive-ar' : 'immersive-vr';
-        if (!xr.isAvailable(type)) {
-            const offered = mode === 'ar' ? state.hasAR : state.hasVR;
-            throw new Error(offered ? 'startXR: reload with WebGL to start this session' : 'startXR: XR is not available');
-        }
-        const { nearClip, farClip } = camera.camera;
-        camera.camera.nearClip = 0.01;
-        camera.camera.farClip = 1000;
-        try {
-            await new Promise((resolve, reject) => {
-                rejectStart = reject;
-                xr.start(camera.camera, type, 'local-floor', {
-                    framebufferScaleFactor: standaloneHeadset && state.performanceMode ? 0.8 : 1,
-                    callback: (error) => {
-                        if (destroyed) {
-                            // Browser session requests cannot be cancelled. Close a late result.
-                            void xr.session?.end().catch(() => {
-                                /* already ended */
-                            });
-                            reject(gone());
-                        }
-                        else if (error) {
-                            reject(error);
-                        }
-                        else {
-                            resolve();
-                        }
-                    }
-                });
-            });
-            if (destroyed)
-                throw gone();
-        }
-        catch (error) {
-            if (!destroyed) {
-                camera.camera.nearClip = nearClip;
-                camera.camera.farClip = farClip;
-            }
-            throw error;
-        }
-        finally {
-            rejectStart = null;
-        }
-    };
-    const end = async () => {
-        if (destroyed)
-            throw gone();
-        if (rejectStart)
-            throw new Error('endXR: a session is still starting');
-        if (rejectEnd)
-            throw new Error('endXR: a session is already ending');
-        const { session } = xr;
-        if (!session)
-            return;
-        let onEnd;
-        try {
-            await new Promise((resolve, reject) => {
-                rejectEnd = reject;
-                onEnd = resolve;
-                xr.once('end', onEnd);
-                // Use the native promise too: XrManager.end's callback does not report a
-                // rejected session.end() promise. The engine handles browser-initiated ends.
-                session.end().catch(reject);
-            });
-            if (destroyed)
-                throw gone();
-        }
-        finally {
-            xr.off('end', onEnd);
-            rejectEnd = null;
-        }
-    };
-    const cancel = events.on('inputEvent', (event) => {
-        if (event === 'cancel' && xr.active) {
-            void end().catch(() => {
-                /* the browser may already be ending the session */
-            });
-        }
-    });
-    return {
-        start,
-        end,
-        setManipulationTarget: (entity) => {
-            manipulation = parent.script.create(XrManipulation, {
-                properties: { target: entity }
-            });
-        },
-        destroy: () => {
-            destroyed = true;
-            availability.off();
-            started.off();
-            ended.off();
-            cancel.off();
-            if (restoreFrame !== null)
-                cancelAnimationFrame(restoreFrame);
-            rejectStart?.(gone());
-            rejectEnd?.(gone());
-            state.xrMode = null;
-        }
-    };
-};
-
 // String.replace wrapper that warns when the source substring is missing, so
 // shader chunk patches against the engine fail loudly instead of silently
 // producing the original chunk.
@@ -101026,27 +106829,6 @@ const rendererTable = {
     webgl: GSPLAT_RENDERER_RASTER_CPU_SORT,
     webgpu: GSPLAT_RENDERER_RASTER_GPU_SORT
 };
-// quality budget, millions of splats
-const budgets = {
-    mobile: {
-        low: 1,
-        high: 2
-    },
-    desktop: {
-        low: 2,
-        high: 4
-    }
-};
-// budget while an XR session runs on a standalone headset, millions of splats. On a Quest 3,
-// 1M splats render at about 30 fps (40 at 0.8x resolution), against 10 fps at the 4M desktop
-// budget it otherwise gets
-const standaloneXrBudget = 1;
-// how much further away parts of the scene behind the camera count when choosing their detail,
-// which saves a lot of splats while orbiting, and the turn after which detail is chosen again.
-// XR sessions choose detail by distance alone, with no penalty and no turn-triggered choices: a
-// head turning less than 90 degrees brought the coarse detail chosen for behind it into view
-const lodBehindPenalty = 5;
-const lodUpdateAngle = 90;
 const tonemapTable = {
     none: TONEMAP_NONE,
     linear: TONEMAP_LINEAR,
@@ -101143,6 +106925,8 @@ class Viewer {
     debugPanel = null;
     /** The opt-in stochastic renderer (WebGPU only); null when the engine's sorted renderer draws. */
     splatRenderer = null;
+    /** Holds the continuous on-demand renders while the gpu is behind (frame-gate.ts). */
+    frameGate;
     /**
      * The engine's MiniStats panel once first shown (`?ministats` or the debug panel), else null.
      * Hiding disables it rather than destroying it.
@@ -101205,38 +106989,35 @@ class Viewer {
         // that, rendering is driven on demand by frame:request and camera-change detection. This
         // mirrors the engine's simple-on-demand gsplat example.
         app.autoRender = true;
+        // created before the stochastic renderer, so its frame end counts a rendered frame before
+        // the renderer asks for the next
+        this.frameGate = new FrameGate(app, config.framesInFlight);
+        this.onDestroy(() => this.frameGate.destroy());
+        // for development pages, as splatRenderer:ready
+        events.once('firstFrame', () => events.fire('frameGate:ready', this.frameGate));
         // configure the camera
         this.configureCamera(settings);
-        // The stochastic renderer, when opted in. Created before the first frame so it can
-        // switch the engine's own splat renderer off as soon as the engine creates it. An
-        // instance without the flag never constructs it, and the sorted path is untouched.
-        if (config.stochastic && renderer === 'webgpu') {
-            const worldLayer = app.scene.layers.getLayerByName('World');
-            // the largest budget this instance can ask for must fit the device's storage binding
-            const budget = (config.budget && config.budget > 0
-                ? config.budget
-                : (platform.mobile ? budgets.mobile : budgets.desktop).high) * 1000000;
-            if (!StochasticSplatRenderer.cacheFits(app.graphicsDevice, budget)) {
-                console.warn(`stochastic renderer: a ${budget / 1000000}M splat budget exceeds this device's storage binding limit; the sorted renderer draws`);
-            }
-            else if (worldLayer) {
-                this.splatRenderer = new StochasticSplatRenderer(app, camera.camera, worldLayer, {
-                    source: config.splatSource,
-                    variant: config.variant
-                });
-                // announced on the first frame rather than here: createViewer resolves after this
-                // constructor, so a page can only subscribe once loading is under way
-                events.once('firstFrame', () => events.fire('splatRenderer:ready', this.splatRenderer));
-            }
-        }
-        // reconfigure camera when entering/exiting XR. The stochastic renderer has no stereo
-        // path yet, so the engine's renderer draws the splats for the session. Follows xrMode
-        // rather than app.xr.active, which still reports the session while its 'end' handlers run
+        // The stochastic renderer, when the quality module says so (the Stochastic setting, or the
+        // flag). Created before the first frame so it can switch the engine's own splat renderer
+        // off as soon as the engine creates it, and switched in and out in place when the setting
+        // changes. An instance that never wants it never constructs it, and the sorted path is
+        // untouched.
+        this.syncSplatRenderer();
+        // announced on the first frame rather than here: createViewer resolves after this
+        // constructor, so a page can only subscribe once loading is under way
+        events.once('firstFrame', () => events.fire('splatRenderer:ready', this.splatRenderer));
+        const stochasticChanged = events.on('stochastic:changed', () => {
+            if (!this.destroyed)
+                this.syncSplatRenderer();
+        });
+        this.onDestroy(() => stochasticChanged.off());
+        // reconfigure camera when entering/exiting XR. The stochastic renderer draws the session
+        // too, one view per eye on WebGPU. Follows xrMode rather than app.xr.active, which still
+        // reports the session while its 'end' handlers run
         const xrModeChanged = events.on('xrMode:changed', () => {
             if (this.destroyed)
                 return;
             this.configureCamera(settings);
-            this.splatRenderer?.setEnabled(state.xrMode === null);
         });
         this.onDestroy(() => xrModeChanged.off());
         // debug ministats, from the flag at start and the debug panel's toggle after
@@ -101256,7 +107037,7 @@ class Viewer {
                 if (this.miniStats?.enabled ||
                     !nearlyEquals(world.data, prevWorld.data) ||
                     !nearlyEquals(proj.data, prevProj.data)) {
-                    app.renderNextFrame = true;
+                    this.frameGate.request();
                 }
             }
             if (app.renderNextFrame) {
@@ -101301,7 +107082,8 @@ class Viewer {
         });
         // update state on first frame
         events.on('firstFrame', () => {
-            state.animationPaused = !!config.noanim;
+            // the vr flag's prompt waits over a still camera
+            state.animationPaused = config.noanim || config.vr;
             state.loaded = true;
             // the window.* hooks below are the standalone document's api for the thumbnail
             // pipeline and console debugging; an embedded instance keeps them off, since two
@@ -101334,8 +107116,8 @@ class Viewer {
         // frame after the gsplat component is created, and lodUpdateAngle / lodBehindPenalty shape
         // which nodes that first pass pulls in.
         // these two allow LOD behind camera to drop, saves lots of splats
-        gsplat.lodUpdateAngle = lodUpdateAngle;
-        gsplat.lodBehindPenalty = lodBehindPenalty;
+        gsplat.lodUpdateAngle = global.quality.lodUpdateAngle;
+        gsplat.lodBehindPenalty = global.quality.lodBehindPenalty;
         gsplat.minContribution = 1;
         gsplat.alphaClip = 1 / 255;
         gsplat.antiAlias = config.aa;
@@ -101428,21 +107210,54 @@ class Viewer {
             if (this.destroyed)
                 return;
             const gsplatComponent = results[0].gsplat;
-            this.xr.setManipulationTarget(results[0]);
             // get scene bounding box
             const gsplatBbox = gsplatComponent.customAabb;
             if (gsplatBbox) {
                 sceneBound.setFromTransformedAabb(gsplatBbox, results[0].getWorldTransform());
             }
+            this.xr.setGrabTarget(results[0], isWalkableSize(sceneBound));
             // the stochastic renderer leaves its frame's depth behind, so no pick pass is needed
-            this.picker = this.splatRenderer
-                ? new FrameDepthPicker(app, camera, this.splatRenderer)
-                : new Picker(app, camera);
+            // while it draws; the pass picker serves the sorted renderer. Each is made on first
+            // use, and the one in use follows the Stochastic setting
+            let enginePicker = null;
+            let framePicker = null;
+            const activePicker = () => {
+                if (this.splatRenderer && this.global.quality.stochastic) {
+                    framePicker ??= new FrameDepthPicker(app, camera, this.splatRenderer);
+                    return framePicker;
+                }
+                enginePicker ??= new Picker(app, camera);
+                return enginePicker;
+            };
+            this.picker = {
+                pick: (x, y) => activePicker().pick(x, y),
+                pickSurface: (x, y) => activePicker().pickSurface(x, y),
+                pickVisibility: (points, radius) => activePicker().pickVisibility(points, radius),
+                renderView: () => activePicker().renderView(),
+                release: () => {
+                    enginePicker?.release();
+                    framePicker?.release();
+                }
+            };
             // for development pages (the bench measures pick noise), as splatRenderer:ready
             events.fire('picker:ready', this.picker);
             this.inputController = new InputController(global, this.picker);
             this.cameraManager = new CameraManager(global, sceneBound);
             applyCamera(this.cameraManager.camera);
+            // the vr flag's prompt (ui/vr-prompt.ts) can start a session from here on, where
+            // startXR waits for the scene to finish loading: the camera is where the session
+            // starts, and the rest of the scene streams in during it
+            if (config.vr) {
+                const promptStart = events.on('vrPrompt:start', () => {
+                    if (this.destroyed || !state.canStartVR)
+                        return;
+                    void this.xr.start('vr').catch(() => {
+                        // a declined permission leaves the prompt up for another tap
+                    });
+                });
+                this.onDestroy(() => promptStart.off());
+                events.fire('vrPrompt:ready');
+            }
             if (config.ui) {
                 this.navCursor = new NavCursor(app, camera, null, events, state, config.reticle);
             }
@@ -101453,6 +107268,7 @@ class Viewer {
             attachCollision = (collision) => {
                 this.inputController.collision = collision;
                 this.cameraManager.setCollision(collision);
+                this.xr.setCollision(collision);
                 if (this.navCursor) {
                     this.navCursor.collision = collision;
                 }
@@ -101461,7 +107277,10 @@ class Viewer {
                 // Create collision debug overlay (voxel uses a compute shader, mesh
                 // uses standard line rendering). The voxel path requires WebGPU.
                 if (collision instanceof VoxelCollision && renderer !== 'webgl') {
-                    const setOverlayEnabled = (value) => {
+                    // The overlay ray-marches one screen-sized view, which an XR session's eyes
+                    // would share, so it is off while one runs
+                    const setOverlayEnabled = () => {
+                        const value = state.collisionOverlayEnabled && state.xrMode === null;
                         // Upload the voxel data and allocate the screen-sized texture only
                         // when the debug overlay is first used.
                         if (value && !this.voxelOverlay) {
@@ -101473,8 +107292,9 @@ class Viewer {
                         app.renderNextFrame = true;
                     };
                     events.on('collisionOverlayEnabled:changed', setOverlayEnabled);
+                    events.on('xrMode:changed', setOverlayEnabled);
                     state.hasCollisionOverlay = true;
-                    setOverlayEnabled(state.collisionOverlayEnabled);
+                    setOverlayEnabled();
                 }
                 else if (collision instanceof MeshCollision) {
                     this.meshOverlay = new MeshDebugOverlay(app, collision, camera, !!this.cameraFrame);
@@ -101493,21 +107313,14 @@ class Viewer {
                 shown: () => !!this.miniStats?.enabled,
                 show: (value) => this.setMiniStats(value)
             });
+            // the budget, colour refresh and level-of-detail parameters are the quality module's
+            // (quality.ts), from the Quality slider, the Stochastic setting and the session
             const applyPerfSettings = () => {
-                const budget = () => {
-                    if (config.budget !== undefined && Number.isFinite(config.budget) && config.budget > 0) {
-                        return config.budget;
-                    }
-                    if (standaloneHeadset && state.xrMode !== null) {
-                        return standaloneXrBudget;
-                    }
-                    const quality = platform.mobile ? budgets.mobile : budgets.desktop;
-                    return state.performanceMode ? quality.low : quality.high;
-                };
-                gsplat.splatBudget = budget() * 1000000;
-                gsplat.colorUpdateAngle = state.performanceMode ? 1 : 0.2;
-                gsplat.lodBehindPenalty = state.xrMode === null ? lodBehindPenalty : 1;
-                gsplat.lodUpdateAngle = state.xrMode === null ? lodUpdateAngle : 0;
+                const { quality } = this.global;
+                gsplat.splatBudget = quality.budget * 1000000;
+                gsplat.colorUpdateAngle = quality.colorUpdateAngle;
+                gsplat.lodBehindPenalty = quality.lodBehindPenalty;
+                gsplat.lodUpdateAngle = quality.lodUpdateAngle;
                 gsplatComponent.lodRangeMin = 0;
                 gsplatComponent.lodRangeMax = 1000;
                 // request a frame so the param changes are processed (full work-buffer
@@ -101536,6 +107349,13 @@ class Viewer {
             // loaded before this handler is registered, so it must not be gated.
             const octree = gsplatComponent.resource?.octree ?? null;
             let streamingStarted = !octree;
+            // a session that ends during loading leaves rendering every frame, which loading needs
+            let revealed = false;
+            const xrEnded = events.on('xrMode:changed', (mode) => {
+                if (!mode && !revealed)
+                    app.autoRender = true;
+            });
+            this.onDestroy(() => xrEnded.off());
             const readyHandler = (camera, layer, ready, loading) => {
                 // `frame.gsplats` is the rendered splat count, the same stat the ministats panel
                 // above reads. It covers an octree that renders before it reports work in flight.
@@ -101547,10 +107367,16 @@ class Viewer {
                     eventHandler.off('frame:ready', readyHandler);
                     stopProgress?.();
                     state.progress = 100;
-                    // switch to on-demand rendering (frame:request + camera-change detection)
-                    app.autoRender = false;
-                    // handle quality mode changes
-                    events.on('performanceMode:changed', applyPerfSettings);
+                    // switch to on-demand rendering (frame:request + camera-change detection),
+                    // except in a session started while loading (the vr flag), which renders
+                    // every frame until it ends
+                    revealed = true;
+                    if (!app.xr.active)
+                        app.autoRender = false;
+                    // handle quality changes: the slider, the renderer (whose availability can
+                    // move the budget) and the session
+                    events.on('quality:changed', applyPerfSettings);
+                    events.on('stochastic:changed', applyPerfSettings);
                     events.on('xrMode:changed', applyPerfSettings);
                     applyPerfSettings();
                     // the stochastic renderer consumes the engine's world under whatever
@@ -101569,6 +107395,31 @@ class Viewer {
             };
             eventHandler.on('frame:ready', readyHandler);
         }, ignoreLoadFailure);
+    }
+    // Makes the stochastic renderer the first time the quality module wants it, then switches it
+    // in and out in place: off, it hands the splats back to the engine's renderer. Announces the
+    // change for the parts that hold the renderer (the XR menu's sharpen switch, the dev pages)
+    syncSplatRenderer() {
+        const { app, config, events, camera, quality } = this.global;
+        const wanted = quality.stochastic;
+        if (wanted && !this.splatRenderer) {
+            const worldLayer = app.scene.layers.getLayerByName('World');
+            // the budget this instance asks for must fit the device's storage binding
+            const budget = quality.budget * 1000000;
+            if (!StochasticSplatRenderer.cacheFits(app.graphicsDevice, budget)) {
+                console.warn(`stochastic renderer: a ${quality.budget}M splat budget exceeds this device's storage binding limit; the sorted renderer draws`);
+            }
+            else if (worldLayer) {
+                this.splatRenderer = new StochasticSplatRenderer(app, camera.camera, worldLayer, {
+                    source: config.splatSource,
+                    mode: quality.stochasticMode,
+                    variant: config.variant,
+                    requestFrame: () => this.frameGate.request()
+                });
+            }
+        }
+        this.splatRenderer?.setEnabled(wanted);
+        events.fire('splatRenderer:changed', wanted ? this.splatRenderer : null);
     }
     requireAlive(method) {
         if (this.destroyed) {
@@ -101734,13 +107585,6 @@ class Viewer {
         options.cpu.enabled = false;
         options.stats = options.stats.filter((s) => s.name !== 'DrawCalls');
         options.stats.push({
-            name: 'VRAM',
-            stats: ['vram.tex'],
-            decimalPlaces: 1,
-            multiplier: 1 / (1024 * 1024),
-            unitsName: 'MB',
-            watermark: 1024
-        }, {
             name: 'Splats',
             stats: ['frame.gsplats'],
             decimalPlaces: 3,
@@ -101984,8 +107828,9 @@ const createApp = async (canvas, config) => {
     });
     // The stochastic renderer never sorts on the cpu, so the per-splat centres the engine
     // reads back for its cpu sort (12 bytes each, plus a gpu readback per file) are dead
-    // weight. Read once per file at load, so it has to be set before any asset loads.
-    if (config.stochastic && renderer === 'webgpu') {
+    // weight. Read once per file at load, so it has to be set before any asset loads; only when
+    // the flag forces that renderer, since the Stochastic setting can hand the splats back
+    if ((config.stochastic === true || config.stochastic === 'mobile') && renderer === 'webgpu') {
         app.scene.gsplatCentersEnabled = false;
     }
     // enable anonymous CORS for image loading in safari (must be set before any
@@ -102015,16 +107860,13 @@ const measureCanvas = (canvas) => ({
     height: canvas.clientHeight
 });
 // size the canvas backbuffer from a css size: scaled by the pixel ratio (capped to
-// limit resolution on high-DPI devices), halved in performance mode. a zero css size
-// (hidden canvas) is skipped — the canvas keeps its previous size, as a zero-sized
-// swap chain is invalid in webgpu.
-const resizeCanvas = (canvas, cssSize, performanceMode) => {
+// limit resolution on high-DPI devices) and the quality module's resolution scale (half at
+// the Performance position on the sorted renderer). a zero css size (hidden canvas) is skipped — the canvas keeps
+// its previous size, as a zero-sized swap chain is invalid in webgpu.
+const resizeCanvas = (canvas, cssSize, resolutionScale) => {
     if (!cssSize.width || !cssSize.height)
         return;
-    // maximum pixel dimension we will allow along the shortest screen dimension based on platform
-    const maxPixelDim = platform.mobile ? 1080 : 2160;
-    const pixelRatio = Math.min(maxPixelDim / Math.min(screen.width, screen.height), window.devicePixelRatio);
-    const scale = pixelRatio * (performanceMode ? 0.5 : 1.0);
+    const scale = canvasPixelRatio() * resolutionScale;
     const width = Math.ceil(cssSize.width * scale);
     const height = Math.ceil(cssSize.height * scale);
     if (width !== canvas.width || height !== canvas.height) {
@@ -102034,7 +107876,7 @@ const resizeCanvas = (canvas, cssSize, performanceMode) => {
 };
 // initialize canvas size and resizing
 const initCanvas = (global) => {
-    const { app, events, state } = global;
+    const { app, events, quality } = global;
     const { canvas } = app.graphicsDevice;
     // the canvas css size, kept current by the resize observer. measured directly at
     // startup so the first frames are sized before the observer's first delivery.
@@ -102044,7 +107886,7 @@ const initCanvas = (global) => {
         // and resetting canvas dimensions can invalidate the XRWebGLLayer
         if (app.xr?.active)
             return;
-        resizeCanvas(canvas, cssSize, state.performanceMode);
+        resizeCanvas(canvas, cssSize, quality.resolutionScale);
     };
     const resizeObserver = new ResizeObserver((entries) => {
         const e = entries[0]?.contentBoxSize?.[0];
@@ -102056,7 +107898,7 @@ const initCanvas = (global) => {
         }
     });
     resizeObserver.observe(canvas);
-    events.on('performanceMode:changed', () => {
+    events.on('quality:changed', () => {
         app.renderNextFrame = true;
     });
     // Resize canvas before render() so the swap chain texture is acquired at the correct size.
@@ -102090,11 +107932,13 @@ const resolveConfig = (options) => ({
     ministats: options.ministats ?? false,
     colorize: options.colorize ?? false,
     fullload: options.fullload ?? false,
+    vr: options.vr ?? false,
     aa: options.aa ?? false,
     stochastic: options.stochastic ?? false,
-    splatSource: options.splatSource ?? 'workbuffer',
+    splatSource: options.splatSource ?? 'direct',
     variant: options.variant ?? '',
     budget: options.budget,
+    framesInFlight: options.framesInFlight ?? 2,
     heatmap: options.heatmap ?? false,
     debug: options.debug ?? false,
     lang: options.lang,
@@ -102130,14 +107974,17 @@ const createViewer = async (options) => {
     // size the canvas backbuffer before the graphics device is created, so the swap
     // chain and any backbuffer-sized resources start at the correct resolution instead
     // of being recreated on the first frame's resize. a hidden embed keeps the default
-    // canvas size here; the resize observer sizes it on reveal
-    resizeCanvas(canvas, measureCanvas(canvas), preferences.performanceMode);
+    // canvas size here; the resize observer sizes it on reveal. Whether the stochastic renderer
+    // draws is only known once the device exists, so this guesses from the flag and the setting
+    const stochastic = config.stochastic === 'off' ? false : config.stochastic !== false || preferences.stochastic;
+    resizeCanvas(canvas, measureCanvas(canvas), resolutionScaleFor(preferences.quality, stochastic));
     const { app, camera, renderer } = await createApp(canvas, config);
     // translate the markup and get this instance's string lookup, before the ui reads any
     const localize = initLocalization(config.lang, root);
     const state = observe(events, {
         loaded: false,
         ...preferences,
+        qualityAvailable: [],
         progress: 0,
         inputMode: platform.mobile ? 'touch' : 'desktop',
         cameraMode: 'orbit',
@@ -102159,6 +108006,20 @@ const createViewer = async (options) => {
         selectedAnnotation: null,
         inputEnabled: true
     });
+    // the budget, renderer and resolution decisions, from the Quality slider and the Stochastic
+    // setting and the device class
+    const quality = new Quality(app, config, state, events, renderer);
+    // state.performanceMode is a deprecated alias of the slider's first position: a host that
+    // sets either sees the other follow
+    events.on('performanceMode:changed', (value) => {
+        if (value)
+            state.quality = 'performance';
+        else if (state.quality === 'performance')
+            state.quality = 'default';
+    });
+    events.on('quality:changed', (value) => {
+        state.performanceMode = value === 'performance';
+    });
     const global = {
         app,
         settings: importSettings(settingsJson),
@@ -102168,7 +108029,8 @@ const createViewer = async (options) => {
         camera,
         renderer,
         root,
-        localize
+        localize,
+        quality
     };
     const disposeCanvas = initCanvas(global);
     // start the application
@@ -102229,6 +108091,7 @@ const createViewer = async (options) => {
     // Create the viewer
     const viewer = new Viewer(global, gsplatLoad, skyboxLoad, collisionLoad);
     viewer.onDestroy(persistPreferences(events));
+    viewer.onDestroy(() => quality.destroy());
     const handle = {
         app,
         state,
@@ -102263,7 +108126,7 @@ const createViewer = async (options) => {
     }
     return handle;
 };
-console.log(`SuperSplat Viewer v${version$1} | Engine v${version$2} (${revision$1})`);
+console.log(`SuperSplat Viewer v${version} | Engine v${version$1} (${revision})`);
 
 export { createViewer };
 //# sourceMappingURL=index.js.map
